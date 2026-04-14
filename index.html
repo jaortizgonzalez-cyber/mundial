@@ -21,7 +21,6 @@
     </header>
 
     <main class="container">
-        
         <section id="auth-container" class="banner">
             <div id="login-form">
                 <h2>Acceso a la Polla</h2>
@@ -30,7 +29,6 @@
                 <button class="btn-guardar" onclick="login()">Entrar</button>
                 <button class="btn-secundario" onclick="mostrarRegistro()">Registrarme</button>
             </div>
-
             <div id="register-form" style="display:none;">
                 <h2>Registro</h2>
                 <input type="text" id="reg-nombre" placeholder="Nombre Completo" class="input-auth">
@@ -43,22 +41,37 @@
 
         <section id="polla-section" style="display:none;">
             <div class="welcome-user">
-                <h3>Hola, <span id="user-display-name"></span></h3>
+                <div>
+                    <h3>Hola, <span id="user-display-name"></span></h3>
+                    <p>Puntos: <strong id="mis-puntos-total">0</strong></p>
+                </div>
                 <button class="btn-logout" onclick="logout()">Salir</button>
             </div>
 
-            <div class="partidos">
-                <h2>Pronósticos del Mundial</h2>
-                <div id="tabla-partidos">
-                    <div class="partido-fila cabecera-tabla">
-                        <div>Encuentro</div>
-                        <div>Marcador</div>
-                        <div>Fecha/Hora</div>
-                    </div>
+            <div id="admin-panel" style="display:none; background: #fff3e0; border: 2px solid #ff9800; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h2 style="color: #e65100;">🛠️ Panel de Control Oficial (Solo Admin)</h2>
+                <p>Ingresa los resultados finales para actualizar los puntos de todos.</p>
+                <div id="admin-contenedor-partidos"></div>
+                <button class="btn-guardar" style="background: #e65100;" onclick="guardarResultadosOficiales()">Publicar Resultados Oficiales</button>
+            </div>
+
+            <div class="grid-dos-columnas">
+                <div class="partidos">
+                    <h2>Tus Pronósticos</h2>
                     <div id="contenedor-dinamico"></div>
+                    <div class="accion-guardar">
+                        <button class="btn-guardar" id="btnGuardarFinal" onclick="guardarTodosLosPronosticos()">Guardar Mis Apuestas</button>
+                    </div>
                 </div>
-                <div class="accion-guardar">
-                    <button class="btn-guardar" onclick="guardarTodosLosPronosticos()">Guardar Todos mis Pronósticos</button>
+
+                <div class="ranking-seccion">
+                    <h2>Ranking General</h2>
+                    <table id="tabla-ranking">
+                        <thead>
+                            <tr><th>Pos</th><th>Nombre</th><th>Pts</th></tr>
+                        </thead>
+                        <tbody id="body-ranking"></tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -66,7 +79,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
+        import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDLBiRdbJyGb6cYrlA-1xi-N8TqJnsUljk",
@@ -87,91 +100,147 @@
         window.mostrarLogin = () => { document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; };
 
         window.registrar = async () => {
-            const n = document.getElementById('reg-nombre').value;
-            const c = document.getElementById('reg-cedula').value;
-            const p = document.getElementById('reg-pass').value;
-            if(!n || !c || !p) return alert("Faltan datos");
-            await set(ref(db, 'usuarios/' + c), { nombre: n, password: p, puntos: 0 });
-            alert("Registrado correctamente");
+            const n = document.getElementById('reg-nombre').value, c = document.getElementById('reg-cedula').value, p = document.getElementById('reg-pass').value;
+            await set(ref(db, 'usuarios/' + c), { nombre: n, password: p, puntos: 0, role: "user" });
+            alert("Registrado. ¡Ya puedes entrar!");
             mostrarLogin();
         };
 
         window.login = async () => {
-            const c = document.getElementById('cedula').value;
-            const p = document.getElementById('pass').value;
+            const c = document.getElementById('cedula').value, p = document.getElementById('pass').value;
             const snap = await get(child(ref(db), `usuarios/${c}`));
             if(snap.exists() && snap.val().password === p){
-                currentUser = { cedula: c, nombre: snap.val().nombre };
+                const userData = snap.val();
+                currentUser = { cedula: c, nombre: userData.nombre, role: userData.role };
+                
                 document.getElementById('auth-container').style.display='none';
                 document.getElementById('polla-section').style.display='block';
                 document.getElementById('user-display-name').innerText = currentUser.nombre;
-                cargarPartidos(); // Cargar la lista al entrar
-            } else { alert("Datos incorrectos"); }
+
+                if(currentUser.role === "admin") {
+                    document.getElementById('admin-panel').style.display = 'block';
+                    cargarPanelAdmin();
+                }
+
+                await procesarPuntos();
+                cargarPartidos();
+                cargarRanking();
+            } else { alert("Cédula o clave incorrecta"); }
         };
 
-        // --- CARGA DINÁMICA DE PARTIDOS ---
-        async function cargarPartidos() {
-            const contenedor = document.getElementById('contenedor-dinamico');
-            contenedor.innerHTML = "Cargando partidos...";
-            
+        // --- LÓGICA DE ADMIN ---
+        async function cargarPanelAdmin() {
             const snap = await get(child(ref(db), 'partidos_oficiales'));
+            const snapOficial = await get(child(ref(db), 'resultados_oficiales'));
+            const oficiales = snapOficial.exists() ? snapOficial.val() : {};
+            const cont = document.getElementById('admin-contenedor-partidos');
+            
             if(snap.exists()){
-                contenedor.innerHTML = "";
                 const partidos = snap.val();
-                
-                // Recorrer los partidos de Firebase y crear el HTML
-                for(let id in partidos) {
-                    const p = partidos[id];
-                    contenedor.innerHTML += `
-                        <div class="partido-fila">
-                            <div class="partido-equipos">${p.equipoL} vs ${p.equipoV}</div>
-                            <div class="partido-marcador">
-                                <input type="number" id="local_${id}" class="input-gol" placeholder="0">
-                                <span>:</span>
-                                <input type="number" id="visit_${id}" class="input-gol" placeholder="0">
-                            </div>
-                            <div class="partido-info">${p.fecha} - ${p.hora}</div>
-                        </div>
-                    `;
+                cont.innerHTML = "";
+                for(let id in partidos){
+                    const resL = oficiales[id] ? oficiales[id].golesL : "";
+                    const resV = oficiales[id] ? oficiales[id].golesV : "";
+                    cont.innerHTML += `
+                        <div style="margin-bottom:10px;">
+                            ${partidos[id].equipoL} <input type="number" id="admin_l_${id}" value="${resL}" style="width:40px"> : 
+                            <input type="number" id="admin_v_${id}" value="${resV}" style="width:40px"> ${partidos[id].equipoV}
+                        </div>`;
                 }
-            } else {
-                contenedor.innerHTML = "No hay partidos programados aún.";
             }
         }
 
-        // --- GUARDAR MASIVO ---
-        window.guardarTodosLosPronosticos = async () => {
-            const inputs = document.querySelectorAll('.input-gol');
-            let datosAEnviar = {};
-            
-            // Recolectar todos los valores de los inputs
+        window.guardarResultadosOficiales = async () => {
             const snap = await get(child(ref(db), 'partidos_oficiales'));
-            const partidos = snap.val();
+            let resultados = {};
+            for(let id in snap.val()){
+                const l = document.getElementById(`admin_l_${id}`).value;
+                const v = document.getElementById(`admin_v_${id}`).value;
+                if(l !== "" && v !== "") resultados[id] = { golesL: l, golesV: v };
+            }
+            await set(ref(db, 'resultados_oficiales'), resultados);
+            alert("Resultados publicados. Los puntos se actualizarán al recargar.");
+            location.reload();
+        };
 
-            for(let id in partidos) {
-                const l = document.getElementById(`local_${id}`).value;
-                const v = document.getElementById(`visit_${id}`).value;
-                if(l !== "" && v !== "") {
-                    datosAEnviar[id] = { local: l, visitante: v };
+        // --- LÓGICA DE USUARIO ---
+        async function cargarPartidos() {
+            const snap = await get(child(ref(db), 'partidos_oficiales'));
+            const misVotosSnap = await get(child(ref(db), `pronosticos/${currentUser.cedula}`));
+            const misVotos = misVotosSnap.exists() ? misVotosSnap.val() : {};
+            const cont = document.getElementById('contenedor-dinamico');
+            
+            if(snap.exists()){
+                cont.innerHTML = "";
+                for(let id in snap.val()){
+                    const p = snap.val()[id];
+                    const isDisabled = p.bloqueado ? "disabled" : "";
+                    cont.innerHTML += `
+                        <div class="partido-fila">
+                            <div>${p.equipoL} vs ${p.equipoV} ${p.bloqueado ? '🔒' : ''}</div>
+                            <div class="partido-marcador">
+                                <input type="number" id="local_${id}" value="${misVotos[id]?.local || ''}" class="input-gol" ${isDisabled}> : 
+                                <input type="number" id="visit_${id}" value="${misVotos[id]?.visitante || ''}" class="input-gol" ${isDisabled}>
+                            </div>
+                        </div>`;
                 }
             }
+        }
 
-            if(Object.keys(datosAEnviar).length === 0) return alert("Ingresa al menos un pronóstico");
+        async function procesarPuntos() {
+            const snapOficial = await get(child(ref(db), 'resultados_oficiales'));
+            const snapMisVotos = await get(child(ref(db), `pronosticos/${currentUser.cedula}`));
+            if(!snapOficial.exists() || !snapMisVotos.exists()) return;
+            
+            let total = 0;
+            const oficiales = snapOficial.val();
+            const votos = snapMisVotos.val();
 
-            await set(ref(db, `pronosticos/${currentUser.cedula}`), datosAEnviar);
-            alert("¡Todos tus pronósticos han sido guardados!");
+            for(let id in oficiales){
+                if(votos[id]){
+                    const rL = parseInt(oficiales[id].golesL), rV = parseInt(oficiales[id].golesV);
+                    const pL = parseInt(votos[id].local), pV = parseInt(votos[id].visitante);
+                    if(rL === pL && rV === pV) total += 5;
+                    else if((rL - rV) === (pL - pV)) total += 3;
+                    else if(Math.sign(rL - rV) === Math.sign(pL - pV)) total += 2;
+                }
+            }
+            await update(ref(db, `usuarios/${currentUser.cedula}`), { puntos: total });
+            document.getElementById('mis-puntos-total').innerText = total;
+        }
+
+        async function cargarRanking() {
+            const snap = await get(child(ref(db), 'usuarios'));
+            if(snap.exists()){
+                const sorted = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
+                document.getElementById('body-ranking').innerHTML = sorted.map((u, i) => `<tr><td>${i+1}</td><td>${u.nombre}</td><td>${u.puntos}</td></tr>`).join('');
+            }
+        }
+
+        window.guardarTodosLosPronosticos = async () => {
+            const snap = await get(child(ref(db), 'partidos_oficiales'));
+            let datos = {};
+            for(let id in snap.val()){
+                if(!snap.val()[id].bloqueado){
+                    const l = document.getElementById(`local_${id}`).value, v = document.getElementById(`visit_${id}`).value;
+                    if(l !== "" && v !== "") datos[id] = { local: l, visitante: v };
+                }
+            }
+            await update(ref(db, `pronosticos/${currentUser.cedula}`), datos);
+            alert("¡Apuestas guardadas!");
+            location.reload();
         };
 
         window.logout = () => location.reload();
-
     </script>
 
     <style>
-        .input-auth { display: block; margin: 10px auto; padding: 10px; width: 80%; max-width: 300px; border-radius: 5px; border: 1px solid #ddd; }
-        .input-gol { width: 40px; text-align: center; padding: 5px; border-radius: 4px; border: 1px solid #ccc; }
-        .partido-info { font-size: 0.8em; color: #666; }
-        .btn-secundario { background: none; border: 1px solid white; color: white; padding: 10px; cursor: pointer; border-radius: 5px; margin-top: 10px; }
-        .accion-guardar { text-align: center; margin-top: 20px; }
+        .grid-dos-columnas { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .input-auth { display: block; margin: 10px auto; padding: 10px; width: 80%; border-radius: 5px; border: 1px solid #ddd; }
+        .input-gol { width: 40px; text-align: center; }
+        #tabla-ranking { width: 100%; border-collapse: collapse; background: white; }
+        #tabla-ranking td, #tabla-ranking th { padding: 8px; border-bottom: 1px solid #eee; }
+        .welcome-user { background: #1e2b4d; color: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; }
     </style>
 </body>
 </html>
