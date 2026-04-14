@@ -30,15 +30,15 @@
 
     <main class="container">
         <section class="banner">
-            <h1>Bienvenido a la Polla Multivac Mundial 2026!</h1>
-            <p>¡Haz tus pronósticos y gana premios!</p>
+            <h1>¡Bienvenido a la Polla Multivac Mundial 2026!</h1>
+            <p>Participa con tus compañeros y demuestra quién sabe más de fútbol.</p>
         </section>
 
         <section class="partidos">
             <h2>Próximos Partidos</h2>
             
             <div class="partido-fila cabecera-tabla">
-                <div></div> <div>Equipos</div>
+                <div>Encuentro</div>
                 <div>Pronóstico</div>
                 <div>Hora</div>
                 <div>Fecha</div>
@@ -47,34 +47,23 @@
             <div class="partido-fila">
                 <div class="partido-equipos">EE. UU. <span class="vs">vs.</span> México</div>
                 <div class="partido-marcador">
-                    <input type="number" min="0" placeholder="0">
+                    <input type="number" id="p1_local" min="0" placeholder="0">
                     <span class="separador">:</span>
-                    <input type="number" min="0" placeholder="0">
+                    <input type="number" id="p1_visitante" min="0" placeholder="0">
                 </div>
                 <div>10:00</div>
                 <div>28 de Jun. 2026</div>
             </div>
 
-            <div class="partido-fila">
-                <div class="partido-equipos">Canadá <span class="vs">vs.</span> Brasil</div>
-                <div class="partido-marcador">
-                    <input type="number" min="0" placeholder="0">
-                    <span class="separador">:</span>
-                    <input type="number" min="0" placeholder="0">
-                </div>
-                <div>10:00</div>
-                <div>29 de Jun. 2026</div>
-            </div>
-
             <div class="accion-guardar">
-                <button class="btn-guardar">Guardar Pronósticos</button>
+                <button class="btn-guardar" id="btnGuardar">Guardar Pronósticos</button>
             </div>
         </section>
 
         <div class="grid-dos-columnas">
             <section class="clasificacion">
-                <h2>Top Clasificación de Empleados</h2>
-                <ol>
+                <h2>Top Clasificación</h2>
+                <ol id="listaClasificacion">
                     <li>Ana García (45 pts)</li>
                     <li>Juan Pérez (42 pts)</li>
                     <li>Sofía López (38 pts)</li>
@@ -82,22 +71,75 @@
             </section>
 
             <section id="reglas" class="reglas-premios">
-                <h2>Reglamento y Premios</h2>
+                <h2>Reglamento</h2>
                 <div class="caja-reglas">
-                    <p>Recuerda leer las REGLAS oficiales y los PREMIOS para ganadores</p>
-                    <a href="#" class="enlace-doc">reglas.html</a>
-                    <a href="#" class="enlace-doc">premios.html</a>
+                    <p>Basado en el reglamento de GolPredictor:</p>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>✅ <b>Marcador exacto:</b> 5 pts</li>
+                        <li>✅ <b>Diferencia de goles:</b> 3 pts</li>
+                        <li>✅ <b>Resultado (G/E):</b> 2 pts</li>
+                    </ul>
+                    <br>
+                    <a href="https://www.golpredictor.com/regulation.aspx" target="_blank" class="enlace-doc">Ver reglamento completo</a>
                 </div>
             </section>
         </div>
-
     </main>
 
     <footer>
-        <img src="img/logo.png" alt="Logo Multivac Pequeño" class="logo-footer">
-        <p>Copyright © 2022 Multivac Polla Nonda</p>
+        <img src="img/logo.png" alt="Logo Multivac" class="logo-footer">
+        <p>Copyright © 2026 Multivac - Proyecto Mundial</p>
     </footer>
 
-    <script src="js/main.js"></script>
+    <script type="module">
+        // Importamos las librerías necesarias de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
+
+        // 1. CONFIGURACIÓN DE TU APP (REEMPLAZA ESTO CON TUS DATOS DE FIREBASE)
+        const firebaseConfig = {
+          apiKey: "AIzaSyDLBiRdbJyGb6cYrlA-1xi-N8TqJnsUljk",
+          authDomain: "mundial-15371.firebaseapp.com",
+          projectId: "mundial-15371",
+          storageBucket: "mundial-15371.firebasestorage.app",
+          messagingSenderId: "740014298129",
+          appId: "1:740014298129:web:9098b4ed2c579527a68db0"
+        };
+
+        // 2. INICIALIZAR FIREBASE
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // 3. LÓGICA DEL BOTÓN GUARDAR
+        document.getElementById('btnGuardar').addEventListener('click', () => {
+            const local = document.getElementById('p1_local').value;
+            const visitante = document.getElementById('p1_visitante').value;
+
+            if (local === "" || visitante === "") {
+                alert("Por favor completa el marcador antes de guardar.");
+                return;
+            }
+
+            // Guardamos en la base de datos bajo una carpeta llamada "votos_prueba"
+            const votosRef = ref(db, 'votos_prueba');
+            const nuevoVotoRef = push(votosRef); // Crea un ID único para este envío
+
+            set(nuevoVotoRef, {
+                empleado: "Ortiz_Prueba", // Luego lo haremos dinámico
+                partido: "EEUU vs Mexico",
+                marcador: local + " - " + visitante,
+                fechaEnvio: new Date().toLocaleString()
+            })
+            .then(() => {
+                alert("¡Conexión Exitosa! El pronóstico se guardó en Firebase.");
+            })
+            .catch((error) => {
+                console.error("Error al guardar:", error);
+                alert("Hubo un error. Revisa la consola.");
+            });
+        });
+
+        console.log("Sistema de Polla Multivac conectado.");
+    </script>
 </body>
 </html>
