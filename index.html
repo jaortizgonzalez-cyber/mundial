@@ -22,7 +22,6 @@
                     <li><a href="#reglas">Reglas</a></li>
                     <li><a href="#">Mis Pronósticos</a></li>
                     <li><a href="#">Clasificación</a></li>
-                    <li><a href="#">Perfil</a></li>
                 </ul>
             </nav>
         </div>
@@ -30,18 +29,20 @@
 
     <main class="container">
         <section class="banner">
-            <h1>¡Bienvenido a la Polla Multivac Mundial 2026!</h1>
-            <p>Participa con tus compañeros y demuestra quién sabe más de fútbol.</p>
+            <div id="auth-section">
+                <h2>Identificación de Colaborador</h2>
+                <p>Ingresa tu ID de empleado o nombre completo para empezar:</p>
+                <input type="text" id="userId" placeholder="Ej: JORTIZ01" style="padding: 10px; border-radius: 5px; border: none; width: 250px; margin-top: 10px;">
+            </div>
         </section>
 
         <section class="partidos">
-            <h2>Próximos Partidos</h2>
+            <h2>Ingresa tus Pronósticos</h2>
             
             <div class="partido-fila cabecera-tabla">
                 <div>Encuentro</div>
-                <div>Pronóstico</div>
-                <div>Hora</div>
-                <div>Fecha</div>
+                <div>Marcador</div>
+                <div>Estado</div>
             </div>
 
             <div class="partido-fila">
@@ -51,36 +52,32 @@
                     <span class="separador">:</span>
                     <input type="number" id="p1_visitante" min="0" placeholder="0">
                 </div>
-                <div>10:00</div>
-                <div>28 de Jun. 2026</div>
+                <div id="p1_status">Pendiente</div>
             </div>
 
             <div class="accion-guardar">
-                <button class="btn-guardar" id="btnGuardar">Guardar Pronósticos</button>
+                <button class="btn-guardar" id="btnGuardar">Enviar Pronósticos</button>
             </div>
         </section>
 
         <div class="grid-dos-columnas">
             <section class="clasificacion">
-                <h2>Top Clasificación</h2>
-                <ol id="listaClasificacion">
-                    <li>Ana García (45 pts)</li>
-                    <li>Juan Pérez (42 pts)</li>
-                    <li>Sofía López (38 pts)</li>
-                </ol>
+                <h2>Tu Ranking Actual</h2>
+                <div id="userStats" style="background: #f4f7f9; padding: 20px; border-radius: 8px;">
+                    <p>Puntos totales: <strong id="userPoints">0</strong></p>
+                    <p>Posición: <strong id="userRank">--</strong></p>
+                </div>
             </section>
 
             <section id="reglas" class="reglas-premios">
                 <h2>Reglamento</h2>
                 <div class="caja-reglas">
-                    <p>Basado en el reglamento de GolPredictor:</p>
+                    <p>Sistema de puntuación:</p>
                     <ul style="list-style: none; padding-left: 0;">
-                        <li>✅ <b>Marcador exacto:</b> 5 pts</li>
-                        <li>✅ <b>Diferencia de goles:</b> 3 pts</li>
-                        <li>✅ <b>Resultado (G/E):</b> 2 pts</li>
+                        <li>🎯 <b>Exacto:</b> 5 pts</li>
+                        <li>⚽ <b>Diferencia:</b> 3 pts</li>
+                        <li>🏆 <b>Ganador/Empate:</b> 2 pts</li>
                     </ul>
-                    <br>
-                    <a href="https://www.golpredictor.com/regulation.aspx" target="_blank" class="enlace-doc">Ver reglamento externo</a>
                 </div>
             </section>
         </div>
@@ -88,14 +85,13 @@
 
     <footer>
         <img src="img/logo.png" alt="Logo Multivac" class="logo-footer">
-        <p>Copyright © 2026 Multivac - Proyecto Mundial</p>
+        <p>Copyright © 2026 Multivac - Gestión Tecnológica</p>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
 
-        // Tus datos aplicados
         const firebaseConfig = {
             apiKey: "AIzaSyDLBiRdbJyGb6cYrlA-1xi-N8TqJnsUljk",
             authDomain: "mundial-15371.firebaseapp.com",
@@ -103,49 +99,46 @@
             storageBucket: "mundial-15371.firebasestorage.app",
             messagingSenderId: "740014298129",
             appId: "1:740014298129:web:9098b4ed2c579527a68db0",
-            // Agregamos manualmente la URL de la base de datos necesaria para Realtime
             databaseURL: "https://mundial-15371-default-rtdb.firebaseio.com"
         };
 
-        // Inicialización
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        console.log("🔥 Firebase: Conectado a mundial-15371");
 
-        // Ejecutar lógica cuando cargue la página
         window.addEventListener('load', () => {
             const btn = document.getElementById('btnGuardar');
             
-            if(btn) {
-                btn.onclick = function() {
-                    const golesL = document.getElementById('p1_local').value;
-                    const golesV = document.getElementById('p1_visitante').value;
+            btn.onclick = function() {
+                const userId = document.getElementById('userId').value.trim();
+                const golesL = document.getElementById('p1_local').value;
+                const golesV = document.getElementById('p1_visitante').value;
 
-                    if (golesL === "" || golesV === "") {
-                        alert("Por favor ingresa un marcador.");
-                        return;
-                    }
+                if (!userId) {
+                    alert("Por favor, identifícate con tu ID o nombre.");
+                    return;
+                }
+                if (golesL === "" || golesV === "") {
+                    alert("Ingresa el marcador para guardar.");
+                    return;
+                }
 
-                    // Referencia a la tabla "votos_prueba"
-                    const votosRef = ref(db, 'votos_prueba');
-                    const nuevoVoto = push(votosRef);
+                // Guardamos bajo el ID del usuario para que sea único
+                const userRef = ref(db, 'participantes/' + userId + '/pronosticos/partido_01');
 
-                    set(nuevoVoto, {
-                        usuario: "Jose Ortiz",
-                        marcador: golesL + " - " + golesV,
-                        timestamp: new Date().toISOString(),
-                        proyecto: "Multivac Polla"
-                    })
-                    .then(() => {
-                        console.log("✅ Éxito en la escritura");
-                        alert("¡Increíble! Los datos ya están en tu Firebase.");
-                    })
-                    .catch((error) => {
-                        console.error("❌ Error:", error);
-                        alert("Error de conexión: " + error.message);
-                    });
-                };
-            }
+                set(userRef, {
+                    local: golesL,
+                    visitante: golesV,
+                    fecha: new Date().toISOString()
+                })
+                .then(() => {
+                    alert("¡Pronóstico registrado para " + userId + "!");
+                    document.getElementById('p1_status').innerHTML = "✅ Guardado";
+                    document.getElementById('p1_status').style.color = "green";
+                })
+                .catch((error) => {
+                    alert("Error: " + error.message);
+                });
+            };
         });
     </script>
 </body>
