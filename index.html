@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multivac Polla Mundial 2026</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="container header-content">
+            <div class="logo-container">
+                <img src="img/logo.png" alt="Logo Multivac" class="logo">
+                <div class="sitio-titulos">
+                    <h1>Multivac</h1>
+                    <h2>Polla Mundial 2026</h2>
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#reglas">Reglas</a></li>
+                    <li><a href="#">Mis Pronósticos</a></li>
+                    <li><a href="#">Clasificación</a></li>
+                    <li><a href="#">Perfil</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="banner">
+            <h1>Bienvenido a la Polla Multivac Mundial 2026!</h1>
+            <p>¡Haz tus pronósticos y gana premios!</p>
+        </section>
+
+        <section class="partidos">
+            <h2>Próximos Partidos</h2>
+            
+            <div class="partido-fila cabecera-tabla">
+                <div></div> <div>Equipos</div>
+                <div>Pronóstico</div>
+                <div>Hora</div>
+                <div>Fecha</div>
+            </div>
+
+            <div class="partido-fila">
+                <div class="partido-equipos">EE. UU. <span class="vs">vs.</span> México</div>
+                <div class="partido-marcador">
+                    <input type="number" min="0" placeholder="0">
+                    <span class="separador">:</span>
+                    <input type="number" min="0" placeholder="0">
+                </div>
+                <div>10:00</div>
+                <div>28 de Jun. 2026</div>
+            </div>
+
+            <div class="partido-fila">
+                <div class="partido-equipos">Canadá <span class="vs">vs.</span> Brasil</div>
+                <div class="partido-marcador">
+                    <input type="number" min="0" placeholder="0">
+                    <span class="separador">:</span>
+                    <input type="number" min="0" placeholder="0">
+                </div>
+                <div>10:00</div>
+                <div>29 de Jun. 2026</div>
+            </div>
+
+            <div class="accion-guardar">
+                <button class="btn-guardar">Guardar Pronósticos</button>
+            </div>
+        </section>
+
+        <div class="grid-dos-columnas">
+            <section class="clasificacion">
+                <h2>Top Clasificación de Empleados</h2>
+                <ol>
+                    <li>Ana García (45 pts)</li>
+                    <li>Juan Pérez (42 pts)</li>
+                    <li>Sofía López (38 pts)</li>
+                </ol>
+            </section>
+
+            <section id="reglas" class="reglas-premios">
+                <h2>Reglamento y Premios</h2>
+                <div class="caja-reglas">
+                    <p>Recuerda leer las REGLAS oficiales y los PREMIOS para ganadores</p>
+                    <a href="#" class="enlace-doc">reglas.html</a>
+                    <a href="#" class="enlace-doc">premios.html</a>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <footer>
+        <img src="img/logo.png" alt="Logo Multivac Pequeño" class="logo-footer">
+        <p>Copyright © 2022 Multivac Polla Nonda</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

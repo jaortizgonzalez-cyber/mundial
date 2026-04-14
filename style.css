@@ -1,0 +1,237 @@
+/* --- Variables de Color y Reset --- */
+:root {
+    --color-principal: #1A237E; /* Azul oscuro Multivac */
+    --color-fondo: #FFFFFF;
+    --color-texto-oscuro: #333333;
+    --color-texto-claro: #FFFFFF;
+    --color-fila-par: #F1F3F9; /* Gris muy azulado claro */
+    --borde-radio: 8px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif; /* Usamos una sans-serif estándar por ahora */
+    background-color: var(--color-fondo);
+    color: var(--color-texto-oscuro);
+    line-height: 1.6;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Cabecera (Header) --- */
+header {
+    background-color: var(--color-fondo);
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    height: 60px; /* Ajusta según tu imagen */
+}
+
+.sitio-titulos h1 {
+    font-size: 24px;
+    color: var(--color-principal);
+}
+
+.sitio-titulos h2 {
+    font-size: 18px;
+    font-weight: normal;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+nav a {
+    text-decoration: none;
+    color: var(--color-texto-oscuro);
+    font-weight: bold;
+}
+
+/* --- Banner --- */
+.banner {
+    background-color: var(--color-principal);
+    color: var(--color-texto-claro);
+    padding: 40px;
+    border-radius: var(--borde-radio);
+    margin: 30px 0;
+}
+
+.banner h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+/* --- Sección Partidos --- */
+.partidos {
+    margin-bottom: 40px;
+}
+
+h2 {
+    color: var(--color-principal);
+    margin-bottom: 20px;
+}
+
+.partido-fila {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr; /* Proporciones de columna */
+    align-items: center;
+    padding: 15px;
+    border-radius: var(--borde-radio);
+    margin-bottom: 10px;
+}
+
+.partido-fila:nth-child(even) {
+    background-color: var(--color-fila-par);
+}
+
+.cabecera-tabla {
+    font-weight: bold;
+    background-color: transparent !important;
+}
+
+.partido-equipos {
+    font-size: 1.1em;
+}
+
+.vs {
+    font-weight: normal;
+    color: #888;
+    margin: 0 5px;
+}
+
+.partido-marcador {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.partido-marcador input {
+    width: 50px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.separador {
+    font-weight: bold;
+}
+
+.accion-guardar {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.btn-guardar {
+    background-color: var(--color-principal);
+    color: var(--color-texto-claro);
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--borde-radio);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* --- Grid y Columnas Inferiores --- */
+.grid-dos-columnas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+/* Clasificación */
+.clasificacion ol {
+    list-style-position: inside;
+}
+
+.clasificacion li {
+    background-color: var(--color-fila-par);
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+/* Reglas y Premios */
+.caja-reglas {
+    background-color: var(--color-principal);
+    color: var(--color-texto-claro);
+    padding: 25px;
+    border-radius: var(--borde-radio);
+}
+
+.caja-reglas p {
+    margin-bottom: 15px;
+}
+
+.enlace-doc {
+    display: block;
+    color: var(--color-texto-claro);
+    margin-bottom: 5px;
+    text-decoration: underline;
+}
+
+/* --- Pie de Página (Footer) --- */
+footer {
+    background-color: #f9f9f9;
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #eee;
+    margin-top: auto;
+}
+
+.logo-footer {
+    height: 40px;
+    margin-bottom: 10px;
+}
+
+/* --- Responsividad Básica --- */
+@media (max-width: 768px) {
+    .header-content, .grid-dos-columnas {
+        flex-direction: column;
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    nav ul {
+        margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .partido-fila {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .partido-marcador {
+        justify-content: center;
+    }
+}
