@@ -80,7 +80,7 @@
                         <li>✅ <b>Resultado (G/E):</b> 2 pts</li>
                     </ul>
                     <br>
-                    <a href="https://www.golpredictor.com/regulation.aspx" target="_blank" class="enlace-doc">Ver reglamento completo</a>
+                    <a href="https://www.golpredictor.com/regulation.aspx" target="_blank" class="enlace-doc">Ver reglamento externo</a>
                 </div>
             </section>
         </div>
@@ -92,54 +92,61 @@
     </footer>
 
     <script type="module">
-        // Importamos las librerías necesarias de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
 
-        // 1. CONFIGURACIÓN DE TU APP (REEMPLAZA ESTO CON TUS DATOS DE FIREBASE)
+        // Tus datos aplicados
         const firebaseConfig = {
-          apiKey: "AIzaSyDLBiRdbJyGb6cYrlA-1xi-N8TqJnsUljk",
-          authDomain: "mundial-15371.firebaseapp.com",
-          projectId: "mundial-15371",
-          storageBucket: "mundial-15371.firebasestorage.app",
-          messagingSenderId: "740014298129",
-          appId: "1:740014298129:web:9098b4ed2c579527a68db0"
+            apiKey: "AIzaSyDLBiRdbJyGb6cYrlA-1xi-N8TqJnsUljk",
+            authDomain: "mundial-15371.firebaseapp.com",
+            projectId: "mundial-15371",
+            storageBucket: "mundial-15371.firebasestorage.app",
+            messagingSenderId: "740014298129",
+            appId: "1:740014298129:web:9098b4ed2c579527a68db0",
+            // Agregamos manualmente la URL de la base de datos necesaria para Realtime
+            databaseURL: "https://mundial-15371-default-rtdb.firebaseio.com"
         };
 
-        // 2. INICIALIZAR FIREBASE
+        // Inicialización
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        console.log("🔥 Firebase: Conectado a mundial-15371");
 
-        // 3. LÓGICA DEL BOTÓN GUARDAR
-        document.getElementById('btnGuardar').addEventListener('click', () => {
-            const local = document.getElementById('p1_local').value;
-            const visitante = document.getElementById('p1_visitante').value;
+        // Ejecutar lógica cuando cargue la página
+        window.addEventListener('load', () => {
+            const btn = document.getElementById('btnGuardar');
+            
+            if(btn) {
+                btn.onclick = function() {
+                    const golesL = document.getElementById('p1_local').value;
+                    const golesV = document.getElementById('p1_visitante').value;
 
-            if (local === "" || visitante === "") {
-                alert("Por favor completa el marcador antes de guardar.");
-                return;
+                    if (golesL === "" || golesV === "") {
+                        alert("Por favor ingresa un marcador.");
+                        return;
+                    }
+
+                    // Referencia a la tabla "votos_prueba"
+                    const votosRef = ref(db, 'votos_prueba');
+                    const nuevoVoto = push(votosRef);
+
+                    set(nuevoVoto, {
+                        usuario: "Jose Ortiz",
+                        marcador: golesL + " - " + golesV,
+                        timestamp: new Date().toISOString(),
+                        proyecto: "Multivac Polla"
+                    })
+                    .then(() => {
+                        console.log("✅ Éxito en la escritura");
+                        alert("¡Increíble! Los datos ya están en tu Firebase.");
+                    })
+                    .catch((error) => {
+                        console.error("❌ Error:", error);
+                        alert("Error de conexión: " + error.message);
+                    });
+                };
             }
-
-            // Guardamos en la base de datos bajo una carpeta llamada "votos_prueba"
-            const votosRef = ref(db, 'votos_prueba');
-            const nuevoVotoRef = push(votosRef); // Crea un ID único para este envío
-
-            set(nuevoVotoRef, {
-                empleado: "Ortiz_Prueba", // Luego lo haremos dinámico
-                partido: "EEUU vs Mexico",
-                marcador: local + " - " + visitante,
-                fechaEnvio: new Date().toLocaleString()
-            })
-            .then(() => {
-                alert("¡Conexión Exitosa! El pronóstico se guardó en Firebase.");
-            })
-            .catch((error) => {
-                console.error("Error al guardar:", error);
-                alert("Hubo un error. Revisa la consola.");
-            });
         });
-
-        console.log("Sistema de Polla Multivac conectado.");
     </script>
 </body>
 </html>
