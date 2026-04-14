@@ -23,36 +23,36 @@
     <main class="container">
         <section id="auth-container" class="banner">
             <div id="login-form">
-                <h2>Acceso a la Polla</h2>
-                <input type="number" id="cedula" placeholder="Cédula" class="input-auth">
+                <h2>Acceso de Colaboradores</h2>
+                <input type="number" id="cedula" placeholder="Número de Cédula" class="input-auth">
                 <input type="password" id="pass" placeholder="Contraseña" class="input-auth">
                 <button class="btn-guardar" onclick="login()">Entrar</button>
-                <button class="btn-secundario" onclick="mostrarRegistro()">Registrarme</button>
+                <button class="btn-secundario" onclick="mostrarRegistro()">¿No tienes cuenta? Regístrate</button>
             </div>
             <div id="register-form" style="display:none;">
-                <h2>Registro</h2>
+                <h2>Registro Nuevo Usuario</h2>
                 <input type="text" id="reg-nombre" placeholder="Nombre Completo" class="input-auth">
                 <input type="number" id="reg-cedula" placeholder="Cédula" class="input-auth">
-                <input type="password" id="reg-pass" placeholder="Contraseña" class="input-auth">
-                <button class="btn-guardar" onclick="registrar()">Crear Cuenta</button>
-                <button class="btn-secundario" onclick="mostrarLogin()">Volver</button>
+                <input type="password" id="reg-pass" placeholder="Crea una Contraseña" class="input-auth">
+                <button class="btn-guardar" onclick="registrar()">Crear Mi Cuenta</button>
+                <button class="btn-secundario" onclick="mostrarLogin()">Volver al Inicio</button>
             </div>
         </section>
 
         <section id="polla-section" style="display:none;">
             <div class="welcome-user">
                 <div>
-                    <h3>Hola, <span id="user-display-name"></span></h3>
-                    <p>Puntos: <strong id="mis-puntos-total">0</strong></p>
+                    <h3>Bienvenido, <span id="user-display-name"></span></h3>
+                    <p>Tu Puntaje Total: <strong id="mis-puntos-total" style="font-size: 1.5em; color: #ffeb3b;">0</strong></p>
                 </div>
-                <button class="btn-logout" onclick="logout()">Salir</button>
+                <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
             </div>
 
             <div id="admin-panel" style="display:none; background: #fff3e0; border: 2px solid #ff9800; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h2 style="color: #e65100;">🛠️ Panel de Control Oficial (Solo Admin)</h2>
-                <p>Ingresa los resultados finales para actualizar los puntos de todos.</p>
+                <h2 style="color: #e65100;">🛠️ Consola de Administración Oficial</h2>
+                <p>1. Ingresa resultados | 2. Bloquea apuestas | 3. Publica</p>
                 <div id="admin-contenedor-partidos"></div>
-                <button class="btn-guardar" style="background: #e65100;" onclick="guardarResultadosOficiales()">Publicar Resultados Oficiales</button>
+                <button class="btn-guardar" style="background: #e65100; width: 100%;" onclick="guardarPanelControl()">Actualizar Todo el Sistema</button>
             </div>
 
             <div class="grid-dos-columnas">
@@ -65,10 +65,10 @@
                 </div>
 
                 <div class="ranking-seccion">
-                    <h2>Ranking General</h2>
+                    <h2>Tabla de Posiciones</h2>
                     <table id="tabla-ranking">
                         <thead>
-                            <tr><th>Pos</th><th>Nombre</th><th>Pts</th></tr>
+                            <tr><th>Pos</th><th>Participante</th><th>Pts</th></tr>
                         </thead>
                         <tbody id="body-ranking"></tbody>
                     </table>
@@ -95,88 +95,93 @@
         const db = getDatabase(app);
         let currentUser = null;
 
-        // --- AUTENTICACIÓN ---
+        // NAVEGACIÓN
         window.mostrarRegistro = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
         window.mostrarLogin = () => { document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; };
 
+        // REGISTRO
         window.registrar = async () => {
             const n = document.getElementById('reg-nombre').value, c = document.getElementById('reg-cedula').value, p = document.getElementById('reg-pass').value;
+            if(!n || !c || !p) return alert("Por favor completa todos los campos.");
             await set(ref(db, 'usuarios/' + c), { nombre: n, password: p, puntos: 0, role: "user" });
-            alert("Registrado. ¡Ya puedes entrar!");
+            alert("¡Registro exitoso! Ya puedes ingresar.");
             mostrarLogin();
         };
 
+        // LOGIN
         window.login = async () => {
             const c = document.getElementById('cedula').value, p = document.getElementById('pass').value;
             const snap = await get(child(ref(db), `usuarios/${c}`));
             if(snap.exists() && snap.val().password === p){
                 const userData = snap.val();
                 currentUser = { cedula: c, nombre: userData.nombre, role: userData.role };
-                
                 document.getElementById('auth-container').style.display='none';
                 document.getElementById('polla-section').style.display='block';
                 document.getElementById('user-display-name').innerText = currentUser.nombre;
-
-                if(currentUser.role === "admin") {
-                    document.getElementById('admin-panel').style.display = 'block';
-                    cargarPanelAdmin();
-                }
-
+                if(currentUser.role === "admin") { cargarPanelAdmin(); }
                 await procesarPuntos();
                 cargarPartidos();
                 cargarRanking();
-            } else { alert("Cédula o clave incorrecta"); }
+            } else { alert("Cédula o contraseña incorrecta."); }
         };
 
-        // --- LÓGICA DE ADMIN ---
+        // PANEL DE CONTROL (ADMIN)
         async function cargarPanelAdmin() {
-            const snap = await get(child(ref(db), 'partidos_oficiales'));
-            const snapOficial = await get(child(ref(db), 'resultados_oficiales'));
-            const oficiales = snapOficial.exists() ? snapOficial.val() : {};
+            document.getElementById('admin-panel').style.display = 'block';
+            const snapP = await get(child(ref(db), 'partidos_oficiales'));
+            const snapR = await get(child(ref(db), 'resultados_oficiales'));
+            const res = snapR.exists() ? snapR.val() : {};
             const cont = document.getElementById('admin-contenedor-partidos');
-            
-            if(snap.exists()){
-                const partidos = snap.val();
+            if(snapP.exists()){
                 cont.innerHTML = "";
-                for(let id in partidos){
-                    const resL = oficiales[id] ? oficiales[id].golesL : "";
-                    const resV = oficiales[id] ? oficiales[id].golesV : "";
+                for(let id in snapP.val()){
+                    const p = snapP.val()[id];
                     cont.innerHTML += `
-                        <div style="margin-bottom:10px;">
-                            ${partidos[id].equipoL} <input type="number" id="admin_l_${id}" value="${resL}" style="width:40px"> : 
-                            <input type="number" id="admin_v_${id}" value="${resV}" style="width:40px"> ${partidos[id].equipoV}
+                        <div style="background: white; margin-bottom: 5px; padding: 10px; display: flex; align-items: center; justify-content: space-between;">
+                            <span>${p.equipoL} vs ${p.equipoV}</span>
+                            <div>
+                                <input type="number" id="adm_l_${id}" value="${res[id]?.golesL || ''}" style="width:35px" placeholder="L"> : 
+                                <input type="number" id="adm_v_${id}" value="${res[id]?.golesV || ''}" style="width:35px" placeholder="V">
+                                <label style="margin-left:15px; font-size: 0.8em;">
+                                    <input type="checkbox" id="adm_lock_${id}" ${p.bloqueado ? 'checked' : ''}> Bloquear 🔒
+                                </label>
+                            </div>
                         </div>`;
                 }
             }
         }
 
-        window.guardarResultadosOficiales = async () => {
+        window.guardarPanelControl = async () => {
             const snap = await get(child(ref(db), 'partidos_oficiales'));
+            const partidos = snap.val();
+            let updatesPartidos = {};
             let resultados = {};
-            for(let id in snap.val()){
-                const l = document.getElementById(`admin_l_${id}`).value;
-                const v = document.getElementById(`admin_v_${id}`).value;
-                if(l !== "" && v !== "") resultados[id] = { golesL: l, golesV: v };
+            for(let id in partidos){
+                const l = document.getElementById(`adm_l_${id}`).value;
+                const v = document.getElementById(`adm_v_${id}`).value;
+                const lock = document.getElementById(`adm_lock_${id}`).checked;
+                updatesPartidos[`partidos_oficiales/${id}/bloqueado`] = lock;
+                if(l !== "" && v !== "") resultados[id] = { golesL: parseInt(l), golesV: parseInt(v) };
             }
+            await update(ref(db), updatesPartidos);
             await set(ref(db, 'resultados_oficiales'), resultados);
-            alert("Resultados publicados. Los puntos se actualizarán al recargar.");
+            alert("Sistema Actualizado Correctamente");
             location.reload();
         };
 
-        // --- LÓGICA DE USUARIO ---
+        // LÓGICA DE JUEGO
         async function cargarPartidos() {
-            const snap = await get(child(ref(db), 'partidos_oficiales'));
-            const misVotosSnap = await get(child(ref(db), `pronosticos/${currentUser.cedula}`));
-            const misVotos = misVotosSnap.exists() ? misVotosSnap.val() : {};
+            const snapP = await get(child(ref(db), 'partidos_oficiales'));
+            const snapV = await get(child(ref(db), `pronosticos/${currentUser.cedula}`));
+            const misVotos = snapV.exists() ? snapV.val() : {};
             const cont = document.getElementById('contenedor-dinamico');
-            
-            if(snap.exists()){
+            if(snapP.exists()){
                 cont.innerHTML = "";
-                for(let id in snap.val()){
-                    const p = snap.val()[id];
+                for(let id in snapP.val()){
+                    const p = snapP.val()[id];
                     const isDisabled = p.bloqueado ? "disabled" : "";
                     cont.innerHTML += `
-                        <div class="partido-fila">
+                        <div class="partido-fila" style="${p.bloqueado ? 'opacity: 0.7; background: #eee;' : ''}">
                             <div>${p.equipoL} vs ${p.equipoV} ${p.bloqueado ? '🔒' : ''}</div>
                             <div class="partido-marcador">
                                 <input type="number" id="local_${id}" value="${misVotos[id]?.local || ''}" class="input-gol" ${isDisabled}> : 
@@ -188,14 +193,11 @@
         }
 
         async function procesarPuntos() {
-            const snapOficial = await get(child(ref(db), 'resultados_oficiales'));
-            const snapMisVotos = await get(child(ref(db), `pronosticos/${currentUser.cedula}`));
-            if(!snapOficial.exists() || !snapMisVotos.exists()) return;
-            
+            const snapO = await get(child(ref(db), 'resultados_oficiales'));
+            const snapV = await get(child(ref(db), `pronosticos/${currentUser.cedula}`));
+            if(!snapO.exists() || !snapV.exists()) return;
             let total = 0;
-            const oficiales = snapOficial.val();
-            const votos = snapMisVotos.val();
-
+            const oficiales = snapO.val(), votos = snapV.val();
             for(let id in oficiales){
                 if(votos[id]){
                     const rL = parseInt(oficiales[id].golesL), rV = parseInt(oficiales[id].golesV);
@@ -227,7 +229,7 @@
                 }
             }
             await update(ref(db, `pronosticos/${currentUser.cedula}`), datos);
-            alert("¡Apuestas guardadas!");
+            alert("Tus apuestas han sido guardadas.");
             location.reload();
         };
 
@@ -235,12 +237,22 @@
     </script>
 
     <style>
-        .grid-dos-columnas { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .input-auth { display: block; margin: 10px auto; padding: 10px; width: 80%; border-radius: 5px; border: 1px solid #ddd; }
-        .input-gol { width: 40px; text-align: center; }
-        #tabla-ranking { width: 100%; border-collapse: collapse; background: white; }
-        #tabla-ranking td, #tabla-ranking th { padding: 8px; border-bottom: 1px solid #eee; }
-        .welcome-user { background: #1e2b4d; color: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; }
+        .container { max-width: 1000px; margin: auto; padding: 20px; }
+        .banner { background: #1e2b4d; color: white; padding: 40px; border-radius: 12px; text-align: center; }
+        .input-auth { display: block; margin: 10px auto; padding: 12px; width: 80%; max-width: 320px; border-radius: 6px; border: 1px solid #ddd; }
+        .grid-dos-columnas { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-top: 20px; }
+        .partidos, .ranking-seccion { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .partido-fila { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+        .input-gol { width: 45px; text-align: center; padding: 5px; font-weight: bold; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-guardar { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-guardar:hover { background: #218838; }
+        .btn-secundario { background: none; border: 1px solid white; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+        #tabla-ranking { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        #tabla-ranking th { background: #f8f9fa; text-align: left; padding: 10px; border-bottom: 2px solid #dee2e6; }
+        #tabla-ranking td { padding: 10px; border-bottom: 1px solid #eee; }
+        .welcome-user { background: #1e2b4d; color: white; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-logout { background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
     </style>
 </body>
 </html>
