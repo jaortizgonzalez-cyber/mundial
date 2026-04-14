@@ -17,80 +17,80 @@
                     <h2>Polla Mundial 2026</h2>
                 </div>
             </div>
-            <nav>
-                <ul>
-                    <li><a href="#reglas">Reglas</a></li>
-                    <li><a href="#">Mis Pronósticos</a></li>
-                    <li><a href="#">Clasificación</a></li>
-                </ul>
-            </nav>
         </div>
     </header>
 
     <main class="container">
-        <section class="banner">
-            <div id="auth-section">
-                <h2>Identificación de Colaborador</h2>
-                <p>Ingresa tu ID de empleado o nombre completo para empezar:</p>
-                <input type="text" id="userId" placeholder="Ej: JORTIZ01" style="padding: 10px; border-radius: 5px; border: none; width: 250px; margin-top: 10px;">
+        
+        <section id="auth-container" class="banner">
+            <div id="login-form">
+                <h2>Acceso a la Polla</h2>
+                <div class="form-group">
+                    <input type="number" id="cedula" placeholder="Número de Cédula" class="input-auth">
+                    <input type="password" id="pass" placeholder="Contraseña" class="input-auth">
+                </div>
+                <div class="btn-group">
+                    <button class="btn-guardar" onclick="login()">Entrar</button>
+                    <button class="btn-secundario" onclick="mostrarRegistro()">No tengo cuenta (Registrarme)</button>
+                </div>
+            </div>
+
+            <div id="register-form" style="display:none;">
+                <h2>Registro de Nuevo Usuario</h2>
+                <div class="form-group">
+                    <input type="text" id="reg-nombre" placeholder="Nombre Completo" class="input-auth">
+                    <input type="number" id="reg-cedula" placeholder="Cédula" class="input-auth">
+                    <input type="password" id="reg-pass" placeholder="Crea tu Contraseña" class="input-auth">
+                </div>
+                <div class="btn-group">
+                    <button class="btn-guardar" onclick="registrar()">Crear Cuenta</button>
+                    <button class="btn-secundario" onclick="mostrarLogin()">Volver al Login</button>
+                </div>
             </div>
         </section>
 
-        <section class="partidos">
-            <h2>Ingresa tus Pronósticos</h2>
-            
-            <div class="partido-fila cabecera-tabla">
-                <div>Encuentro</div>
-                <div>Marcador</div>
-                <div>Estado</div>
+        <section id="polla-section" style="display:none;">
+            <div class="welcome-user">
+                <h3>Bienvenido/a, <span id="user-display-name"></span></h3>
+                <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
             </div>
 
-            <div class="partido-fila">
-                <div class="partido-equipos">EE. UU. <span class="vs">vs.</span> México</div>
-                <div class="partido-marcador">
-                    <input type="number" id="p1_local" min="0" placeholder="0">
-                    <span class="separador">:</span>
-                    <input type="number" id="p1_visitante" min="0" placeholder="0">
+            <div class="partidos">
+                <h2>Tus Pronósticos</h2>
+                <div class="partido-fila cabecera-tabla">
+                    <div>Encuentro</div>
+                    <div>Marcador</div>
+                    <div>Acción</div>
                 </div>
-                <div id="p1_status">Pendiente</div>
-            </div>
-
-            <div class="accion-guardar">
-                <button class="btn-guardar" id="btnGuardar">Enviar Pronósticos</button>
+                <div class="partido-fila">
+                    <div class="partido-equipos">EE. UU. <span class="vs">vs.</span> México</div>
+                    <div class="partido-marcador">
+                        <input type="number" id="p1_local" min="0" placeholder="0">
+                        <span>:</span>
+                        <input type="number" id="p1_visitante" min="0" placeholder="0">
+                    </div>
+                    <div>
+                        <button class="btn-guardar-min" id="btnGuardar">Guardar</button>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <div class="grid-dos-columnas">
-            <section class="clasificacion">
-                <h2>Tu Ranking Actual</h2>
-                <div id="userStats" style="background: #f4f7f9; padding: 20px; border-radius: 8px;">
-                    <p>Puntos totales: <strong id="userPoints">0</strong></p>
-                    <p>Posición: <strong id="userRank">--</strong></p>
-                </div>
-            </section>
-
-            <section id="reglas" class="reglas-premios">
-                <h2>Reglamento</h2>
-                <div class="caja-reglas">
-                    <p>Sistema de puntuación:</p>
-                    <ul style="list-style: none; padding-left: 0;">
-                        <li>🎯 <b>Exacto:</b> 5 pts</li>
-                        <li>⚽ <b>Diferencia:</b> 3 pts</li>
-                        <li>🏆 <b>Ganador/Empate:</b> 2 pts</li>
-                    </ul>
-                </div>
-            </section>
-        </div>
     </main>
 
-    <footer>
-        <img src="img/logo.png" alt="Logo Multivac" class="logo-footer">
-        <p>Copyright © 2026 Multivac - Gestión Tecnológica</p>
-    </footer>
+    <style>
+        /* Estilos rápidos para el formulario */
+        .input-auth { padding: 12px; margin: 8px 0; width: 100%; border-radius: 5px; border: 1px solid #ccc; max-width: 300px; display: block; margin-left: auto; margin-right: auto; }
+        .btn-group { margin-top: 20px; }
+        .btn-secundario { background: transparent; color: white; border: 1px solid white; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-left: 10px; }
+        .welcome-user { display: flex; justify-content: space-between; align-items: center; background: #f4f7f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .btn-logout { background: #d32f2f; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .btn-guardar-min { background: #1e2b4d; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; }
+    </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDLBiRdbJyGb6cYrlA-1xi-N8TqJnsUljk",
@@ -105,41 +105,90 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        window.addEventListener('load', () => {
-            const btn = document.getElementById('btnGuardar');
-            
-            btn.onclick = function() {
-                const userId = document.getElementById('userId').value.trim();
-                const golesL = document.getElementById('p1_local').value;
-                const golesV = document.getElementById('p1_visitante').value;
+        // Variables de sesión local
+        let currentUser = null;
 
-                if (!userId) {
-                    alert("Por favor, identifícate con tu ID o nombre.");
-                    return;
-                }
-                if (golesL === "" || golesV === "") {
-                    alert("Ingresa el marcador para guardar.");
-                    return;
-                }
+        // --- FUNCIONES DE NAVEGACIÓN ---
+        window.mostrarRegistro = () => {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+        };
 
-                // Guardamos bajo el ID del usuario para que sea único
-                const userRef = ref(db, 'participantes/' + userId + '/pronosticos/partido_01');
+        window.mostrarLogin = () => {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+        };
 
-                set(userRef, {
-                    local: golesL,
-                    visitante: golesV,
-                    fecha: new Date().toISOString()
-                })
-                .then(() => {
-                    alert("¡Pronóstico registrado para " + userId + "!");
-                    document.getElementById('p1_status').innerHTML = "✅ Guardado";
-                    document.getElementById('p1_status').style.color = "green";
-                })
-                .catch((error) => {
-                    alert("Error: " + error.message);
+        // --- LÓGICA DE REGISTRO ---
+        window.registrar = async () => {
+            const nombre = document.getElementById('reg-nombre').value;
+            const cedula = document.getElementById('reg-cedula').value;
+            const pass = document.getElementById('reg-pass').value;
+
+            if (!nombre || !cedula || !pass) return alert("Completa todos los campos");
+
+            const dbRef = ref(db);
+            const snapshot = await get(child(dbRef, `usuarios/${cedula}`));
+
+            if (snapshot.exists()) {
+                alert("Esta cédula ya está registrada. Por favor inicia sesión.");
+            } else {
+                await set(ref(db, 'usuarios/' + cedula), {
+                    nombre: nombre,
+                    password: pass, // Nota: En producción esto debería ir encriptado
+                    puntos: 0
                 });
-            };
-        });
+                alert("¡Registro exitoso! Ya puedes iniciar sesión.");
+                mostrarLogin();
+            }
+        };
+
+        // --- LÓGICA DE LOGIN ---
+        window.login = async () => {
+            const cedula = document.getElementById('cedula').value;
+            const pass = document.getElementById('pass').value;
+
+            if (!cedula || !pass) return alert("Ingresa tus credenciales");
+
+            const dbRef = ref(db);
+            const snapshot = await get(child(dbRef, `usuarios/${cedula}`));
+
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                if (userData.password === pass) {
+                    currentUser = { cedula, nombre: userData.nombre };
+                    iniciarSesion(userData.nombre);
+                } else {
+                    alert("Contraseña incorrecta");
+                }
+            } else {
+                alert("Cédula no encontrada. Por favor regístrate.");
+            }
+        };
+
+        function iniciarSesion(nombre) {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('polla-section').style.display = 'block';
+            document.getElementById('user-display-name').innerText = nombre;
+        }
+
+        window.logout = () => { location.reload(); };
+
+        // --- GUARDAR PRONÓSTICO ---
+        document.getElementById('btnGuardar').onclick = async () => {
+            const l = document.getElementById('p1_local').value;
+            const v = document.getElementById('p1_visitante').value;
+
+            if (l === "" || v === "") return alert("Ingresa marcador");
+
+            await set(ref(db, `pronosticos/${currentUser.cedula}/partido_01`), {
+                local: l,
+                visitante: v,
+                nombre: currentUser.nombre
+            });
+            alert("¡Pronóstico guardado!");
+        };
+
     </script>
 </body>
 </html>
