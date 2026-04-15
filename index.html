@@ -3,123 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Multivac Polla Elite 2026</title>
+    <title>Multivac Polla Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS MAESTRO --- */
         :root {
             --primary-dark: #020d1a;
             --accent-green: #00ff88;
             --accent-gold: #ffcc00;
-            --glass-bg: rgba(255, 255, 255, 0.06);
+            --glass: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         body {
             font-family: 'Barlow Condensed', sans-serif;
             background: radial-gradient(circle at top right, #062a4d, var(--primary-dark));
-            color: #fff; margin: 0; padding: 0;
-            min-height: 100vh;
-            display: flex; flex-direction: column;
-            overflow-x: hidden;
+            color: #fff; margin: 0; min-height: 100vh; overflow-x: hidden;
         }
 
-        /* REMOVER FLECHAS DE INPUTS NUMERICOS */
+        /* Limpieza de inputs */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        .container { width: 92%; max-width: 1000px; margin: auto; padding: 20px; }
+        .container { width: 92%; max-width: 1100px; margin: auto; padding: 20px; }
 
-        /* CABECERA PROFESIONAL */
+        /* HEADER PRO */
         header { 
-            background: rgba(0, 0, 0, 0.4); 
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 15px 0;
-            position: sticky; top: 0; z-index: 100;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border); padding: 12px 0;
+            position: sticky; top: 0; z-index: 1000;
         }
         .header-content { display: flex; justify-content: space-between; align-items: center; }
-        .logo-wrap { display: flex; align-items: center; gap: 12px; }
-        .logo-img { height: 42px; filter: drop-shadow(0 0 8px var(--accent-green)); }
-        .brand-title { font-family: 'Anton'; font-size: 1.8rem; letter-spacing: 2px; color: #fff; text-transform: uppercase; margin: 0; }
+        .logo-box { display: flex; align-items: center; gap: 15px; }
+        .logo-img { height: 45px; filter: drop-shadow(0 0 10px var(--accent-green)); }
+        .logo-text { font-family: 'Anton'; font-size: 1.8rem; letter-spacing: 1px; text-transform: uppercase; }
 
-        /* ESTILO WOW: LOGIN */
+        /* AUTH CARD */
+        .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
         .auth-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border);
-            border-radius: 28px;
-            padding: 40px;
-            max-width: 400px;
-            margin: 60px auto;
-            text-align: center;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
-            transition: 0.3s;
+            background: var(--glass); backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border); border-radius: 30px;
+            padding: 50px; width: 100%; max-width: 420px; text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
         }
-        
-        .logo-main { height: 70px; margin-bottom: 20px; filter: drop-shadow(0 0 12px var(--accent-green)); }
-        .auth-card h2 { font-family: 'Anton'; font-size: 2rem; margin-bottom: 30px; letter-spacing: 1px; }
 
         .custom-input {
-            width: 100%; padding: 15px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid #333;
-            border-radius: 12px;
-            color: #fff; font-size: 1.1rem;
-            box-sizing: border-box; transition: 0.3s;
-            margin-bottom: 20px;
-        }
-        .custom-input:focus { border-color: var(--accent-green); outline: none; box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
-
-        .btn-main {
-            width: 100%; padding: 16px;
-            background: linear-gradient(90deg, #00ff88, #00bd65);
-            border: none; border-radius: 12px;
-            color: #000; font-family: 'Anton'; font-size: 1.2rem;
-            text-transform: uppercase; cursor: pointer; transition: 0.3s;
-            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.2);
-        }
-        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(0, 255, 136, 0.4); }
-
-        /* APP CONTENT */
-        .match-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px; padding: 20px;
-            margin-bottom: 20px;
-            position: relative; overflow: hidden;
+            width: 100%; padding: 16px; background: rgba(0,0,0,0.4);
+            border: 1px solid #333; border-radius: 15px; color: #fff;
+            font-size: 1.1rem; box-sizing: border-box; margin-bottom: 20px;
             transition: 0.3s;
         }
-        .match-card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-green); }
+        .custom-input:focus { border-color: var(--accent-green); box-shadow: 0 0 20px rgba(0, 255, 136, 0.15); outline: none; }
 
-        .score-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 10px; }
-        .team-name { font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
-        .input-score {
-            width: 50px; height: 50px; border-radius: 12px; border: 2px solid #333;
-            background: #000; color: var(--accent-green); text-align: center;
-            font-family: 'Anton'; font-size: 1.6rem;
+        .btn-action {
+            width: 100%; padding: 18px; border-radius: 15px; border: none;
+            font-family: 'Anton'; font-size: 1.3rem; text-transform: uppercase;
+            cursor: pointer; transition: 0.3s;
         }
-        .input-score:disabled { color: #555; border-color: #222; }
+        .btn-green { background: linear-gradient(90deg, #00ff88, #00bd65); color: #000; }
+        .btn-green:hover { transform: scale(1.02); filter: brightness(1.1); }
 
-        .ranking-card { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; border: 1px solid var(--glass-border); }
-        
-        /* BOTÓN ADMIN - FIJO Y SEGURO */
+        /* MAIN APP */
+        .user-hero { 
+            background: var(--glass); border-radius: 25px; padding: 30px;
+            margin-bottom: 40px; border: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .points-box { font-family: 'Anton'; font-size: 3.5rem; color: var(--accent-gold); line-height: 1; }
+
+        .match-card {
+            background: var(--glass); border-radius: 20px; padding: 25px;
+            margin-bottom: 20px; border: 1px solid var(--glass-border);
+            position: relative; transition: 0.3s;
+        }
+        .match-card:hover { border-color: var(--accent-green); }
+        .match-info { font-size: 0.8rem; color: var(--accent-gold); font-weight: 800; margin-bottom: 15px; }
+
+        .score-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .team-label { flex: 1; font-weight: 800; font-size: 1.2rem; text-transform: uppercase; }
+        .input-score {
+            width: 55px; height: 55px; background: #000; border: 2px solid #333;
+            border-radius: 12px; color: var(--accent-green); text-align: center;
+            font-family: 'Anton'; font-size: 1.8rem;
+        }
+        .input-score:disabled { border-color: #222; color: #444; }
+
+        /* RANKING */
+        .rank-item {
+            display: flex; justify-content: space-between; padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center;
+        }
+        .pos-num { background: var(--accent-gold); color: #000; width: 28px; height: 28px; 
+                   display: inline-flex; align-items: center; justify-content: center; 
+                   border-radius: 6px; font-weight: 800; margin-right: 10px; }
+
+        /* FLOATING ADMIN BUTTON */
         #admin-toggle {
             position: fixed; bottom: 30px; right: 30px; 
-            background: var(--accent-gold); color: #000;
-            width: 65px; height: 65px; border-radius: 50%; border: none;
-            font-size: 2rem; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: none; z-index: 9999;
-            transition: 0.3s;
+            width: 70px; height: 70px; border-radius: 50%;
+            background: var(--accent-gold); border: none; cursor: pointer;
+            font-size: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            display: none; z-index: 9999; transition: 0.4s;
         }
-        #admin-toggle:hover { transform: scale(1.1); }
+        #admin-toggle:hover { transform: rotate(90deg) scale(1.1); }
 
         /* PANEL ADMIN */
         #admin-panel {
-            position: fixed; inset: 0; background: #020d1a;
-            z-index: 10000; display: none; padding: 30px; overflow-y: auto;
+            position: fixed; inset: 0; background: var(--primary-dark);
+            z-index: 10000; display: none; padding: 40px; overflow-y: auto;
         }
-        .admin-row { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -127,79 +118,73 @@
     <button id="admin-toggle" onclick="toggleAdminPanel()">⚙️</button>
 
     <div id="admin-panel">
-        <h2 style="font-family:'Anton'; color:var(--accent-gold);">PANEL DE CONTROL ADMIN 🛠️</h2>
-        
-        <div class="match-card">
-            <h3 style="color:var(--accent-green)">+ CREAR PARTIDO</h3>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
-                <input type="text" id="new-equipoL" placeholder="Local" class="custom-input">
-                <input type="text" id="new-equipoV" placeholder="Visitante" class="custom-input">
-            </div>
+        <h1 style="font-family:'Anton'; color:var(--accent-gold)">CONSOLA DE ADMINISTRACIÓN</h1>
+        <div class="match-card" style="max-width: 600px">
+            <h3 style="color:var(--accent-green)">+ AGREGAR PARTIDO OFICIAL</h3>
+            <input type="text" id="new-equipoL" placeholder="Equipo Local" class="custom-input">
+            <input type="text" id="new-equipoV" placeholder="Equipo Visitante" class="custom-input">
             <input type="datetime-local" id="new-fecha" class="custom-input">
-            <button class="btn-main" onclick="crearPartidoOficial()">CONFIRMAR PARTIDO</button>
+            <button class="btn-action btn-green" onclick="crearPartidoOficial()">REGISTRAR PARTIDO</button>
         </div>
-
-        <h3>GESTIONAR MARCADORES OFICIALES</h3>
-        <div id="admin-contenedor-partidos"></div>
-        
-        <button class="btn-main" style="background:var(--accent-gold); margin: 20px 0;" onclick="guardarPanelControl()">PUBLICAR Y CALCULAR PUNTOS</button>
-        <button class="btn-main" style="background:#444; color:white" onclick="toggleAdminPanel()">CERRAR PANEL</button>
+        <div id="admin-list"></div>
+        <button class="btn-action" style="background:var(--accent-gold); margin-top:20px" onclick="guardarPanelControl()">PUBLICAR RESULTADOS FINALES</button>
+        <button class="btn-action" style="background:#444; color:white; margin-top:10px" onclick="toggleAdminPanel()">SALIR</button>
     </div>
 
     <header>
         <div class="container header-content">
-            <div class="logo-wrap">
-                <img src="img/logo.png" class="logo-img" alt="Logo">
-                <span class="brand-title">MULTIVAC POLLA</span>
+            <div class="logo-box">
+                <img src="img/logo.png" class="logo-img" alt="M">
+                <span class="logo-text">MULTIVAC POLLA</span>
             </div>
-            <div style="color: var(--accent-gold); font-weight: 800">2026 EDITION</div>
+            <div id="status-tag" style="font-weight: 800; color: var(--accent-gold); font-size: 0.9rem;">LIVE SERVER</div>
         </div>
     </header>
 
     <main class="container">
-        <section id="auth-container">
+        <section id="auth-container" class="auth-wrapper">
             <div class="auth-card" id="login-form">
-                <img src="img/logo.png" class="logo-main" alt="Logo">
-                <h2>INICIAR SESIÓN</h2>
-                <input type="number" id="cedula" class="custom-input" placeholder="Tu Cédula" oninput="this.value=Math.abs(this.value)">
+                <img src="img/logo.png" style="height: 80px; margin-bottom: 20px;" alt="Logo">
+                <h2>BIENVENIDO</h2>
+                <input type="number" id="cedula" class="custom-input" placeholder="Cédula" oninput="validarPositivo(this)">
                 <input type="password" id="pass" class="custom-input" placeholder="Contraseña">
-                <button class="btn-main" onclick="login()">ENTRAR AL ESTADIO</button>
-                <p style="margin-top:25px; font-size:0.9rem; color:#888">¿Eres nuevo? <span onclick="mostrarRegistro()" style="color:var(--accent-green); cursor:pointer; font-weight:800">REGÍSTRATE</span></p>
+                <button class="btn-action btn-green" onclick="login()">INGRESAR</button>
+                <p style="margin-top:20px; font-size:0.9rem; color:#666">¿No tienes cuenta? <span onclick="mostrarRegistro()" style="color:var(--accent-green); cursor:pointer; font-weight:800">REGÍSTRATE AQUÍ</span></p>
             </div>
 
             <div class="auth-card" id="register-form" style="display:none;">
-                <h2>NUEVO REGISTRO</h2>
+                <h2>REGISTRO</h2>
                 <input type="text" id="reg-nombre" class="custom-input" placeholder="Nombre Completo">
-                <input type="number" id="reg-cedula" class="custom-input" placeholder="Cédula" oninput="this.value=Math.abs(this.value)">
+                <input type="number" id="reg-cedula" class="custom-input" placeholder="Cédula" oninput="validarPositivo(this)">
                 <input type="password" id="reg-pass" class="custom-input" placeholder="Contraseña">
-                <button class="btn-main" onclick="registrar()">CREAR MI CUENTA</button>
-                <p style="margin-top:25px; font-size:0.9rem; color:#888" onclick="mostrarLogin()">VOLVER AL LOGIN</p>
+                <button class="btn-action btn-green" onclick="registrar()">CREAR CUENTA</button>
+                <p style="margin-top:20px; font-size:0.9rem; color:#666" onclick="mostrarLogin()">VOLVER AL LOGIN</p>
             </div>
         </section>
 
         <section id="polla-section" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px">
+            <div class="user-hero">
                 <div>
-                    <h3 id="user-display-name" style="margin:0; color:var(--accent-green)">---</h3>
-                    <div style="font-family:'Anton'; font-size:2.5rem"><span id="mis-puntos-total">0</span> <small style="font-size:1rem">PTS</small></div>
+                    <h2 id="user-display-name" style="margin:0; text-transform:uppercase; color:var(--accent-green)">---</h2>
+                    <span style="font-weight:800; color:#888">PUNTAJE ACUMULADO</span>
                 </div>
-                <button onclick="location.reload()" style="background:#e74c3c; border:none; color:white; padding:10px 20px; border-radius:10px; cursor:pointer">CERRAR SESIÓN</button>
+                <div class="points-box"><span id="mis-puntos-total">0</span></div>
             </div>
 
-            <div style="display:grid; grid-template-columns: 1fr; gap:40px">
-                <div>
-                    <h3 style="font-family:'Anton'; border-left:4px solid var(--accent-green); padding-left:15px; margin-bottom:25px">PARTIDOS DISPONIBLES</h3>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 40px;">
+                <div id="matches-area">
+                    <h3 style="font-family:'Anton'; letter-spacing:1px; margin-bottom:20px;">⚽ TUS PRONÓSTICOS</h3>
                     <div id="contenedor-dinamico"></div>
-                    <button class="btn-main" onclick="guardarTodosLosPronosticos()" style="margin-top:20px">GUARDAR MIS APUESTAS</button>
+                    <button class="btn-action btn-green" onclick="guardarTodosLosPronosticos()" style="margin-top:20px">CONFIRMAR MIS MARCADORES</button>
                 </div>
 
-                <div>
-                    <h3 style="font-family:'Anton'; border-left:4px solid var(--accent-gold); padding-left:15px; margin-bottom:25px">TOP MULTIVAC GLOBAL</h3>
-                    <div class="ranking-card">
-                        <div id="body-ranking"></div>
-                    </div>
+                <div id="ranking-area">
+                    <h3 style="font-family:'Anton'; letter-spacing:1px; margin-bottom:20px;">🏆 RANKING DE LÍDERES</h3>
+                    <div style="background:var(--glass); border-radius:20px; border:1px solid var(--glass-border);" id="body-ranking"></div>
                 </div>
             </div>
+            
+            <button onclick="location.reload()" style="margin: 50px auto; display:block; background:none; border:none; color:#555; cursor:pointer">Cerrar Sesión</button>
         </section>
     </main>
 
@@ -221,52 +206,49 @@
         const db = getDatabase(app);
         let currentCedula = null;
 
-        // UI GLOBAL
+        window.validarPositivo = (el) => { if(el.value < 0) el.value = 0; };
         window.mostrarRegistro = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
         window.mostrarLogin = () => { document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; };
         window.toggleAdminPanel = () => { const p = document.getElementById('admin-panel'); p.style.display = (p.style.display === 'block') ? 'none' : 'block'; };
 
-        function checkBloqueo(fechaISO) {
-            const ahora = new Date();
-            const inicio = new Date(fechaISO);
-            if(isNaN(inicio)) return true;
-            return ahora >= new Date(inicio.getTime() - 300000); // 5 min antes
+        function estaBloqueado(fecha) {
+            const min5 = 5 * 60 * 1000;
+            return new Date() >= new Date(new Date(fecha).getTime() - min5);
         }
 
-        // LOGIN Y DETECCION DE ROL
         window.login = async () => {
             const c = document.getElementById('cedula').value, p = document.getElementById('pass').value;
             const snap = await get(child(ref(db), `usuarios/${c}`));
             if(snap.exists() && snap.val().password === p){
+                const user = snap.val();
                 currentCedula = c;
                 document.getElementById('auth-container').style.display='none';
                 document.getElementById('polla-section').style.display='block';
-                document.getElementById('user-display-name').innerText = snap.val().nombre.toUpperCase();
+                document.getElementById('user-display-name').innerText = user.nombre;
                 
-                // REGLA CLAVE: Mostrar botón si rol es admin
-                if(snap.val().role === "admin") {
+                // VALIDACIÓN ADMIN MEJORADA
+                if(user.role && user.role.toLowerCase() === "admin") {
                     document.getElementById('admin-toggle').style.display = 'block';
                     cargarPanelAdmin();
                 }
-                actualizarTodo();
-            } else { alert("ACCESO DENEGADO"); }
+                actualizarApp();
+            } else { alert("Cédula o contraseña incorrecta"); }
         };
 
         window.registrar = async () => {
             const n = document.getElementById('reg-nombre').value, c = document.getElementById('reg-cedula').value, p = document.getElementById('reg-pass').value;
-            if(!n || !c || !p) return alert("COMPLETA LOS DATOS");
+            if(!n || !c || !p) return alert("Por favor llena todos los campos");
             await set(ref(db, 'usuarios/' + c), { nombre: n, password: p, puntos: 0, role: "user" });
-            alert("BIENVENIDO AL ESTADIO"); mostrarLogin();
+            alert("Cuenta creada con éxito"); mostrarLogin();
         };
 
-        async function actualizarTodo() {
-            await procesarPuntos();
-            cargarPartidosUser();
-            cargarRanking();
+        async function actualizarApp() {
+            await calcularPuntosLocal();
+            renderizarPartidos();
+            renderizarRanking();
         }
 
-        // VISTA USUARIO
-        async function cargarPartidosUser() {
+        async function renderizarPartidos() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
             const misVotos = snapV.exists() ? snapV.val() : {};
@@ -274,109 +256,114 @@
             cont.innerHTML = "";
             
             if(snapP.exists()){
-                const partidos = snapP.val();
-                for(let id in partidos){
-                    const p = partidos[id], bloqueado = checkBloqueo(p.fechaInicio);
-                    const lock = bloqueado ? 'disabled' : '';
-                    const fecha = new Date(p.fechaInicio);
-                    const fechaTxt = isNaN(fecha) ? "Pendiente" : fecha.toLocaleString([], {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
-
+                Object.entries(snapP.val()).forEach(([id, p]) => {
+                    const bloqueado = estaBloqueado(p.fechaInicio);
+                    const fechaObj = new Date(p.fechaInicio);
+                    const fechaStr = isNaN(fechaObj) ? "Por definir" : fechaObj.toLocaleString([], {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+                    
                     cont.innerHTML += `
                         <div class="match-card">
-                            <div style="font-size:0.8rem; color:var(--accent-gold)">${fechaTxt} ${bloqueado ? '🔒 CERRADO' : '🟢 ABIERTO'}</div>
+                            <div class="match-info">
+                                <span>${fechaStr}</span>
+                                <span style="float:right; color:${bloqueado ? '#ff4444' : 'var(--accent-green)'}">${bloqueado ? '🔒 CERRADO' : '🟢 ABIERTO'}</span>
+                            </div>
                             <div class="score-row">
-                                <span class="team-name">${p.equipoL}</span>
-                                <div style="display:flex; gap:10px">
-                                    <input type="number" id="l_${id}" value="${misVotos[id]?.local ?? ''}" class="input-score" ${lock} oninput="this.value=Math.abs(this.value)">
-                                    <input type="number" id="v_${id}" value="${misVotos[id]?.visitante ?? ''}" class="input-score" ${lock} oninput="this.value=Math.abs(this.value)">
+                                <div class="team-label" style="text-align:right">${p.equipoL}</div>
+                                <div style="display:flex; gap:10px; align-items:center">
+                                    <input type="number" id="l_${id}" value="${misVotos[id]?.local ?? ''}" class="input-score" ${bloqueado ? 'disabled' : ''} oninput="validarPositivo(this)">
+                                    <span style="font-weight:800; color:#444">VS</span>
+                                    <input type="number" id="v_${id}" value="${misVotos[id]?.visitante ?? ''}" class="input-score" ${bloqueado ? 'disabled' : ''} oninput="validarPositivo(this)">
                                 </div>
-                                <span class="team-name">${p.equipoV}</span>
+                                <div class="team-label">${p.equipoV}</div>
                             </div>
                         </div>`;
-                }
+                });
             }
         }
 
         window.guardarTodosLosPronosticos = async () => {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
-            let d = {};
-            for(let id in snapP.val()){
-                if(!checkBloqueo(snapP.val()[id].fechaInicio)){
+            let updates = {};
+            Object.keys(snapP.val()).forEach(id => {
+                if(!estaBloqueado(snapP.val()[id].fechaInicio)) {
                     const l = document.getElementById(`l_${id}`).value, v = document.getElementById(`v_${id}`).value;
-                    if(l !== "" && v !== "") d[id] = { local: parseInt(l), visitante: parseInt(v) };
+                    if(l !== "" && v !== "") updates[id] = { local: parseInt(l), visitante: parseInt(v) };
                 }
-            }
-            await update(ref(db, `pronosticos/${currentCedula}`), d);
-            alert("APUESTAS GUARDADAS");
+            });
+            await update(ref(db, `pronosticos/${currentCedula}`), updates);
+            alert("Tus marcadores han sido guardados");
         };
 
-        // GESTIÓN ADMIN
+        // --- ADMIN CORE ---
         window.crearPartidoOficial = async () => {
             const l = document.getElementById('new-equipoL').value, v = document.getElementById('new-equipoV').value, f = document.getElementById('new-fecha').value;
-            if(!l || !v || !f) return alert("FALTAN DATOS");
+            if(!l || !v || !f) return alert("Completa la info del partido");
             await set(ref(db, 'partidos_oficiales/p_' + Date.now()), { equipoL: l, equipoV: v, fechaInicio: f });
-            alert("PARTIDO CREADO"); cargarPanelAdmin(); cargarPartidosUser();
+            alert("Partido añadido al calendario"); cargarPanelAdmin(); renderizarPartidos();
         };
 
         async function cargarPanelAdmin() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const resSnap = await get(child(ref(db), 'resultados_oficiales'));
             const res = resSnap.exists() ? resSnap.val() : {};
-            const cont = document.getElementById('admin-contenedor-partidos');
-            cont.innerHTML = "";
-            for(let id in snapP.val()){
-                const p = snapP.val()[id];
-                cont.innerHTML += `
-                    <div class="admin-row">
-                        <span>${p.equipoL} vs ${p.equipoV}</span>
-                        <div>
-                            <input type="number" id="adm_l_${id}" value="${res[id]?.golesL ?? ''}" style="width:40px" oninput="this.value=Math.abs(this.value)"> : 
-                            <input type="number" id="adm_v_${id}" value="${res[id]?.golesV ?? ''}" style="width:40px" oninput="this.value=Math.abs(this.value)">
-                            <button onclick="eliminarPartido('${id}')" style="background:none; border:none; color:red">🗑️</button>
-                        </div>
-                    </div>`;
+            const cont = document.getElementById('admin-list');
+            cont.innerHTML = "<h3 style='margin-top:30px'>MARCADORES OFICIALES</h3>";
+            if(snapP.exists()){
+                Object.entries(snapP.val()).forEach(([id, p]) => {
+                    cont.innerHTML += `
+                        <div class="match-card" style="display:flex; justify-content:space-between; align-items:center">
+                            <span>${p.equipoL} vs ${p.equipoV}</span>
+                            <div style="display:flex; gap:5px; align-items:center">
+                                <input type="number" id="adm_l_${id}" value="${res[id]?.golesL ?? ''}" style="width:40px; background:#000; color:#fff; border:1px solid #555"> :
+                                <input type="number" id="adm_v_${id}" value="${res[id]?.golesV ?? ''}" style="width:40px; background:#000; color:#fff; border:1px solid #555">
+                                <button onclick="borrarPartido('${id}')" style="background:none; border:none; cursor:pointer">🗑️</button>
+                            </div>
+                        </div>`;
+                });
             }
         }
 
         window.guardarPanelControl = async () => {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             let r = {};
-            for(let id in snapP.val()){
+            Object.keys(snapP.val()).forEach(id => {
                 const l = document.getElementById(`adm_l_${id}`).value, v = document.getElementById(`adm_v_${id}`).value;
                 if(l !== "" && v !== "") r[id] = { golesL: parseInt(l), golesV: parseInt(v) };
-            }
+            });
             await set(ref(db, 'resultados_oficiales'), r);
-            alert("RESULTADOS PUBLICADOS Y PUNTOS CALCULADOS"); location.reload();
+            alert("Resultados publicados. El ranking se actualizará para todos.");
+            location.reload();
         };
 
-        window.eliminarPartido = async (id) => { if(confirm("¿ELIMINAR?")) { await set(ref(db, 'partidos_oficiales/' + id), null); cargarPanelAdmin(); cargarPartidosUser(); } };
+        window.borrarPartido = async (id) => { if(confirm("¿Eliminar este partido?")) { await set(ref(db, 'partidos_oficiales/'+id), null); cargarPanelAdmin(); } };
 
-        // CÁLCULO DE PUNTOS
-        async function procesarPuntos() {
+        // --- LÓGICA DE PUNTOS ---
+        async function calcularPuntosLocal() {
             const snapO = await get(child(ref(db), 'resultados_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
             if(!snapO.exists() || !snapV.exists()) return;
-            let t = 0; const ofi = snapO.val(), vot = snapV.val();
-            for(let id in ofi){
-                if(vot[id]){
-                    const rL = ofi[id].golesL, rV = ofi[id].golesV, pL = vot[id].local, pV = vot[id].visitante;
-                    if(rL === pL && rV === pV) t += 5;
-                    else if((rL - rV) === (pL - pV)) t += 3;
-                    else if(Math.sign(rL - rV) === Math.sign(pL - pV)) t += 2;
+            let total = 0;
+            const oficiales = snapO.val(), misVotos = snapV.val();
+            Object.keys(oficiales).forEach(id => {
+                if(misVotos[id]) {
+                    const {golesL, golesV} = oficiales[id], {local, visitante} = misVotos[id];
+                    if(golesL === local && golesV === visitante) total += 5;
+                    else if((golesL - golesV) === (local - visitante)) total += 3;
+                    else if(Math.sign(golesL - golesV) === Math.sign(local - visitante)) total += 2;
                 }
-            }
-            await update(ref(db, `usuarios/${currentCedula}`), { puntos: t });
-            document.getElementById('mis-puntos-total').innerText = t;
+            });
+            await update(ref(db, `usuarios/${currentCedula}`), { puntos: total });
+            document.getElementById('mis-puntos-total').innerText = total;
         }
 
-        async function cargarRanking() {
+        async function renderizarRanking() {
             const snap = await get(child(ref(db), 'usuarios'));
             if(snap.exists()){
-                const sorted = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
-                document.getElementById('body-ranking').innerHTML = sorted.map((u, i) => `
-                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333">
-                        <span style="font-weight:600">#${i+1} ${u.nombre}</span>
-                        <b style="color:var(--accent-gold)">${u.puntos} PTS</b>
+                const usuarios = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
+                document.getElementById('body-ranking').innerHTML = usuarios.map((u, i) => `
+                    <div class="rank-item">
+                        <span><span class="pos-num">${i+1}</span> <b>${u.nombre}</b></span>
+                        <span style="color:var(--accent-gold); font-weight:800">${u.puntos} PTS</span>
                     </div>`).join('');
             }
         }
