@@ -6,6 +6,7 @@
     <title>Multivac Polla Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         :root {
             --primary-dark: #020d1a;
@@ -15,16 +16,20 @@
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
-        /* Estilos personalizados para SweetAlert2 */
-        .swal2-popup {
-            background: #062a4d !important;
-            border: 1px solid var(--accent-green) !important;
-            border-radius: 25px !important;
-            color: #fff !important;
-            font-family: 'Barlow Condensed', sans-serif !important;
-        }
+        /* Estilos SweetAlert2 */
+        .swal2-popup { background: #062a4d !important; border: 1px solid var(--accent-green) !important; border-radius: 25px !important; color: #fff !important; font-family: 'Barlow Condensed', sans-serif !important; }
         .swal2-title { font-family: 'Anton', sans-serif !important; text-transform: uppercase; }
         .swal2-confirm { background: linear-gradient(90deg, #00ff88, #00bd65) !important; color: #000 !important; font-weight: 800 !important; }
+
+        /* ANIMACIÓN DE LÍDERES (FOOTBALL INTRO) */
+        #intro-anim {
+            position: fixed; inset: 0; background: radial-gradient(circle, #0a4a8c, #020d1a);
+            z-index: 20000; display: none; align-items: center; justify-content: center;
+            flex-direction: column; text-align: center;
+        }
+        .podium-title { font-family: 'Anton'; font-size: 3rem; color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,204,0,0.5); margin-bottom: 20px; }
+        .leader-card { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 50%; border: 4px solid var(--accent-green); box-shadow: 0 0 50px var(--accent-green); }
+        .leader-name { font-family: 'Anton'; font-size: 2.5rem; margin-top: 15px; color: #fff; }
 
         body {
             font-family: 'Barlow Condensed', sans-serif;
@@ -120,6 +125,15 @@
 </head>
 <body>
 
+    <div id="intro-anim">
+        <h1 class="podium-title animate__animated animate__zoomInDown">🏆 LÍDER ACTUAL 🏆</h1>
+        <div class="leader-card animate__animated animate__jackInTheBox">
+            <span style="font-size: 4rem;">⚽</span>
+        </div>
+        <div id="leader-name-anim" class="leader-name animate__animated animate__fadeInUp animate__delay-1s">---</div>
+        <div style="color:var(--accent-gold); font-weight:800; letter-spacing:3px" class="animate__animated animate__fadeIn animate__delay-2s">PREPÁRATE PARA GANAR</div>
+    </div>
+
     <button id="admin-toggle" onclick="toggleAdminPanel()">⚙️</button>
 
     <div id="admin-panel">
@@ -211,20 +225,34 @@
         const db = getDatabase(app);
         let currentCedula = null;
 
-        // HELPER PARA ALERTAS PRO
         const alertPro = (title, text, icon = 'success') => {
-            Swal.fire({ title, text, icon, showClass: { popup: 'animate__animated animate__bounceIn' } });
+            Swal.fire({ title, text, icon });
         };
+
+        // FUNCIÓN DE ANIMACIÓN WOW PARA EL LÍDER
+        async function mostrarLiderWOW() {
+            const snap = await get(child(ref(db), 'usuarios'));
+            if(snap.exists()){
+                const usuarios = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
+                const lider = usuarios[0];
+                document.getElementById('leader-name-anim').innerText = lider.nombre;
+                
+                const animDiv = document.getElementById('intro-anim');
+                animDiv.style.display = 'flex';
+                
+                setTimeout(() => {
+                    animDiv.classList.add('animate__animated', 'animate__fadeOut');
+                    setTimeout(() => animDiv.style.display = 'none', 1000);
+                }, 4000);
+            }
+        }
 
         window.validarPositivo = (el) => { if(el.value < 0) el.value = 0; };
         window.mostrarRegistro = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
         window.mostrarLogin = () => { document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; };
         window.toggleAdminPanel = () => { const p = document.getElementById('admin-panel'); p.style.display = (p.style.display === 'block') ? 'none' : 'block'; };
 
-        window.logout = () => {
-            localStorage.removeItem('userCedula');
-            location.reload();
-        };
+        window.logout = () => { localStorage.removeItem('userCedula'); location.reload(); };
 
         function estaBloqueado(fecha) {
             const min5 = 5 * 60 * 1000;
@@ -262,6 +290,7 @@
                 cargarPanelAdmin();
             }
             actualizarApp();
+            mostrarLiderWOW(); // DISPARAR ANIMACIÓN AL ENTRAR
         }
 
         window.registrar = async () => {
@@ -329,8 +358,7 @@
             if(!l || !v || !f) return alertPro("CAMPO VACÍO", "Completa la info del partido", "warning");
             await set(ref(db, 'partidos_oficiales/p_' + Date.now()), { equipoL: l, equipoV: v, fechaInicio: f });
             alertPro("LISTO", "Partido añadido al calendario", "success"); 
-            cargarPanelAdmin(); 
-            renderizarPartidos();
+            cargarPanelAdmin(); renderizarPartidos();
         };
 
         async function cargarPanelAdmin() {
@@ -364,16 +392,11 @@
             await set(ref(db, 'resultados_oficiales'), r);
             Swal.fire({
                 title: '¿PUBLICAR RESULTADOS?',
-                text: "El ranking se actualizará para todos los usuarios",
+                text: "El ranking se actualizará para todos",
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'SÍ, PUBLICAR',
-                cancelButtonText: 'CANCELAR'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    location.reload();
-                }
-            });
+                confirmButtonText: 'SÍ, PUBLICAR'
+            }).then((result) => { if (result.isConfirmed) location.reload(); });
         };
 
         window.borrarPartido = (id) => { 
@@ -381,13 +404,9 @@
                 title: '¿ELIMINAR PARTIDO?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'SÍ, ELIMINAR'
+                confirmButtonText: 'ELIMINAR'
             }).then(async (result) => {
-                if (result.isConfirmed) {
-                    await set(ref(db, 'partidos_oficiales/'+id), null);
-                    cargarPanelAdmin();
-                }
+                if (result.isConfirmed) { await set(ref(db, 'partidos_oficiales/'+id), null); cargarPanelAdmin(); }
             });
         };
 
