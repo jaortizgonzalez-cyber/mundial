@@ -20,13 +20,11 @@
             color: #fff; margin: 0; min-height: 100vh; overflow-x: hidden;
         }
 
-        /* Limpieza de inputs */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
         .container { width: 92%; max-width: 1100px; margin: auto; padding: 20px; }
 
-        /* HEADER PRO */
         header { 
             background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--glass-border); padding: 12px 0;
@@ -37,7 +35,6 @@
         .logo-img { height: 45px; filter: drop-shadow(0 0 10px var(--accent-green)); }
         .logo-text { font-family: 'Anton'; font-size: 1.8rem; letter-spacing: 1px; text-transform: uppercase; }
 
-        /* AUTH CARD */
         .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
         .auth-card {
             background: var(--glass); backdrop-filter: blur(25px);
@@ -62,7 +59,6 @@
         .btn-green { background: linear-gradient(90deg, #00ff88, #00bd65); color: #000; }
         .btn-green:hover { transform: scale(1.02); filter: brightness(1.1); }
 
-        /* MAIN APP */
         .user-hero { 
             background: var(--glass); border-radius: 25px; padding: 30px;
             margin-bottom: 40px; border: 1px solid var(--glass-border);
@@ -87,7 +83,6 @@
         }
         .input-score:disabled { border-color: #222; color: #444; }
 
-        /* RANKING */
         .rank-item {
             display: flex; justify-content: space-between; padding: 15px;
             border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center;
@@ -96,7 +91,6 @@
                    display: inline-flex; align-items: center; justify-content: center; 
                    border-radius: 6px; font-weight: 800; margin-right: 10px; }
 
-        /* FLOATING ADMIN BUTTON */
         #admin-toggle {
             position: fixed; bottom: 30px; right: 30px; 
             width: 70px; height: 70px; border-radius: 50%;
@@ -106,7 +100,6 @@
         }
         #admin-toggle:hover { transform: rotate(90deg) scale(1.1); }
 
-        /* PANEL ADMIN */
         #admin-panel {
             position: fixed; inset: 0; background: var(--primary-dark);
             z-index: 10000; display: none; padding: 40px; overflow-y: auto;
@@ -184,7 +177,7 @@
                 </div>
             </div>
             
-            <button onclick="location.reload()" style="margin: 50px auto; display:block; background:none; border:none; color:#555; cursor:pointer">Cerrar Sesión</button>
+            <button onclick="logout()" style="margin: 50px auto; display:block; background:none; border:none; color:#555; cursor:pointer">Cerrar Sesión</button>
         </section>
     </main>
 
@@ -211,29 +204,50 @@
         window.mostrarLogin = () => { document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; };
         window.toggleAdminPanel = () => { const p = document.getElementById('admin-panel'); p.style.display = (p.style.display === 'block') ? 'none' : 'block'; };
 
+        // INTEGRACIÓN: CERRAR SESIÓN LIMPIANDO STORAGE
+        window.logout = () => {
+            localStorage.removeItem('userCedula');
+            location.reload();
+        };
+
         function estaBloqueado(fecha) {
             const min5 = 5 * 60 * 1000;
             return new Date() >= new Date(new Date(fecha).getTime() - min5);
         }
 
+        // INTEGRACIÓN: PERSISTENCIA AL RECARGAR
+        window.addEventListener('load', async () => {
+            const savedCedula = localStorage.getItem('userCedula');
+            if (savedCedula) {
+                const snap = await get(child(ref(db), `usuarios/${savedCedula}`));
+                if(snap.exists()){
+                    currentCedula = savedCedula;
+                    completarLogin(snap.val());
+                }
+            }
+        });
+
         window.login = async () => {
             const c = document.getElementById('cedula').value, p = document.getElementById('pass').value;
             const snap = await get(child(ref(db), `usuarios/${c}`));
             if(snap.exists() && snap.val().password === p){
-                const user = snap.val();
                 currentCedula = c;
-                document.getElementById('auth-container').style.display='none';
-                document.getElementById('polla-section').style.display='block';
-                document.getElementById('user-display-name').innerText = user.nombre;
-                
-                // VALIDACIÓN ADMIN MEJORADA
-                if(user.role && user.role.toLowerCase() === "admin") {
-                    document.getElementById('admin-toggle').style.display = 'block';
-                    cargarPanelAdmin();
-                }
-                actualizarApp();
+                localStorage.setItem('userCedula', c); // Guardar en navegador
+                completarLogin(snap.val());
             } else { alert("Cédula o contraseña incorrecta"); }
         };
+
+        function completarLogin(user) {
+            document.getElementById('auth-container').style.display='none';
+            document.getElementById('polla-section').style.display='block';
+            document.getElementById('user-display-name').innerText = user.nombre;
+            
+            if(user.role && user.role.toLowerCase() === "admin") {
+                document.getElementById('admin-toggle').style.display = 'block';
+                cargarPanelAdmin();
+            }
+            actualizarApp();
+        }
 
         window.registrar = async () => {
             const n = document.getElementById('reg-nombre').value, c = document.getElementById('reg-cedula').value, p = document.getElementById('reg-pass').value;
@@ -294,7 +308,6 @@
             alert("Tus marcadores han sido guardados");
         };
 
-        // --- ADMIN CORE ---
         window.crearPartidoOficial = async () => {
             const l = document.getElementById('new-equipoL').value, v = document.getElementById('new-equipoV').value, f = document.getElementById('new-fecha').value;
             if(!l || !v || !f) return alert("Completa la info del partido");
@@ -337,7 +350,6 @@
 
         window.borrarPartido = async (id) => { if(confirm("¿Eliminar este partido?")) { await set(ref(db, 'partidos_oficiales/'+id), null); cargarPanelAdmin(); } };
 
-        // --- LÓGICA DE PUNTOS ---
         async function calcularPuntosLocal() {
             const snapO = await get(child(ref(db), 'resultados_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
