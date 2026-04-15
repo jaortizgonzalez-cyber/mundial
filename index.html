@@ -6,75 +6,120 @@
     <title>Multivac Polla Elite 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
+        /* --- CSS MAESTRO --- */
         :root {
             --primary-dark: #020d1a;
             --accent-green: #00ff88;
             --accent-gold: #ffcc00;
-            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-bg: rgba(255, 255, 255, 0.06);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         body {
             font-family: 'Barlow Condensed', sans-serif;
             background: radial-gradient(circle at top right, #062a4d, var(--primary-dark));
-            color: #fff; margin: 0; min-height: 100vh;
+            color: #fff; margin: 0; padding: 0;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            overflow-x: hidden;
         }
 
+        /* REMOVER FLECHAS DE INPUTS NUMERICOS */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
         .container { width: 92%; max-width: 1000px; margin: auto; padding: 20px; }
 
+        /* CABECERA PROFESIONAL */
         header { 
-            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--glass-border); padding: 15px 0;
+            background: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 0;
             position: sticky; top: 0; z-index: 100;
         }
         .header-content { display: flex; justify-content: space-between; align-items: center; }
-        .brand-title { font-family: 'Anton'; font-size: 1.8rem; letter-spacing: 2px; color: #fff; text-transform: uppercase; }
+        .logo-wrap { display: flex; align-items: center; gap: 12px; }
+        .logo-img { height: 42px; filter: drop-shadow(0 0 8px var(--accent-green)); }
+        .brand-title { font-family: 'Anton'; font-size: 1.8rem; letter-spacing: 2px; color: #fff; text-transform: uppercase; margin: 0; }
 
+        /* ESTILO WOW: LOGIN */
         .auth-card {
-            background: var(--glass-bg); backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border); border-radius: 24px;
-            padding: 40px; max-width: 400px; margin: 60px auto; text-align: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 40px;
+            max-width: 400px;
+            margin: 60px auto;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            transition: 0.3s;
         }
+        
+        .logo-main { height: 70px; margin-bottom: 20px; filter: drop-shadow(0 0 12px var(--accent-green)); }
+        .auth-card h2 { font-family: 'Anton'; font-size: 2rem; margin-bottom: 30px; letter-spacing: 1px; }
 
         .custom-input {
-            width: 100%; padding: 14px; background: rgba(0,0,0,0.3);
-            border: 1px solid #333; border-radius: 12px; color: #fff; font-size: 1.1rem;
-            box-sizing: border-box; margin: 10px 0;
+            width: 100%; padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #333;
+            border-radius: 12px;
+            color: #fff; font-size: 1.1rem;
+            box-sizing: border-box; transition: 0.3s;
+            margin-bottom: 20px;
         }
+        .custom-input:focus { border-color: var(--accent-green); outline: none; box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
 
         .btn-main {
-            width: 100%; padding: 16px; background: linear-gradient(90deg, #00ff88, #00bd65);
-            border: none; border-radius: 12px; color: #000; font-family: 'Anton'; 
-            font-size: 1.2rem; text-transform: uppercase; cursor: pointer;
+            width: 100%; padding: 16px;
+            background: linear-gradient(90deg, #00ff88, #00bd65);
+            border: none; border-radius: 12px;
+            color: #000; font-family: 'Anton'; font-size: 1.2rem;
+            text-transform: uppercase; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.2);
         }
+        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(0, 255, 136, 0.4); }
 
+        /* APP CONTENT */
         .match-card {
-            background: var(--glass-bg); border: 1px solid var(--glass-border);
-            border-radius: 20px; padding: 20px; margin-bottom: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 20px;
+            margin-bottom: 20px;
+            position: relative; overflow: hidden;
+            transition: 0.3s;
         }
+        .match-card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-green); }
 
-        /* BOTON ADMIN - ASEGURADO */
+        .score-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 10px; }
+        .team-name { font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
+        .input-score {
+            width: 50px; height: 50px; border-radius: 12px; border: 2px solid #333;
+            background: #000; color: var(--accent-green); text-align: center;
+            font-family: 'Anton'; font-size: 1.6rem;
+        }
+        .input-score:disabled { color: #555; border-color: #222; }
+
+        .ranking-card { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; border: 1px solid var(--glass-border); }
+        
+        /* BOTÓN ADMIN - FIJO Y SEGURO */
         #admin-toggle {
             position: fixed; bottom: 30px; right: 30px; 
             background: var(--accent-gold); color: #000;
             width: 65px; height: 65px; border-radius: 50%; border: none;
             font-size: 2rem; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             display: none; z-index: 9999;
+            transition: 0.3s;
         }
+        #admin-toggle:hover { transform: scale(1.1); }
 
+        /* PANEL ADMIN */
         #admin-panel {
             position: fixed; inset: 0; background: #020d1a;
-            z-index: 10000; display: none; padding: 20px; overflow-y: auto;
+            z-index: 10000; display: none; padding: 30px; overflow-y: auto;
         }
-        
-        .admin-item {
-            background: rgba(255,255,255,0.05); padding: 15px; 
-            border-radius: 12px; margin-bottom: 10px; display: flex; 
-            justify-content: space-between; align-items: center;
-        }
+        .admin-row { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -82,17 +127,19 @@
     <button id="admin-toggle" onclick="toggleAdminPanel()">⚙️</button>
 
     <div id="admin-panel">
-        <h2 style="font-family:'Anton'; color:var(--accent-gold);">PANEL DE CONTROL ADMIN</h2>
+        <h2 style="font-family:'Anton'; color:var(--accent-gold);">PANEL DE CONTROL ADMIN 🛠️</h2>
         
         <div class="match-card">
-            <h3 style="color:var(--accent-green)">+ NUEVO PARTIDO</h3>
-            <input type="text" id="new-equipoL" placeholder="Local" class="custom-input">
-            <input type="text" id="new-equipoV" placeholder="Visitante" class="custom-input">
+            <h3 style="color:var(--accent-green)">+ CREAR PARTIDO</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+                <input type="text" id="new-equipoL" placeholder="Local" class="custom-input">
+                <input type="text" id="new-equipoV" placeholder="Visitante" class="custom-input">
+            </div>
             <input type="datetime-local" id="new-fecha" class="custom-input">
-            <button class="btn-main" onclick="crearPartidoOficial()">CREAR PARTIDO</button>
+            <button class="btn-main" onclick="crearPartidoOficial()">CONFIRMAR PARTIDO</button>
         </div>
 
-        <h3 style="font-family:'Anton';">GESTIONAR MARCADORES OFICIALES</h3>
+        <h3>GESTIONAR MARCADORES OFICIALES</h3>
         <div id="admin-contenedor-partidos"></div>
         
         <button class="btn-main" style="background:var(--accent-gold); margin: 20px 0;" onclick="guardarPanelControl()">PUBLICAR Y CALCULAR PUNTOS</button>
@@ -101,35 +148,58 @@
 
     <header>
         <div class="container header-content">
-            <span class="brand-title">MULTIVAC POLLA</span>
-            <span style="color:var(--accent-gold); font-weight:800">2026 EDITION</span>
+            <div class="logo-wrap">
+                <img src="img/logo.png" class="logo-img" alt="Logo">
+                <span class="brand-title">MULTIVAC POLLA</span>
+            </div>
+            <div style="color: var(--accent-gold); font-weight: 800">2026 EDITION</div>
         </div>
     </header>
 
     <main class="container">
         <section id="auth-container">
             <div class="auth-card" id="login-form">
-                <h2>ACCESO</h2>
-                <input type="number" id="cedula" class="custom-input" placeholder="Cédula" oninput="this.value=Math.abs(this.value)">
+                <img src="img/logo.png" class="logo-main" alt="Logo">
+                <h2>INICIAR SESIÓN</h2>
+                <input type="number" id="cedula" class="custom-input" placeholder="Tu Cédula" oninput="this.value=Math.abs(this.value)">
                 <input type="password" id="pass" class="custom-input" placeholder="Contraseña">
-                <button class="btn-main" onclick="login()">ENTRAR</button>
+                <button class="btn-main" onclick="login()">ENTRAR AL ESTADIO</button>
+                <p style="margin-top:25px; font-size:0.9rem; color:#888">¿Eres nuevo? <span onclick="mostrarRegistro()" style="color:var(--accent-green); cursor:pointer; font-weight:800">REGÍSTRATE</span></p>
+            </div>
+
+            <div class="auth-card" id="register-form" style="display:none;">
+                <h2>NUEVO REGISTRO</h2>
+                <input type="text" id="reg-nombre" class="custom-input" placeholder="Nombre Completo">
+                <input type="number" id="reg-cedula" class="custom-input" placeholder="Cédula" oninput="this.value=Math.abs(this.value)">
+                <input type="password" id="reg-pass" class="custom-input" placeholder="Contraseña">
+                <button class="btn-main" onclick="registrar()">CREAR MI CUENTA</button>
+                <p style="margin-top:25px; font-size:0.9rem; color:#888" onclick="mostrarLogin()">VOLVER AL LOGIN</p>
             </div>
         </section>
 
         <section id="polla-section" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px">
                 <div>
-                    <h2 id="user-display-name" style="margin:0; color:var(--accent-green)">---</h2>
-                    <div style="font-family:'Anton'; font-size:2rem"><span id="mis-puntos-total">0</span> PTS</div>
+                    <h3 id="user-display-name" style="margin:0; color:var(--accent-green)">---</h3>
+                    <div style="font-family:'Anton'; font-size:2.5rem"><span id="mis-puntos-total">0</span> <small style="font-size:1rem">PTS</small></div>
                 </div>
-                <button onclick="location.reload()" style="background:#444; border:none; color:white; padding:10px 20px; border-radius:10px">SALIR</button>
+                <button onclick="location.reload()" style="background:#e74c3c; border:none; color:white; padding:10px 20px; border-radius:10px; cursor:pointer">CERRAR SESIÓN</button>
             </div>
 
-            <div id="contenedor-dinamico"></div>
-            <button class="btn-main" onclick="guardarTodosLosPronosticos()" style="margin-top:20px">GUARDAR MIS APUESTAS</button>
-            
-            <h3 style="font-family:'Anton'; margin-top:40px">RANKING GLOBAL</h3>
-            <div id="body-ranking"></div>
+            <div style="display:grid; grid-template-columns: 1fr; gap:40px">
+                <div>
+                    <h3 style="font-family:'Anton'; border-left:4px solid var(--accent-green); padding-left:15px; margin-bottom:25px">PARTIDOS DISPONIBLES</h3>
+                    <div id="contenedor-dinamico"></div>
+                    <button class="btn-main" onclick="guardarTodosLosPronosticos()" style="margin-top:20px">GUARDAR MIS APUESTAS</button>
+                </div>
+
+                <div>
+                    <h3 style="font-family:'Anton'; border-left:4px solid var(--accent-gold); padding-left:15px; margin-bottom:25px">TOP MULTIVAC GLOBAL</h3>
+                    <div class="ranking-card">
+                        <div id="body-ranking"></div>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -151,29 +221,42 @@
         const db = getDatabase(app);
         let currentCedula = null;
 
-        window.toggleAdminPanel = () => {
-            const p = document.getElementById('admin-panel');
-            p.style.display = (p.style.display === 'block') ? 'none' : 'block';
-        };
+        // UI GLOBAL
+        window.mostrarRegistro = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
+        window.mostrarLogin = () => { document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; };
+        window.toggleAdminPanel = () => { const p = document.getElementById('admin-panel'); p.style.display = (p.style.display === 'block') ? 'none' : 'block'; };
 
+        function checkBloqueo(fechaISO) {
+            const ahora = new Date();
+            const inicio = new Date(fechaISO);
+            if(isNaN(inicio)) return true;
+            return ahora >= new Date(inicio.getTime() - 300000); // 5 min antes
+        }
+
+        // LOGIN Y DETECCION DE ROL
         window.login = async () => {
             const c = document.getElementById('cedula').value, p = document.getElementById('pass').value;
             const snap = await get(child(ref(db), `usuarios/${c}`));
-            
-            if(snap.exists() && snap.val().password === p) {
-                const user = snap.val();
+            if(snap.exists() && snap.val().password === p){
                 currentCedula = c;
-                document.getElementById('auth-container').style.display = 'none';
-                document.getElementById('polla-section').style.display = 'block';
-                document.getElementById('user-display-name').innerText = user.nombre.toUpperCase();
+                document.getElementById('auth-container').style.display='none';
+                document.getElementById('polla-section').style.display='block';
+                document.getElementById('user-display-name').innerText = snap.val().nombre.toUpperCase();
                 
-                // REGLA DE ORO: Si el rol es admin (en minúsculas o mayúsculas), mostrar el botón
-                if(user.role && user.role.toLowerCase() === "admin") {
+                // REGLA CLAVE: Mostrar botón si rol es admin
+                if(snap.val().role === "admin") {
                     document.getElementById('admin-toggle').style.display = 'block';
                     cargarPanelAdmin();
                 }
                 actualizarTodo();
-            } else { alert("Error de acceso"); }
+            } else { alert("ACCESO DENEGADO"); }
+        };
+
+        window.registrar = async () => {
+            const n = document.getElementById('reg-nombre').value, c = document.getElementById('reg-cedula').value, p = document.getElementById('reg-pass').value;
+            if(!n || !c || !p) return alert("COMPLETA LOS DATOS");
+            await set(ref(db, 'usuarios/' + c), { nombre: n, password: p, puntos: 0, role: "user" });
+            alert("BIENVENIDO AL ESTADIO"); mostrarLogin();
         };
 
         async function actualizarTodo() {
@@ -182,33 +265,32 @@
             cargarRanking();
         }
 
-        // --- GESTIÓN USUARIO ---
+        // VISTA USUARIO
         async function cargarPartidosUser() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
-            const votos = snapV.exists() ? snapV.val() : {};
+            const misVotos = snapV.exists() ? snapV.val() : {};
             const cont = document.getElementById('contenedor-dinamico');
             cont.innerHTML = "";
             
             if(snapP.exists()){
                 const partidos = snapP.val();
                 for(let id in partidos){
-                    const p = partidos[id];
-                    // Corregir "Invalid Date": Asegurarse que el formato sea ISO
+                    const p = partidos[id], bloqueado = checkBloqueo(p.fechaInicio);
+                    const lock = bloqueado ? 'disabled' : '';
                     const fecha = new Date(p.fechaInicio);
-                    const fechaTxt = isNaN(fecha) ? "Pendiente" : fecha.toLocaleString();
-                    const bloqueado = !isNaN(fecha) && (new Date() >= new Date(fecha.getTime() - 300000));
+                    const fechaTxt = isNaN(fecha) ? "Pendiente" : fecha.toLocaleString([], {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
 
                     cont.innerHTML += `
                         <div class="match-card">
-                            <div style="font-size:0.8rem; color:var(--accent-gold)">${fechaTxt}</div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px">
-                                <span>${p.equipoL}</span>
+                            <div style="font-size:0.8rem; color:var(--accent-gold)">${fechaTxt} ${bloqueado ? '🔒 CERRADO' : '🟢 ABIERTO'}</div>
+                            <div class="score-row">
+                                <span class="team-name">${p.equipoL}</span>
                                 <div style="display:flex; gap:10px">
-                                    <input type="number" id="l_${id}" value="${votos[id]?.local ?? ''}" class="custom-input" style="width:50px; text-align:center; margin:0" ${bloqueado ? 'disabled' : ''}>
-                                    <input type="number" id="v_${id}" value="${votos[id]?.visitante ?? ''}" class="custom-input" style="width:50px; text-align:center; margin:0" ${bloqueado ? 'disabled' : ''}>
+                                    <input type="number" id="l_${id}" value="${misVotos[id]?.local ?? ''}" class="input-score" ${lock} oninput="this.value=Math.abs(this.value)">
+                                    <input type="number" id="v_${id}" value="${misVotos[id]?.visitante ?? ''}" class="input-score" ${lock} oninput="this.value=Math.abs(this.value)">
                                 </div>
-                                <span>${p.equipoV}</span>
+                                <span class="team-name">${p.equipoV}</span>
                             </div>
                         </div>`;
                 }
@@ -219,42 +301,40 @@
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             let d = {};
             for(let id in snapP.val()){
-                const l = document.getElementById(`l_${id}`).value, v = document.getElementById(`v_${id}`).value;
-                if(l !== "" && v !== "") d[id] = { local: parseInt(l), visitante: parseInt(v) };
+                if(!checkBloqueo(snapP.val()[id].fechaInicio)){
+                    const l = document.getElementById(`l_${id}`).value, v = document.getElementById(`v_${id}`).value;
+                    if(l !== "" && v !== "") d[id] = { local: parseInt(l), visitante: parseInt(v) };
+                }
             }
             await update(ref(db, `pronosticos/${currentCedula}`), d);
-            alert("Guardado");
+            alert("APUESTAS GUARDADAS");
         };
 
-        // --- GESTIÓN ADMIN (EL FORMULARIO QUE BUSCAS) ---
+        // GESTIÓN ADMIN
         window.crearPartidoOficial = async () => {
             const l = document.getElementById('new-equipoL').value, v = document.getElementById('new-equipoV').value, f = document.getElementById('new-fecha').value;
-            if(!l || !v || !f) return alert("Faltan datos");
-            const id = "p_" + Date.now();
-            await set(ref(db, 'partidos_oficiales/' + id), { equipoL: l, equipoV: v, fechaInicio: f });
-            alert("Creado"); cargarPanelAdmin(); cargarPartidosUser();
+            if(!l || !v || !f) return alert("FALTAN DATOS");
+            await set(ref(db, 'partidos_oficiales/p_' + Date.now()), { equipoL: l, equipoV: v, fechaInicio: f });
+            alert("PARTIDO CREADO"); cargarPanelAdmin(); cargarPartidosUser();
         };
 
         async function cargarPanelAdmin() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
-            const snapR = await get(child(ref(db), 'resultados_oficiales'));
-            const res = snapR.exists() ? snapR.val() : {};
+            const resSnap = await get(child(ref(db), 'resultados_oficiales'));
+            const res = resSnap.exists() ? resSnap.val() : {};
             const cont = document.getElementById('admin-contenedor-partidos');
             cont.innerHTML = "";
-            
-            if(snapP.exists()){
-                for(let id in snapP.val()){
-                    const p = snapP.val()[id];
-                    cont.innerHTML += `
-                        <div class="admin-item">
-                            <span>${p.equipoL} vs ${p.equipoV}</span>
-                            <div>
-                                <input type="number" id="adm_l_${id}" value="${res[id]?.golesL ?? ''}" style="width:40px"> : 
-                                <input type="number" id="adm_v_${id}" value="${res[id]?.golesV ?? ''}" style="width:40px">
-                                <button onclick="eliminarPartido('${id}')" style="background:none; border:none; color:red; cursor:pointer">🗑️</button>
-                            </div>
-                        </div>`;
-                }
+            for(let id in snapP.val()){
+                const p = snapP.val()[id];
+                cont.innerHTML += `
+                    <div class="admin-row">
+                        <span>${p.equipoL} vs ${p.equipoV}</span>
+                        <div>
+                            <input type="number" id="adm_l_${id}" value="${res[id]?.golesL ?? ''}" style="width:40px" oninput="this.value=Math.abs(this.value)"> : 
+                            <input type="number" id="adm_v_${id}" value="${res[id]?.golesV ?? ''}" style="width:40px" oninput="this.value=Math.abs(this.value)">
+                            <button onclick="eliminarPartido('${id}')" style="background:none; border:none; color:red">🗑️</button>
+                        </div>
+                    </div>`;
             }
         }
 
@@ -266,14 +346,12 @@
                 if(l !== "" && v !== "") r[id] = { golesL: parseInt(l), golesV: parseInt(v) };
             }
             await set(ref(db, 'resultados_oficiales'), r);
-            alert("Resultados Publicados"); location.reload();
+            alert("RESULTADOS PUBLICADOS Y PUNTOS CALCULADOS"); location.reload();
         };
 
-        window.eliminarPartido = async (id) => {
-            if(confirm("¿Eliminar?")) { await set(ref(db, 'partidos_oficiales/' + id), null); cargarPanelAdmin(); cargarPartidosUser(); }
-        };
+        window.eliminarPartido = async (id) => { if(confirm("¿ELIMINAR?")) { await set(ref(db, 'partidos_oficiales/' + id), null); cargarPanelAdmin(); cargarPartidosUser(); } };
 
-        // --- PUNTOS ---
+        // CÁLCULO DE PUNTOS
         async function procesarPuntos() {
             const snapO = await get(child(ref(db), 'resultados_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
@@ -296,9 +374,9 @@
             if(snap.exists()){
                 const sorted = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
                 document.getElementById('body-ranking').innerHTML = sorted.map((u, i) => `
-                    <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333">
-                        <span>#${i+1} ${u.nombre}</span>
-                        <b>${u.puntos} PTS</b>
+                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333">
+                        <span style="font-weight:600">#${i+1} ${u.nombre}</span>
+                        <b style="color:var(--accent-gold)">${u.puntos} PTS</b>
                     </div>`).join('');
             }
         }
