@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Multivac Polla Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary-dark: #020d1a;
@@ -13,6 +14,17 @@
             --glass: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
+
+        /* Estilos personalizados para SweetAlert2 */
+        .swal2-popup {
+            background: #062a4d !important;
+            border: 1px solid var(--accent-green) !important;
+            border-radius: 25px !important;
+            color: #fff !important;
+            font-family: 'Barlow Condensed', sans-serif !important;
+        }
+        .swal2-title { font-family: 'Anton', sans-serif !important; text-transform: uppercase; }
+        .swal2-confirm { background: linear-gradient(90deg, #00ff88, #00bd65) !important; color: #000 !important; font-weight: 800 !important; }
 
         body {
             font-family: 'Barlow Condensed', sans-serif;
@@ -199,12 +211,16 @@
         const db = getDatabase(app);
         let currentCedula = null;
 
+        // HELPER PARA ALERTAS PRO
+        const alertPro = (title, text, icon = 'success') => {
+            Swal.fire({ title, text, icon, showClass: { popup: 'animate__animated animate__bounceIn' } });
+        };
+
         window.validarPositivo = (el) => { if(el.value < 0) el.value = 0; };
         window.mostrarRegistro = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
         window.mostrarLogin = () => { document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; };
         window.toggleAdminPanel = () => { const p = document.getElementById('admin-panel'); p.style.display = (p.style.display === 'block') ? 'none' : 'block'; };
 
-        // INTEGRACIÓN: CERRAR SESIÓN LIMPIANDO STORAGE
         window.logout = () => {
             localStorage.removeItem('userCedula');
             location.reload();
@@ -215,7 +231,6 @@
             return new Date() >= new Date(new Date(fecha).getTime() - min5);
         }
 
-        // INTEGRACIÓN: PERSISTENCIA AL RECARGAR
         window.addEventListener('load', async () => {
             const savedCedula = localStorage.getItem('userCedula');
             if (savedCedula) {
@@ -232,9 +247,9 @@
             const snap = await get(child(ref(db), `usuarios/${c}`));
             if(snap.exists() && snap.val().password === p){
                 currentCedula = c;
-                localStorage.setItem('userCedula', c); // Guardar en navegador
+                localStorage.setItem('userCedula', c);
                 completarLogin(snap.val());
-            } else { alert("Cédula o contraseña incorrecta"); }
+            } else { alertPro("ERROR", "Cédula o contraseña incorrecta", "error"); }
         };
 
         function completarLogin(user) {
@@ -251,9 +266,10 @@
 
         window.registrar = async () => {
             const n = document.getElementById('reg-nombre').value, c = document.getElementById('reg-cedula').value, p = document.getElementById('reg-pass').value;
-            if(!n || !c || !p) return alert("Por favor llena todos los campos");
+            if(!n || !c || !p) return alertPro("ATENCIÓN", "Por favor llena todos los campos", "warning");
             await set(ref(db, 'usuarios/' + c), { nombre: n, password: p, puntos: 0, role: "user" });
-            alert("Cuenta creada con éxito"); mostrarLogin();
+            alertPro("¡GOLAZO!", "Cuenta creada con éxito", "success"); 
+            mostrarLogin();
         };
 
         async function actualizarApp() {
@@ -305,14 +321,16 @@
                 }
             });
             await update(ref(db, `pronosticos/${currentCedula}`), updates);
-            alert("Tus marcadores han sido guardados");
+            alertPro("RECIBIDO", "Tus marcadores han sido guardados", "success");
         };
 
         window.crearPartidoOficial = async () => {
             const l = document.getElementById('new-equipoL').value, v = document.getElementById('new-equipoV').value, f = document.getElementById('new-fecha').value;
-            if(!l || !v || !f) return alert("Completa la info del partido");
+            if(!l || !v || !f) return alertPro("CAMPO VACÍO", "Completa la info del partido", "warning");
             await set(ref(db, 'partidos_oficiales/p_' + Date.now()), { equipoL: l, equipoV: v, fechaInicio: f });
-            alert("Partido añadido al calendario"); cargarPanelAdmin(); renderizarPartidos();
+            alertPro("LISTO", "Partido añadido al calendario", "success"); 
+            cargarPanelAdmin(); 
+            renderizarPartidos();
         };
 
         async function cargarPanelAdmin() {
@@ -344,11 +362,34 @@
                 if(l !== "" && v !== "") r[id] = { golesL: parseInt(l), golesV: parseInt(v) };
             });
             await set(ref(db, 'resultados_oficiales'), r);
-            alert("Resultados publicados. El ranking se actualizará para todos.");
-            location.reload();
+            Swal.fire({
+                title: '¿PUBLICAR RESULTADOS?',
+                text: "El ranking se actualizará para todos los usuarios",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'SÍ, PUBLICAR',
+                cancelButtonText: 'CANCELAR'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
         };
 
-        window.borrarPartido = async (id) => { if(confirm("¿Eliminar este partido?")) { await set(ref(db, 'partidos_oficiales/'+id), null); cargarPanelAdmin(); } };
+        window.borrarPartido = (id) => { 
+            Swal.fire({
+                title: '¿ELIMINAR PARTIDO?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'SÍ, ELIMINAR'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    await set(ref(db, 'partidos_oficiales/'+id), null);
+                    cargarPanelAdmin();
+                }
+            });
+        };
 
         async function calcularPuntosLocal() {
             const snapO = await get(child(ref(db), 'resultados_oficiales'));
