@@ -19,15 +19,17 @@
             --error-red: #ff4444;
         }
 
-        /* --- ANIMACIÓN LÍDER WOW --- */
+        /* --- PRIORIDAD POPUPS --- */
+        .swal2-container { z-index: 99999 !important; }
+
         #intro-anim {
             position: fixed; inset: 0; background: radial-gradient(circle, #0a4a8c, #020d1a);
             z-index: 30000; display: none; align-items: center; justify-content: center;
             flex-direction: column; text-align: center;
         }
-        .podium-title { font-family: 'Anton'; font-size: 3rem; color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,204,0,0.5); margin-bottom: 20px; }
-        .leader-card { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 50%; border: 4px solid var(--accent-green); box-shadow: 0 0 50px var(--accent-green); }
-        .leader-name { font-family: 'Anton'; font-size: 2.5rem; margin-top: 15px; color: #fff; }
+        .podium-title { font-family: 'Anton'; font-size: 3rem; color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,204,0,0.5); }
+        .leader-card { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 50%; border: 4px solid var(--accent-green); box-shadow: 0 0 50px var(--accent-green); margin: 20px 0; }
+        .leader-name { font-family: 'Anton'; font-size: 2.5rem; color: #fff; }
 
         body {
             font-family: 'Barlow Condensed', sans-serif;
@@ -37,7 +39,6 @@
 
         .container { width: 92%; max-width: 1100px; margin: auto; padding: 20px; }
 
-        /* --- HEADER CON LOGO ORIGINAL + TROFEO FIFA --- */
         header { 
             background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--glass-border); padding: 15px 0;
@@ -46,21 +47,21 @@
         .header-content { display: flex; justify-content: space-between; align-items: center; }
         .logo-box { display: flex; align-items: center; gap: 15px; }
         .logo-img { height: 45px; filter: drop-shadow(0 0 10px var(--accent-green)); }
-        .logo-text { font-family: 'Anton'; font-size: 1.8rem; letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+        .logo-text { font-family: 'Anton'; font-size: 1.8rem; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+        .fifa-trophy { height: 35px; filter: drop-shadow(0 0 5px var(--accent-gold)); }
 
-        /* Estilo del Trofeo FIFA */
-        .fifa-trophy {
-            height: 35px;
-            filter: drop-shadow(0 0 5px var(--accent-gold));
-        }
-
-        /* --- RESTO DE ESTILOS --- */
         .custom-input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid #333; border-radius: 12px; color: #fff; margin-bottom: 15px; box-sizing: border-box; }
-        .btn-action { width: 100%; padding: 16px; border-radius: 12px; border: none; font-family: 'Anton'; font-size: 1.2rem; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        .btn-action { width: 100%; padding: 16px; border-radius: 12px; border: none; font-family: 'Anton'; font-size: 1.2rem; text-transform: uppercase; cursor: pointer; }
         .btn-green { background: linear-gradient(90deg, #00ff88, #00bd65); color: #000; }
+
         .match-card { background: var(--glass); border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
         .input-score { width: 55px; height: 55px; background: #000; border: 2px solid #333; border-radius: 12px; color: var(--accent-green); text-align: center; font-family: 'Anton'; font-size: 1.8rem; }
-        #admin-toggle { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent-gold); border: none; z-index: 9999; cursor: pointer; font-size: 1.5rem; }
+
+        /* ESTILO REGLAS */
+        .rules-card { background: rgba(0, 255, 136, 0.05); border: 1px dashed var(--accent-green); border-radius: 15px; padding: 15px; margin: 20px 0; font-size: 0.9rem; }
+        .rules-card ul { margin: 5px 0; padding-left: 20px; }
+
+        #admin-toggle { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent-gold); border: none; z-index: 10000; cursor: pointer; font-size: 1.5rem; }
         #admin-panel { position: fixed; inset: 0; background: var(--primary-dark); z-index: 20000; display: none; padding: 40px; overflow-y: auto; }
     </style>
 </head>
@@ -91,16 +92,16 @@
     </header>
 
     <main class="container">
-        <section id="auth-container" class="auth-wrapper" style="display:flex; justify-content:center; align-items:center; min-height:60vh;">
-            <div class="auth-card" id="login-form">
+        <section id="auth-container" style="display:flex; justify-content:center; padding-top:50px;">
+            <div class="match-card" id="login-form" style="max-width:400px; text-align:center; width:100%;">
                 <h2 style="font-family:'Anton'">ACCESO</h2>
                 <input type="email" id="login-email" class="custom-input" placeholder="Correo">
                 <input type="password" id="login-pass" class="custom-input" placeholder="Contraseña">
                 <button class="btn-action btn-green" onclick="handleLogin()">ENTRAR</button>
                 <p onclick="mostrarRegistro()" style="cursor:pointer; color:var(--accent-gold); margin-top:15px">¿No tienes cuenta? Regístrate</p>
             </div>
-            <div class="auth-card" id="register-form" style="display:none;">
-                <h2 style="font-family:'Anton'">NUEVO JUGADOR</h2>
+            <div class="match-card" id="register-form" style="display:none; max-width:400px; text-align:center; width:100%;">
+                <h2 style="font-family:'Anton'">REGISTRO</h2>
                 <input type="text" id="reg-nombre" class="custom-input" placeholder="Nombre">
                 <input type="text" id="reg-cedula" class="custom-input" placeholder="Cédula">
                 <input type="email" id="reg-email" class="custom-input" placeholder="Correo">
@@ -114,17 +115,29 @@
             <div style="background:var(--glass); padding:25px; border-radius:20px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <div>
                     <h2 id="user-display-name" style="margin:0; color:var(--accent-green)">---</h2>
-                    <span id="user-display-cedula" style="color:#666">C.C. ---</span>
+                    <span id="user-display-cedula" style="color:#888">C.C. ---</span>
                 </div>
                 <div style="font-family:'Anton'; font-size:3rem; color:var(--accent-gold)"><span id="mis-puntos-total">0</span> PTS</div>
             </div>
+
             <div id="contenedor-dinamico"></div>
-            <button class="btn-action btn-green" onclick="guardarTodosLosPronosticos()">GUARDAR MIS MARCADORES</button>
-            <div id="ranking-area" style="margin-top:40px">
-                <h3 style="font-family:'Anton'">🏆 RANKING ACTUAL</h3>
-                <div id="body-ranking" style="background:var(--glass); border-radius:15px;"></div>
+            <button class="btn-action btn-green" onclick="guardarTodosLosPronosticos()">GUARDAR MIS APUESTAS</button>
+
+            <div class="rules-card">
+                <h4 style="margin:0; color:var(--accent-gold); font-family:'Anton'">SISTEMA DE PUNTOS</h4>
+                <ul>
+                    <li><strong>5 Puntos:</strong> Acierto exacto del marcador.</li>
+                    <li><strong>3 Puntos:</strong> Acierto de ganador y diferencia de goles.</li>
+                    <li><strong>2 Puntos:</strong> Acierto solo de ganador o empate.</li>
+                </ul>
+                <small>* Los pronósticos se bloquean 5 minutos antes de cada partido.</small>
             </div>
-            <button onclick="logout()" style="background:none; border:1px solid var(--error-red); color:var(--error-red); padding:12px; border-radius:12px; width:100%; margin-top:40px; cursor:pointer">Cerrar Sesión</button>
+
+            <div id="ranking-area" style="margin-top:20px">
+                <h3 style="font-family:'Anton'">🏆 RANKING GLOBAL</h3>
+                <div id="body-ranking" style="background:var(--glass); border-radius:20px; padding:10px;"></div>
+            </div>
+            <button onclick="logout()" style="background:none; border:1px solid var(--error-red); color:var(--error-red); padding:10px; border-radius:10px; width:100%; margin-top:30px; cursor:pointer">Cerrar Sesión</button>
         </section>
     </main>
 
@@ -140,6 +153,7 @@
                 <select id="new-grupo" class="custom-input">
                     <option value="" disabled selected>Grupo</option>
                     <option value="A">Grupo A</option><option value="B">Grupo B</option><option value="C">Grupo C</option><option value="D">Grupo D</option>
+                    <option value="E">Grupo E</option><option value="F">Grupo F</option><option value="G">Grupo G</option><option value="H">Grupo H</option>
                 </select>
                 <input type="datetime-local" id="new-fecha" class="custom-input">
                 <button class="btn-action btn-green" onclick="crearPartidoOficial()">CREAR</button>
@@ -150,7 +164,7 @@
                 <button class="btn-action" style="background:var(--accent-gold); color:#000" onclick="guardarResultadosOficiales()">PUBLICAR TODO</button>
             </div>
         </div>
-        <button class="btn-action" style="background:#333; color:#fff; margin-top:20px" onclick="toggleAdminPanel()">CERRAR</button>
+        <button class="btn-action" style="background:#333; color:#fff; margin-top:20px" onclick="toggleAdminPanel()">SALIR</button>
     </div>
 
     <script type="module">
@@ -173,7 +187,6 @@
         const auth = getAuth(app);
         let currentCedula = null;
 
-        // ANIMACIÓN LIDER (RESTAURADA)
         async function mostrarLiderWOW() {
             const snap = await get(child(ref(db), 'usuarios'));
             if(snap.exists()){
@@ -202,7 +215,6 @@
                     document.getElementById('user-display-name').innerText = uData.nombre;
                     document.getElementById('user-display-cedula').innerText = `C.C. ${currentCedula}`;
                     if(uData.role === "admin") document.getElementById('admin-toggle').style.display = 'block';
-                    
                     initApp();
                     mostrarLiderWOW();
                 }
@@ -247,12 +259,11 @@
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             let up = {};
             Object.keys(snapP.val()).forEach(id => {
-                const l = document.getElementById(`l_${id}`).value;
-                const v = document.getElementById(`v_${id}`).value;
+                const l = document.getElementById(`l_${id}`).value, v = document.getElementById(`v_${id}`).value;
                 if(l !== "" && v !== "") up[id] = { local: Math.max(0, parseInt(l)), visitante: Math.max(0, parseInt(v)) };
             });
             await update(ref(db, `pronosticos/${currentCedula}`), up);
-            Swal.fire("¡Listo!", "Pronósticos actualizados", "success");
+            Swal.fire("Éxito", "Pronósticos guardados", "success");
         };
 
         async function calcularMisPuntos() {
@@ -278,33 +289,12 @@
             if(snap.exists()){
                 const sorted = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
                 document.getElementById('body-ranking').innerHTML = sorted.map((u, i) => `
-                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05)">
                         <span>${i+1}. ${u.nombre}</span>
                         <span style="color:var(--accent-gold); font-weight:bold">${u.puntos} PTS</span>
                     </div>`).join('');
             }
         }
-
-        // LÓGICA AUTH
-        window.handleLogin = async () => {
-            const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
-            try {
-                const res = await signInWithEmailAndPassword(auth, e, p);
-                if(!res.user.emailVerified) { await signOut(auth); return Swal.fire("Verifica tu correo", "", "warning"); }
-            } catch (err) { Swal.fire("Error", "Credenciales incorrectas", "error"); }
-        };
-
-        window.handleRegister = async () => {
-            const n = document.getElementById('reg-nombre').value, c = document.getElementById('reg-cedula').value, e = document.getElementById('reg-email').value, p = document.getElementById('reg-pass').value;
-            try {
-                const res = await createUserWithEmailAndPassword(auth, e, p);
-                await sendEmailVerification(res.user);
-                await set(ref(db, `usuarios/${c}`), { nombre: n, email: e, uid: res.user.uid, puntos: 0, role: "user" });
-                await set(ref(db, `mapa_usuarios/${res.user.uid}`), c);
-                Swal.fire("Registro", "Verifica tu email antes de entrar", "success");
-                mostrarLogin();
-            } catch (err) { Swal.fire("Error", err.message, "error"); }
-        };
 
         window.toggleAdminPanel = () => {
             const p = document.getElementById('admin-panel');
@@ -337,6 +327,7 @@
             if(!l || !v || !g || !f) return Swal.fire("Error", "Faltan datos", "error");
             await set(ref(db, 'partidos_oficiales/p_' + Date.now()), { equipoL: l, equipoV: v, grupo: g, fechaInicio: f });
             renderAdminList();
+            Swal.fire("Creado", "Partido en línea", "success");
         };
 
         window.guardarResultadosOficiales = async () => {
@@ -347,7 +338,27 @@
                 if(l !== "" && v !== "") data[id] = { golesL: parseInt(l), golesV: parseInt(v) };
             });
             await set(ref(db, 'resultados_oficiales'), data);
-            Swal.fire("Éxito", "Resultados publicados", "success");
+            Swal.fire("Publicado", "Los resultados ya son oficiales", "success");
+        };
+
+        window.handleLogin = async () => {
+            const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
+            try {
+                const res = await signInWithEmailAndPassword(auth, e, p);
+                if(!res.user.emailVerified) { await signOut(auth); return Swal.fire("Verifica tu email", "", "warning"); }
+            } catch (err) { Swal.fire("Error", "Credenciales incorrectas", "error"); }
+        };
+
+        window.handleRegister = async () => {
+            const n = document.getElementById('reg-nombre').value, c = document.getElementById('reg-cedula').value, e = document.getElementById('reg-email').value, p = document.getElementById('reg-pass').value;
+            try {
+                const res = await createUserWithEmailAndPassword(auth, e, p);
+                await sendEmailVerification(res.user);
+                await set(ref(db, `usuarios/${c}`), { nombre: n, email: e, uid: res.user.uid, puntos: 0, role: "user" });
+                await set(ref(db, `mapa_usuarios/${res.user.uid}`), c);
+                Swal.fire("Registro", "Revisa tu email", "success");
+                mostrarLogin();
+            } catch (err) { Swal.fire("Error", err.message, "error"); }
         };
 
         window.mostrarRegistro = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
