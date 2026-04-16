@@ -19,21 +19,15 @@
             --error-red: #ff4444;
         }
 
-        /* Estilos generales y animaciones */
-        .swal2-container { z-index: 25000 !important; }
-        .swal2-popup { 
-            background: #062a4d !important; 
-            border: 1px solid var(--accent-green) !important; 
-            border-radius: 25px !important; 
-            color: #fff !important; 
-            font-family: 'Barlow Condensed', sans-serif !important; 
-        }
-
+        /* --- ANIMACIÓN LÍDER WOW --- */
         #intro-anim {
             position: fixed; inset: 0; background: radial-gradient(circle, #0a4a8c, #020d1a);
             z-index: 30000; display: none; align-items: center; justify-content: center;
             flex-direction: column; text-align: center;
         }
+        .podium-title { font-family: 'Anton'; font-size: 3rem; color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,204,0,0.5); margin-bottom: 20px; }
+        .leader-card { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 50%; border: 4px solid var(--accent-green); box-shadow: 0 0 50px var(--accent-green); }
+        .leader-name { font-family: 'Anton'; font-size: 2.5rem; margin-top: 15px; color: #fff; }
 
         body {
             font-family: 'Barlow Condensed', sans-serif;
@@ -43,103 +37,61 @@
 
         .container { width: 92%; max-width: 1100px; margin: auto; padding: 20px; }
 
-        /* HEADER CON ICONO DE COPA */
+        /* --- HEADER CON LOGO ORIGINAL + TROFEO FIFA --- */
         header { 
-            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--glass-border); padding: 12px 0;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border); padding: 15px 0;
             position: sticky; top: 0; z-index: 1000;
         }
         .header-content { display: flex; justify-content: space-between; align-items: center; }
-        .logo-box { display: flex; align-items: center; gap: 12px; }
-        
-        .trophy-icon {
-            width: 40px;
-            height: 40px;
-            filter: drop-shadow(0 0 8px rgba(255, 204, 0, 0.6));
+        .logo-box { display: flex; align-items: center; gap: 15px; }
+        .logo-img { height: 45px; filter: drop-shadow(0 0 10px var(--accent-green)); }
+        .logo-text { font-family: 'Anton'; font-size: 1.8rem; letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+
+        /* Estilo del Trofeo FIFA */
+        .fifa-trophy {
+            height: 35px;
+            filter: drop-shadow(0 0 5px var(--accent-gold));
         }
 
-        .logo-text { 
-            font-family: 'Anton'; 
-            font-size: 1.8rem; 
-            letter-spacing: 1px; 
-            text-transform: uppercase;
-            background: linear-gradient(to bottom, #fff, #ccc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Formulario y Botones */
-        .custom-input {
-            width: 100%; padding: 14px; background: rgba(0,0,0,0.4);
-            border: 1px solid #333; border-radius: 12px; color: #fff;
-            font-size: 1rem; box-sizing: border-box; margin-bottom: 15px;
-        }
-        
-        .btn-action {
-            width: 100%; padding: 16px; border-radius: 12px; border: none;
-            font-family: 'Anton'; font-size: 1.2rem; text-transform: uppercase;
-            cursor: pointer; transition: 0.3s;
-        }
+        /* --- RESTO DE ESTILOS --- */
+        .custom-input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid #333; border-radius: 12px; color: #fff; margin-bottom: 15px; box-sizing: border-box; }
+        .btn-action { width: 100%; padding: 16px; border-radius: 12px; border: none; font-family: 'Anton'; font-size: 1.2rem; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
         .btn-green { background: linear-gradient(90deg, #00ff88, #00bd65); color: #000; }
-
         .match-card { background: var(--glass); border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
         .input-score { width: 55px; height: 55px; background: #000; border: 2px solid #333; border-radius: 12px; color: var(--accent-green); text-align: center; font-family: 'Anton'; font-size: 1.8rem; }
-
-        #admin-toggle { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent-gold); border: none; z-index: 9999; cursor: pointer; }
+        #admin-toggle { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent-gold); border: none; z-index: 9999; cursor: pointer; font-size: 1.5rem; }
         #admin-panel { position: fixed; inset: 0; background: var(--primary-dark); z-index: 20000; display: none; padding: 40px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
     <div id="intro-anim">
-        <h1 class="podium-title animate__animated animate__zoomInDown" style="font-family:'Anton'; color:var(--accent-gold); font-size:3rem;">🏆 LÍDER ACTUAL 🏆</h1>
-        <div id="leader-name-anim" class="leader-name animate__animated animate__fadeInUp" style="font-family:'Anton'; font-size:2.5rem;">---</div>
-    </div>
-
-    <button id="admin-toggle" onclick="toggleAdminPanel()" style="display:none">⚙️</button>
-
-    <div id="admin-panel">
-        <h1 style="font-family:'Anton'; color:var(--accent-gold)">ADMIN CONSOLE</h1>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-            <div class="match-card">
-                <h3>+ NUEVO PARTIDO</h3>
-                <input type="text" id="new-equipoL" placeholder="Local" class="custom-input">
-                <input type="text" id="new-equipoV" placeholder="Visitante" class="custom-input">
-                <select id="new-grupo" class="custom-input">
-                    <option value="" disabled selected>Seleccione Grupo</option>
-                    <option value="A">Grupo A</option><option value="B">Grupo B</option>
-                    <option value="C">Grupo C</option><option value="D">Grupo D</option>
-                    <option value="E">Grupo E</option><option value="F">Grupo F</option>
-                    <option value="G">Grupo G</option><option value="H">Grupo H</option>
-                </select>
-                <input type="datetime-local" id="new-fecha" class="custom-input">
-                <button class="btn-action btn-green" onclick="crearPartidoOficial()">AGREGAR PARTIDO</button>
-            </div>
-            <div id="admin-list-container">
-                <h3>RESULTADOS OFICIALES</h3>
-                <div id="admin-list"></div>
-                <button class="btn-action" style="background:var(--accent-gold); margin-top:10px" onclick="guardarResultadosOficiales()">PUBLICAR</button>
-            </div>
-        </div>
-        <button class="btn-action" style="background:#444; color:#fff; margin-top:20px" onclick="toggleAdminPanel()">CERRAR PANEL</button>
+        <h1 class="podium-title animate__animated animate__zoomInDown">🏆 LÍDER ACTUAL 🏆</h1>
+        <div class="leader-card animate__animated animate__jackInTheBox"><span style="font-size: 4rem;">⚽</span></div>
+        <div id="leader-name-anim" class="leader-name animate__animated animate__fadeInUp animate__delay-1s">---</div>
     </div>
 
     <header>
         <div class="container header-content">
             <div class="logo-box">
-                <svg class="trophy-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 9V2H18V9C18 12.3137 15.3137 15 12 15C8.68629 15 6 12.3137 6 9Z" fill="#FFD700"/>
-                    <path d="M8 22H16M12 15V22" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M6 4H4C2.89543 4 2 4.89543 2 6V7C2 8.10457 2.89543 9 4 9H6" stroke="#DAA520" stroke-width="2"/>
-                    <path d="M18 4H20C21.1046 4 22 4.89543 22 6V7C22 8.10457 21.1046 9 20 9H18" stroke="#DAA520" stroke-width="2"/>
-                </svg>
-                <span class="logo-text">MULTIVAC FUTBOLERA</span>
+                <img src="img/logo.png" class="logo-img" alt="M">
+                <span class="logo-text">
+                    MULTIVAC FUTBOLERA
+                    <svg class="fifa-trophy" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 2C14.5 2 13 3.5 13 5C13 6.5 14.5 8 16 8C17.5 8 19 6.5 19 5C19 3.5 17.5 2 16 2Z" fill="#FFD700"/>
+                        <path d="M11 26C11 24 13 23 16 23C19 23 21 24 21 26V30H11V26Z" fill="#DAA520"/>
+                        <path d="M16 8C14 8 12 10 12 13C12 15 13 16 14 18C14.5 19.5 14 21 14 23H18C18 21 17.5 19.5 18 18C19 16 20 15 20 13C20 10 18 8 16 8Z" fill="#FFD700"/>
+                        <path d="M12 13C11 13 9 12 9 10V8C9 7 10 6 11 6H12V13Z" fill="#DAA520"/>
+                        <path d="M20 13C21 13 23 12 23 10V8C23 7 22 6 21 6H20V13Z" fill="#DAA520"/>
+                    </svg>
+                </span>
             </div>
         </div>
     </header>
 
     <main class="container">
-        <section id="auth-container" class="auth-wrapper" style="display:flex; justify-content:center; padding-top:50px;">
+        <section id="auth-container" class="auth-wrapper" style="display:flex; justify-content:center; align-items:center; min-height:60vh;">
             <div class="auth-card" id="login-form">
                 <h2 style="font-family:'Anton'">ACCESO</h2>
                 <input type="email" id="login-email" class="custom-input" placeholder="Correo">
@@ -147,7 +99,6 @@
                 <button class="btn-action btn-green" onclick="handleLogin()">ENTRAR</button>
                 <p onclick="mostrarRegistro()" style="cursor:pointer; color:var(--accent-gold); margin-top:15px">¿No tienes cuenta? Regístrate</p>
             </div>
-
             <div class="auth-card" id="register-form" style="display:none;">
                 <h2 style="font-family:'Anton'">NUEVO JUGADOR</h2>
                 <input type="text" id="reg-nombre" class="custom-input" placeholder="Nombre">
@@ -160,25 +111,47 @@
         </section>
 
         <section id="polla-section" style="display:none;">
-            <div style="background:var(--glass); padding:20px; border-radius:20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="background:var(--glass); padding:25px; border-radius:20px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <div>
                     <h2 id="user-display-name" style="margin:0; color:var(--accent-green)">---</h2>
-                    <small id="user-display-cedula">C.C. ---</small>
+                    <span id="user-display-cedula" style="color:#666">C.C. ---</span>
                 </div>
-                <div style="font-family:'Anton'; font-size:2.5rem; color:var(--accent-gold)"><span id="mis-puntos-total">0</span> PTS</div>
+                <div style="font-family:'Anton'; font-size:3rem; color:var(--accent-gold)"><span id="mis-puntos-total">0</span> PTS</div>
             </div>
-
             <div id="contenedor-dinamico"></div>
-            <button class="btn-action btn-green" onclick="guardarTodosLosPronosticos()">GUARDAR PRONÓSTICOS</button>
-
+            <button class="btn-action btn-green" onclick="guardarTodosLosPronosticos()">GUARDAR MIS MARCADORES</button>
             <div id="ranking-area" style="margin-top:40px">
-                <h3 style="font-family:'Anton'">🏆 TOP RANKING</h3>
-                <div id="body-ranking" style="background:var(--glass); border-radius:15px; padding:10px;"></div>
+                <h3 style="font-family:'Anton'">🏆 RANKING ACTUAL</h3>
+                <div id="body-ranking" style="background:var(--glass); border-radius:15px;"></div>
             </div>
-
-            <button onclick="logout()" style="background:none; border:1px solid var(--error-red); color:var(--error-red); padding:10px 20px; border-radius:10px; margin-top:30px; cursor:pointer; width:100%">Cerrar Sesión</button>
+            <button onclick="logout()" style="background:none; border:1px solid var(--error-red); color:var(--error-red); padding:12px; border-radius:12px; width:100%; margin-top:40px; cursor:pointer">Cerrar Sesión</button>
         </section>
     </main>
+
+    <button id="admin-toggle" onclick="toggleAdminPanel()" style="display:none">⚙️</button>
+
+    <div id="admin-panel">
+        <h1 style="font-family:'Anton'; color:var(--accent-gold)">CONTROL PANEL</h1>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div class="match-card">
+                <h3>+ AGREGAR PARTIDO</h3>
+                <input type="text" id="new-equipoL" placeholder="Local" class="custom-input">
+                <input type="text" id="new-equipoV" placeholder="Visitante" class="custom-input">
+                <select id="new-grupo" class="custom-input">
+                    <option value="" disabled selected>Grupo</option>
+                    <option value="A">Grupo A</option><option value="B">Grupo B</option><option value="C">Grupo C</option><option value="D">Grupo D</option>
+                </select>
+                <input type="datetime-local" id="new-fecha" class="custom-input">
+                <button class="btn-action btn-green" onclick="crearPartidoOficial()">CREAR</button>
+            </div>
+            <div>
+                <h3>RESULTADOS REALES</h3>
+                <div id="admin-list"></div>
+                <button class="btn-action" style="background:var(--accent-gold); color:#000" onclick="guardarResultadosOficiales()">PUBLICAR TODO</button>
+            </div>
+        </div>
+        <button class="btn-action" style="background:#333; color:#fff; margin-top:20px" onclick="toggleAdminPanel()">CERRAR</button>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
@@ -200,59 +173,23 @@
         const auth = getAuth(app);
         let currentCedula = null;
 
-        // --- LÓGICA DE ADMIN ---
-        window.toggleAdminPanel = () => {
-            const p = document.getElementById('admin-panel');
-            p.style.display = p.style.display === 'block' ? 'none' : 'block';
-            if(p.style.display === 'block') renderAdminList();
-        };
-
-        async function renderAdminList() {
-            const snapP = await get(child(ref(db), 'partidos_oficiales'));
-            const snapR = await get(child(ref(db), 'resultados_oficiales'));
-            const resOf = snapR.exists() ? snapR.val() : {};
-            const list = document.getElementById('admin-list');
-            list.innerHTML = "";
-            if(snapP.exists()){
-                Object.entries(snapP.val()).forEach(([id, p]) => {
-                    list.innerHTML += `
-                        <div style="margin-bottom:10px; padding:10px; border-bottom:1px solid #333">
-                            <small>Grupo ${p.grupo}</small><br>
-                            ${p.equipoL} vs ${p.equipoV}
-                            <div style="display:flex; gap:5px; margin-top:5px">
-                                <input type="number" id="adm_l_${id}" class="input-score" style="width:40px; height:40px; font-size:1.2rem" value="${resOf[id]?.golesL ?? ''}">
-                                <input type="number" id="adm_v_${id}" class="input-score" style="width:40px; height:40px; font-size:1.2rem" value="${resOf[id]?.golesV ?? ''}">
-                            </div>
-                        </div>`;
-                });
+        // ANIMACIÓN LIDER (RESTAURADA)
+        async function mostrarLiderWOW() {
+            const snap = await get(child(ref(db), 'usuarios'));
+            if(snap.exists()){
+                const usuarios = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
+                if(usuarios[0] && usuarios[0].puntos > 0) {
+                    document.getElementById('leader-name-anim').innerText = usuarios[0].nombre;
+                    const animDiv = document.getElementById('intro-anim');
+                    animDiv.style.display = 'flex';
+                    setTimeout(() => {
+                        animDiv.classList.add('animate__animated', 'animate__fadeOut');
+                        setTimeout(() => animDiv.style.display = 'none', 1000);
+                    }, 3500);
+                }
             }
         }
 
-        window.crearPartidoOficial = async () => {
-            const l = document.getElementById('new-equipoL').value;
-            const v = document.getElementById('new-equipoV').value;
-            const g = document.getElementById('new-grupo').value;
-            const f = document.getElementById('new-fecha').value;
-            if(!l || !v || !g || !f) return Swal.fire("Error", "Completa todo", "error");
-            
-            await set(ref(db, 'partidos_oficiales/p_' + Date.now()), { equipoL: l, equipoV: v, grupo: g, fechaInicio: f });
-            renderAdminList();
-            Swal.fire("Éxito", "Partido agregado", "success");
-        };
-
-        window.guardarResultadosOficiales = async () => {
-            const snapP = await get(child(ref(db), 'partidos_oficiales'));
-            let data = {};
-            Object.keys(snapP.val()).forEach(id => {
-                const l = document.getElementById(`adm_l_${id}`).value;
-                const v = document.getElementById(`adm_v_${id}`).value;
-                if(l !== "" && v !== "") data[id] = { golesL: parseInt(l), golesV: parseInt(v) };
-            });
-            await set(ref(db, 'resultados_oficiales'), data);
-            Swal.fire("Publicado", "Marcadores actualizados", "success");
-        };
-
-        // --- LÓGICA DE USUARIO ---
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
                 const uidSnap = await get(child(ref(db), `mapa_usuarios/${user.uid}`));
@@ -265,7 +202,9 @@
                     document.getElementById('user-display-name').innerText = uData.nombre;
                     document.getElementById('user-display-cedula').innerText = `C.C. ${currentCedula}`;
                     if(uData.role === "admin") document.getElementById('admin-toggle').style.display = 'block';
+                    
                     initApp();
+                    mostrarLiderWOW();
                 }
             }
         });
@@ -284,7 +223,7 @@
             cont.innerHTML = "";
             if(snapP.exists()){
                 Object.entries(snapP.val()).forEach(([id, p]) => {
-                    const bloqueado = new Date() > new Date(new Date(p.fechaInicio).getTime() - 300000);
+                    const bloqueado = new Date() >= new Date(new Date(p.fechaInicio).getTime() - 300000);
                     cont.innerHTML += `
                         <div class="match-card">
                             <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-gold); margin-bottom:10px;">
@@ -310,10 +249,10 @@
             Object.keys(snapP.val()).forEach(id => {
                 const l = document.getElementById(`l_${id}`).value;
                 const v = document.getElementById(`v_${id}`).value;
-                if(l !== "" && v !== "") up[id] = { local: parseInt(l), visitante: parseInt(v) };
+                if(l !== "" && v !== "") up[id] = { local: Math.max(0, parseInt(l)), visitante: Math.max(0, parseInt(v)) };
             });
             await update(ref(db, `pronosticos/${currentCedula}`), up);
-            Swal.fire("Guardado", "Tus apuestas están listas", "success");
+            Swal.fire("¡Listo!", "Pronósticos actualizados", "success");
         };
 
         async function calcularMisPuntos() {
@@ -339,32 +278,76 @@
             if(snap.exists()){
                 const sorted = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
                 document.getElementById('body-ranking').innerHTML = sorted.map((u, i) => `
-                    <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05)">
                         <span>${i+1}. ${u.nombre}</span>
                         <span style="color:var(--accent-gold); font-weight:bold">${u.puntos} PTS</span>
                     </div>`).join('');
             }
         }
 
+        // LÓGICA AUTH
         window.handleLogin = async () => {
             const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
             try {
                 const res = await signInWithEmailAndPassword(auth, e, p);
-                if(!res.user.emailVerified) { await signOut(auth); return Swal.fire("Verifica tu email", "", "warning"); }
-            } catch (err) { Swal.fire("Error", "Credenciales inválidas", "error"); }
+                if(!res.user.emailVerified) { await signOut(auth); return Swal.fire("Verifica tu correo", "", "warning"); }
+            } catch (err) { Swal.fire("Error", "Credenciales incorrectas", "error"); }
         };
 
         window.handleRegister = async () => {
-            const n = document.getElementById('reg-nombre').value, c = document.getElementById('reg-cedula').value;
-            const e = document.getElementById('reg-email').value, p = document.getElementById('reg-pass').value;
+            const n = document.getElementById('reg-nombre').value, c = document.getElementById('reg-cedula').value, e = document.getElementById('reg-email').value, p = document.getElementById('reg-pass').value;
             try {
                 const res = await createUserWithEmailAndPassword(auth, e, p);
                 await sendEmailVerification(res.user);
                 await set(ref(db, `usuarios/${c}`), { nombre: n, email: e, uid: res.user.uid, puntos: 0, role: "user" });
                 await set(ref(db, `mapa_usuarios/${res.user.uid}`), c);
-                Swal.fire("Registrado", "Verifica tu correo", "success");
+                Swal.fire("Registro", "Verifica tu email antes de entrar", "success");
                 mostrarLogin();
             } catch (err) { Swal.fire("Error", err.message, "error"); }
+        };
+
+        window.toggleAdminPanel = () => {
+            const p = document.getElementById('admin-panel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+            if(p.style.display === 'block') renderAdminList();
+        };
+
+        async function renderAdminList() {
+            const snapP = await get(child(ref(db), 'partidos_oficiales'));
+            const snapR = await get(child(ref(db), 'resultados_oficiales'));
+            const list = document.getElementById('admin-list');
+            list.innerHTML = "";
+            if(snapP.exists()){
+                const resOf = snapR.exists() ? snapR.val() : {};
+                Object.entries(snapP.val()).forEach(([id, p]) => {
+                    list.innerHTML += `
+                        <div style="margin-bottom:10px; padding:10px; border-bottom:1px solid #333">
+                            ${p.equipoL} vs ${p.equipoV}
+                            <div style="display:flex; gap:5px; margin-top:5px">
+                                <input type="number" id="adm_l_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesL ?? ''}">
+                                <input type="number" id="adm_v_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesV ?? ''}">
+                            </div>
+                        </div>`;
+                });
+            }
+        }
+
+        window.crearPartidoOficial = async () => {
+            const l = document.getElementById('new-equipoL').value, v = document.getElementById('new-equipoV').value, g = document.getElementById('new-grupo').value, f = document.getElementById('new-fecha').value;
+            if(!l || !v || !g || !f) return Swal.fire("Error", "Faltan datos", "error");
+            await set(ref(db, 'partidos_oficiales/p_' + Date.now()), { equipoL: l, equipoV: v, grupo: g, fechaInicio: f });
+            renderAdminList();
+        };
+
+        window.guardarResultadosOficiales = async () => {
+            const snapP = await get(child(ref(db), 'partidos_oficiales'));
+            let data = {};
+            Object.keys(snapP.val()).forEach(id => {
+                const l = document.getElementById(`adm_l_${id}`).value, v = document.getElementById(`adm_v_${id}`).value;
+                if(l !== "" && v !== "") data[id] = { golesL: parseInt(l), golesV: parseInt(v) };
+            });
+            await set(ref(db, 'resultados_oficiales'), data);
+            Swal.fire("Éxito", "Resultados publicados", "success");
         };
 
         window.mostrarRegistro = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
