@@ -53,12 +53,16 @@
         .btn-action { width: 100%; padding: 16px; border-radius: 12px; border: none; font-family: 'Anton'; font-size: 1.2rem; text-transform: uppercase; cursor: pointer; }
         .btn-green { background: linear-gradient(90deg, #00ff88, #00bd65); color: #000; }
 
-        /* BOTÓN REGLAMENTO */
         .btn-info { background: rgba(255, 204, 0, 0.1); color: var(--accent-gold); border: 1px solid var(--accent-gold); margin: 20px 0; padding: 12px; width: 100%; border-radius: 12px; font-family: 'Anton'; cursor: pointer; transition: 0.3s; }
         .btn-info:hover { background: var(--accent-gold); color: #000; }
 
         .match-card { background: var(--glass); border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
         .input-score { width: 55px; height: 55px; background: #000; border: 2px solid #333; border-radius: 12px; color: var(--accent-green); text-align: center; font-family: 'Anton'; font-size: 1.8rem; }
+
+        /* Estilos para tablas dentro del popup */
+        .swal-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.8rem; }
+        .swal-table th, .swal-table td { border: 1px solid #444; padding: 8px; text-align: left; }
+        .swal-table th { background: rgba(255,255,255,0.1); color: var(--accent-gold); }
 
         #admin-toggle { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent-gold); border: none; z-index: 10000; cursor: pointer; font-size: 1.5rem; }
         #admin-panel { position: fixed; inset: 0; background: var(--primary-dark); z-index: 20000; display: none; padding: 40px; overflow-y: auto; }
@@ -177,32 +181,36 @@
         const auth = getAuth(app);
         let currentCedula = null;
 
-        // FUNCIÓN REGLAMENTO GOLPREDICTOR
+        // --- REGLAMENTO EXACTO ACTUALIZADO ---
         window.verReglamento = () => {
             Swal.fire({
-                title: '<span style="font-family:Anton; color:#ffcc00">REGLAMENTO DEL JUEGO</span>',
+                title: '<span style="font-family:Anton; color:#ffcc00">REGLAMENTO Y PUNTUACIÓN</span>',
                 background: '#020d1a',
                 color: '#fff',
-                width: '90%',
+                width: '95%',
                 html: `
-                <div style="text-align:left; font-size:0.9rem; line-height:1.5; color:#ccc;">
-                    <p><strong>1. SISTEMA DE PUNTUACIÓN</strong></p>
-                    <ul style="padding-left:15px">
-                        <li><b style="color:#00ff88">5 PUNTOS (MARCADOR EXACTO):</b> Si aciertas el número de goles de ambos equipos.</li>
-                        <li><b style="color:#ffcc00">3 PUNTOS (DIFERENCIA):</b> Si aciertas el ganador/empate y la diferencia de goles (ej. pronóstico 2-1, resultado 1-0).</li>
-                        <li><b style="color:#fff">2 PUNTOS (TENDENCIA):</b> Si solo aciertas el ganador o que hubo empate (ej. pronóstico 3-0, resultado 1-0).</li>
-                    </ul>
-                    <p><strong>2. TIEMPOS LÍMITE</strong></p>
-                    <p>Puedes ingresar o modificar tus pronósticos hasta <b>5 minutos antes</b> de la hora programada de inicio de cada partido.</p>
-                    <p><strong>3. DESEMPATES</strong></p>
-                    <p>En caso de empate en puntos en el ranking, el criterio será:</p>
-                    <ul style="padding-left:15px">
-                        <li>1. Mayor número de marcadores exactos (5 pts).</li>
-                        <li>2. Mayor número de aciertos por diferencia (3 pts).</li>
-                        <li>3. Orden alfabético del nombre.</li>
-                    </ul>
-                    <p><strong>4. RESULTADOS OFICIALES</strong></p>
-                    <p>Se tomará en cuenta el resultado al finalizar los 90 minutos reglamentarios (incluyendo tiempo de adición). No se incluye prórroga ni penales.</p>
+                <div style="text-align:left; font-size:0.85rem; line-height:1.4; color:#ccc; max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                    <p>Los torneos están estructurados por una fase inicial de grupos seguida de una ronda eliminatoria.</p>
+                    <p><strong>TIEMPO LÍMITE:</strong> Puedes cambiar tu predicción hasta máximo <b>10 minutos antes</b> del inicio del partido.</p>
+                    <p><strong>90 MINUTOS:</strong> La predicción incluye el tiempo reglamentario más la reposición, pero <b>EXCLUYE</b> tiempos adicionales (prórrogas) o series de penaltis.</p>
+                    
+                    <h4 style="color:var(--accent-green); border-bottom:1px solid #333; margin:15px 0 5px 0">PUNTUACIÓN POR PARTIDO</h4>
+                    <table class="swal-table">
+                        <tr><th>Concepto</th><th>Ronda 1</th><th>Eliminatorias</th></tr>
+                        <tr><td>Acertar Resultado (Ganador/Empate)</td><td>5 pts</td><td>10 pts</td></tr>
+                        <tr><td>Acertar Goles Equipo Local</td><td>2 pts</td><td>4 pts</td></tr>
+                        <tr><td>Acertar Goles Equipo Visitante</td><td>2 pts</td><td>4 pts</td></tr>
+                        <tr><td>Acertar Diferencia de Goles</td><td>1 pt</td><td>2 pts</td></tr>
+                        <tr style="background:rgba(0,255,136,0.1)"><td><strong>TOTAL MÁXIMO</strong></td><td><strong>10 pts</strong></td><td><strong>20 pts</strong></td></tr>
+                    </table>
+
+                    <h4 style="color:var(--accent-green); border-bottom:1px solid #333; margin:15px 0 5px 0">EJEMPLOS (Ronda 1)</h4>
+                    <p>• <b>Pronóstico 1:0 | Resultado 1:0</b> -> Obtienes <b>10 pts</b> (5 por ganador + 2 local + 2 visitante + 1 diferencia).</p>
+                    <p>• <b>Pronóstico 2:0 | Resultado 3:1</b> -> Obtienes <b>6 pts</b> (5 por ganador + 1 por diferencia de 2 goles).</p>
+                    
+                    <p style="margin-top:15px; font-size:0.75rem; border-top:1px solid #333; padding-top:5px;">
+                        * El ranking refleja el puntaje acumulado. En caso de empate, se recomienda considerar el mayor número de aciertos plenos (10 pts).
+                    </p>
                 </div>`,
                 confirmButtonText: 'ENTENDIDO',
                 confirmButtonColor: '#00ff88'
@@ -257,11 +265,12 @@
             cont.innerHTML = "";
             if(snapP.exists()){
                 Object.entries(snapP.val()).forEach(([id, p]) => {
-                    const bloqueado = new Date() >= new Date(new Date(p.fechaInicio).getTime() - 300000);
+                    // BLOQUEO 10 MINUTOS SEGÚN REGLAMENTO
+                    const bloqueado = new Date() >= new Date(new Date(p.fechaInicio).getTime() - 600000);
                     cont.innerHTML += `
                         <div class="match-card">
                             <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-gold); margin-bottom:10px;">
-                                <span>GRUPO ${p.grupo}</span>
+                                <span>${p.grupo.includes('Fase') ? p.grupo : 'GRUPO ' + p.grupo}</span>
                                 <span>${new Date(p.fechaInicio).toLocaleString()}</span>
                             </div>
                             <div style="display:flex; align-items:center; justify-content:space-between">
@@ -291,15 +300,26 @@
         async function calcularMisPuntos() {
             const snapO = await get(child(ref(db), 'resultados_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
-            if(!snapO.exists() || !snapV.exists()) return;
+            const snapP = await get(child(ref(db), 'partidos_oficiales'));
+            if(!snapO.exists() || !snapV.exists() || !snapP.exists()) return;
+            
             let pts = 0;
-            const ofi = snapO.val(), mis = snapV.val();
+            const ofi = snapO.val(), mis = snapV.val(), part = snapP.val();
+            
             Object.keys(ofi).forEach(id => {
-                if(mis[id]) {
+                if(mis[id] && part[id]) {
                     const {golesL, golesV} = ofi[id], {local, visitante} = mis[id];
-                    if(golesL === local && golesV === visitante) pts += 5;
-                    else if((golesL - golesV) === (local - visitante)) pts += 3;
-                    else if(Math.sign(golesL - golesV) === Math.sign(local - visitante)) pts += 2;
+                    const esEliminatoria = part[id].grupo.toLowerCase().includes('fase') || part[id].grupo.toLowerCase().includes('final');
+                    const factor = esEliminatoria ? 2 : 1;
+
+                    // 1. Resultado (5 o 10 pts)
+                    if(Math.sign(golesL - golesV) === Math.sign(local - visitante)) pts += (5 * factor);
+                    // 2. Goles Local (2 o 4 pts)
+                    if(golesL === local) pts += (2 * factor);
+                    // 3. Goles Visitante (2 o 4 pts)
+                    if(golesV === visitante) pts += (2 * factor);
+                    // 4. Diferencia (1 o 2 pts)
+                    if((golesL - golesV) === (local - visitante)) pts += (1 * factor);
                 }
             });
             await update(ref(db, `usuarios/${currentCedula}`), { puntos: pts });
@@ -334,7 +354,7 @@
                 Object.entries(snapP.val()).forEach(([id, p]) => {
                     list.innerHTML += `
                         <div style="margin-bottom:10px; padding:10px; border-bottom:1px solid #333">
-                            ${p.equipoL} vs ${p.equipoV}
+                            ${p.equipoL} vs ${p.equipoV} (${p.grupo})
                             <div style="display:flex; gap:5px; margin-top:5px">
                                 <input type="number" id="adm_l_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesL ?? ''}">
                                 <input type="number" id="adm_v_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesV ?? ''}">
@@ -360,7 +380,8 @@
                 if(l !== "" && v !== "") data[id] = { golesL: parseInt(l), golesV: parseInt(v) };
             });
             await set(ref(db, 'resultados_oficiales'), data);
-            Swal.fire("Publicado", "Los resultados ya son oficiales", "success");
+            await calcularMisPuntos(); // Recalcular inmediatamente al publicar
+            Swal.fire("Publicado", "Resultados oficiales actualizados", "success");
         };
 
         window.handleLogin = async () => {
