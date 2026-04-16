@@ -19,7 +19,9 @@
             --error-red: #ff4444;
         }
 
-        /* Estilos SweetAlert2 */
+        /* SweetAlert en frente del Admin */
+        .swal2-container { z-index: 25000 !important; }
+
         .swal2-popup { 
             background: #062a4d !important; 
             border: 1px solid var(--accent-green) !important; 
@@ -29,6 +31,16 @@
         }
         .swal2-title { font-family: 'Anton', sans-serif !important; text-transform: uppercase; }
         .swal2-confirm { background: linear-gradient(90deg, #00ff88, #00bd65) !important; color: #000 !important; font-weight: 800 !important; }
+
+        /* Animación Intro Líder (REINTEGRADA) */
+        #intro-anim {
+            position: fixed; inset: 0; background: radial-gradient(circle, #0a4a8c, #020d1a);
+            z-index: 30000; display: none; align-items: center; justify-content: center;
+            flex-direction: column; text-align: center;
+        }
+        .podium-title { font-family: 'Anton'; font-size: 3rem; color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,204,0,0.5); margin-bottom: 20px; }
+        .leader-card { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 50%; border: 4px solid var(--accent-green); box-shadow: 0 0 50px var(--accent-green); }
+        .leader-name { font-family: 'Anton'; font-size: 2.5rem; margin-top: 15px; color: #fff; }
 
         body {
             font-family: 'Barlow Condensed', sans-serif;
@@ -48,7 +60,6 @@
         .logo-img { height: 45px; filter: drop-shadow(0 0 10px var(--accent-green)); }
         .logo-text { font-family: 'Anton'; font-size: 1.8rem; letter-spacing: 1px; text-transform: uppercase; }
 
-        /* Auth Cards */
         .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
         .auth-card {
             background: var(--glass); backdrop-filter: blur(25px);
@@ -72,7 +83,6 @@
         }
         .btn-green { background: linear-gradient(90deg, #00ff88, #00bd65); color: #000; }
         
-        /* Dashboard */
         .user-hero { background: var(--glass); border-radius: 25px; padding: 30px; margin-bottom: 30px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; }
         .points-box { font-family: 'Anton'; font-size: 3.5rem; color: var(--accent-gold); line-height: 1; }
 
@@ -80,9 +90,8 @@
         .score-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .input-score { width: 55px; height: 55px; background: #000; border: 2px solid #333; border-radius: 12px; color: var(--accent-green); text-align: center; font-family: 'Anton'; font-size: 1.8rem; }
 
-        /* Admin Panel */
         #admin-toggle { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent-gold); border: none; cursor: pointer; font-size: 1.5rem; z-index: 9999; }
-        #admin-panel { position: fixed; inset: 0; background: var(--primary-dark); z-index: 10000; display: none; padding: 40px; overflow-y: auto; }
+        #admin-panel { position: fixed; inset: 0; background: var(--primary-dark); z-index: 20000; display: none; padding: 40px; overflow-y: auto; }
 
         .btn-logout {
             display: block; margin: 40px auto; padding: 12px 25px;
@@ -93,11 +102,17 @@
 </head>
 <body>
 
+    <div id="intro-anim">
+        <h1 class="podium-title animate__animated animate__zoomInDown">🏆 LÍDER ACTUAL 🏆</h1>
+        <div class="leader-card animate__animated animate__jackInTheBox"><span style="font-size: 4rem;">⚽</span></div>
+        <div id="leader-name-anim" class="leader-name animate__animated animate__fadeInUp animate__delay-1s">---</div>
+    </div>
+
     <button id="admin-toggle" onclick="toggleAdminPanel()" style="display:none">⚙️</button>
 
     <div id="admin-panel">
         <h1 style="font-family:'Anton'; color:var(--accent-gold)">ADMIN CONSOLE</h1>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
             <div class="match-card">
                 <h3>+ NUEVO PARTIDO</h3>
                 <input type="text" id="new-equipoL" placeholder="Local" class="custom-input">
@@ -105,11 +120,9 @@
                 <input type="datetime-local" id="new-fecha" class="custom-input">
                 <button class="btn-action btn-green" onclick="crearPartidoOficial()">AGREGAR PARTIDO</button>
             </div>
-            
             <div id="admin-results-section">
                 <h3>RESULTADOS OFICIALES</h3>
-                <div id="admin-list">
-                    </div>
+                <div id="admin-list"></div>
                 <button class="btn-action" style="background:var(--accent-gold); color:#000" onclick="guardarResultadosOficiales()">PUBLICAR RESULTADOS</button>
             </div>
         </div>
@@ -130,9 +143,9 @@
             <div class="match-card" style="border: 1px dashed var(--accent-green); background: rgba(0, 255, 136, 0.02)">
                 <h3 style="font-family:'Anton'; color:var(--accent-green); margin-top:0">📜 REGLAMENTO DE PUNTOS</h3>
                 <ul style="list-style: none; padding: 0; font-size: 1.1rem; margin:0">
-                    <li style="margin-bottom:8px">🔥 <strong>5 Puntos:</strong> Acertar el marcador exacto.</li>
-                    <li style="margin-bottom:8px">⚽ <strong>3 Puntos:</strong> Acertar ganador y diferencia de goles.</li>
-                    <li style="margin-bottom:8px">✅ <strong>2 Puntos:</strong> Acertar solo el ganador o empate.</li>
+                    <li style="margin-bottom:8px">🔥 <strong>5 Puntos:</strong> Marcador exacto.</li>
+                    <li style="margin-bottom:8px">⚽ <strong>3 Puntos:</strong> Ganador y diferencia de goles.</li>
+                    <li style="margin-bottom:8px">✅ <strong>2 Puntos:</strong> Ganador o empate.</li>
                 </ul>
             </div>
         </section>
@@ -149,7 +162,7 @@
             <div class="auth-card" id="register-form" style="display:none;">
                 <h2 style="font-family:'Anton'">NUEVO JUGADOR</h2>
                 <input type="text" id="reg-nombre" class="custom-input" placeholder="Nombre Completo">
-                <input type="text" id="reg-cedula" class="custom-input" placeholder="Cédula (ID Único)" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <input type="text" id="reg-cedula" class="custom-input" placeholder="Cédula" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 <input type="email" id="reg-email" class="custom-input" placeholder="Correo Electrónico">
                 <input type="password" id="reg-pass" class="custom-input" placeholder="Contraseña">
                 <button class="btn-action btn-green" onclick="handleRegister()">REGISTRARSE</button>
@@ -203,7 +216,23 @@
 
         const alertPro = (title, text, icon = 'success') => Swal.fire({ title, text, icon });
 
-        // --- LÓGICA DE ADMIN CORREGIDA ---
+        // --- LÓGICA DE INTRO LÍDER (REINTEGRADA) ---
+        async function mostrarLiderWOW() {
+            const snap = await get(child(ref(db), 'usuarios'));
+            if(snap.exists()){
+                const usuarios = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
+                if(usuarios[0] && usuarios[0].puntos > 0) {
+                    document.getElementById('leader-name-anim').innerText = usuarios[0].nombre;
+                    const animDiv = document.getElementById('intro-anim');
+                    animDiv.style.display = 'flex';
+                    setTimeout(() => {
+                        animDiv.classList.add('animate__animated', 'animate__fadeOut');
+                        setTimeout(() => animDiv.style.display = 'none', 1000);
+                    }, 3000);
+                }
+            }
+        }
+
         window.toggleAdminPanel = async () => { 
             const p = document.getElementById('admin-panel'); 
             const isOpening = p.style.display !== 'block';
@@ -216,20 +245,17 @@
             const snapR = await get(child(ref(db), 'resultados_oficiales'));
             const adminList = document.getElementById('admin-list');
             const resultadosActuales = snapR.exists() ? snapR.val() : {};
-            
             adminList.innerHTML = "";
-            
             if(snapP.exists()){
                 Object.entries(snapP.val()).forEach(([id, p]) => {
                     const resL = resultadosActuales[id]?.golesL ?? "";
                     const resV = resultadosActuales[id]?.golesV ?? "";
-                    
                     adminList.innerHTML += `
                         <div class="match-card" style="margin-bottom:10px; padding:15px; border-left:4px solid var(--accent-gold)">
                             <p style="margin:0 0 10px 0; font-weight:800; font-size:0.85rem">${p.equipoL} vs ${p.equipoV}</p>
                             <div style="display:flex; gap:10px">
-                                <input type="number" id="adm_l_${id}" value="${resL}" placeholder="L" class="input-score" style="width:45px; height:45px; font-size:1.2rem">
-                                <input type="number" id="adm_v_${id}" value="${resV}" placeholder="V" class="input-score" style="width:45px; height:45px; font-size:1.2rem">
+                                <input type="number" id="adm_l_${id}" value="${resL}" class="input-score" style="width:45px; height:45px;">
+                                <input type="number" id="adm_v_${id}" value="${resV}" class="input-score" style="width:45px; height:45px;">
                             </div>
                         </div>`;
                 });
@@ -242,12 +268,10 @@
             Object.keys(snapP.val()).forEach(id => {
                 const l = document.getElementById(`adm_l_${id}`).value;
                 const v = document.getElementById(`adm_v_${id}`).value;
-                if(l !== "" && v !== "") {
-                    resultados[id] = { golesL: parseInt(l), golesV: parseInt(v) };
-                }
+                if(l !== "" && v !== "") resultados[id] = { golesL: parseInt(l), golesV: parseInt(v) };
             });
             await set(ref(db, 'resultados_oficiales'), resultados);
-            alertPro("PUBLICADO", "Resultados guardados y puntos actualizados.");
+            alertPro("ACTUALIZADO", "Resultados y puntos procesados.");
             renderizarRanking();
         };
 
@@ -255,15 +279,11 @@
             const l = document.getElementById('new-equipoL').value;
             const v = document.getElementById('new-equipoV').value;
             const f = document.getElementById('new-fecha').value;
-            if(!l || !v || !f) return alertPro("ERROR", "Completa todos los datos del partido.", "warning");
+            if(!l || !v || !f) return alertPro("ERROR", "Datos incompletos", "warning");
             await set(ref(db, 'partidos_oficiales/p_' + Date.now()), { equipoL: l, equipoV: v, fechaInicio: f });
             renderizarListaAdmin();
-            alertPro("ÉXITO", "Partido creado.");
+            alertPro("LISTO", "Partido creado.");
         };
-
-        // --- LÓGICA DE USUARIO ---
-        window.mostrarRegistro = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
-        window.mostrarLogin = () => { document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; };
 
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
@@ -288,6 +308,7 @@
             document.getElementById('user-display-cedula').innerText = `C.C. ${currentCedula}`;
             if(userData.role === "admin") document.getElementById('admin-toggle').style.display = 'block';
             actualizarApp();
+            mostrarLiderWOW(); // Activada al loguear
         }
 
         async function actualizarApp() {
@@ -328,7 +349,7 @@
                 if(l !== "" && v !== "") updates[id] = { local: parseInt(l), visitante: parseInt(v) };
             });
             await update(ref(db, `pronosticos/${currentCedula}`), updates);
-            alertPro("GUARDADO", "Tus marcadores están listos.");
+            alertPro("GUARDADO", "Pronósticos listos.");
         };
 
         async function calcularPuntosLocal() {
@@ -368,25 +389,27 @@
                 const res = await signInWithEmailAndPassword(auth, email, pass);
                 if(!res.user.emailVerified) {
                     await signOut(auth);
-                    return alertPro("AVISO", "Verifica tu correo antes de entrar.", "warning");
+                    return alertPro("VERIFICACIÓN", "Revisa tu correo.", "warning");
                 }
-            } catch (e) { alertPro("ERROR", "Credenciales inválidas", "error"); }
+            } catch (e) { alertPro("ERROR", "Acceso denegado", "error"); }
         };
 
         window.handleRegister = async () => {
             const nom = document.getElementById('reg-nombre').value, ced = document.getElementById('reg-cedula').value;
             const email = document.getElementById('reg-email').value, pass = document.getElementById('reg-pass').value;
-            if(!nom || !ced || !email || !pass) return alertPro("DATOS", "Completa todo", "warning");
+            if(!nom || !ced || !email || !pass) return alertPro("DATOS", "Faltan campos", "warning");
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 await sendEmailVerification(userCredential.user);
                 await set(ref(db, `usuarios/${ced}`), { nombre: nom, email, uid: userCredential.user.uid, puntos: 0, role: "user" });
                 await set(ref(db, `mapa_usuarios/${userCredential.user.uid}`), ced);
-                alertPro("REGISTRO EXITOSO", "Verifica tu correo para activar tu cuenta.");
+                alertPro("REGISTRADO", "Verifica el correo enviado.");
                 mostrarLogin();
             } catch (e) { alertPro("ERROR", e.message, "error"); }
         };
 
+        window.mostrarRegistro = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
+        window.mostrarLogin = () => { document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; };
         window.logout = () => signOut(auth).then(() => location.reload());
     </script>
 </body>
