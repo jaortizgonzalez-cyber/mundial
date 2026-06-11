@@ -59,7 +59,6 @@
         .match-card { background: var(--glass); border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
         .input-score { width: 55px; height: 55px; background: #000; border: 2px solid #333; border-radius: 12px; color: var(--accent-green); text-align: center; font-family: 'Anton'; font-size: 1.8rem; }
 
-        /* Estilos para tablas dentro del popup */
         .swal-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.8rem; }
         .swal-table th, .swal-table td { border: 1px solid #444; padding: 8px; text-align: left; }
         .swal-table th { background: rgba(255,255,255,0.1); color: var(--accent-gold); }
@@ -148,6 +147,8 @@
                 <select id="new-grupo" class="custom-input">
                     <option value="" disabled selected>Grupo</option>
                     <option value="A">Grupo A</option><option value="B">Grupo B</option><option value="C">Grupo C</option><option value="D">Grupo D</option>
+                    <option value="E">Grupo E</option><option value="F">Grupo F</option><option value="G">Grupo G</option><option value="H">Grupo H</option>
+                    <option value="I">Grupo I</option><option value="J">Grupo J</option><option value="K">Grupo K</option><option value="L">Grupo L</option>
                 </select>
                 <input type="datetime-local" id="new-fecha" class="custom-input">
                 <button class="btn-action btn-green" onclick="crearPartidoOficial()">CREAR</button>
@@ -181,7 +182,6 @@
         const auth = getAuth(app);
         let currentCedula = null;
 
-        // --- REGLAMENTO EXACTO ACTUALIZADO ---
         window.verReglamento = () => {
             Swal.fire({
                 title: '<span style="font-family:Anton; color:#ffcc00">REGLAMENTO Y PUNTUACIÓN</span>',
@@ -207,10 +207,6 @@
                     <h4 style="color:var(--accent-green); border-bottom:1px solid #333; margin:15px 0 5px 0">EJEMPLOS (Ronda 1)</h4>
                     <p>• <b>Pronóstico 1:0 | Resultado 1:0</b> -> Obtienes <b>10 pts</b> (5 por ganador + 2 local + 2 visitante + 1 diferencia).</p>
                     <p>• <b>Pronóstico 2:0 | Resultado 3:1</b> -> Obtienes <b>6 pts</b> (5 por ganador + 1 por diferencia de 2 goles).</p>
-                    
-                    <p style="margin-top:15px; font-size:0.75rem; border-top:1px solid #333; padding-top:5px;">
-                        * El ranking refleja el puntaje acumulado. En caso de empate, se recomienda considerar el mayor número de aciertos plenos (10 pts).
-                    </p>
                 </div>`,
                 confirmButtonText: 'ENTENDIDO',
                 confirmButtonColor: '#00ff88'
@@ -265,7 +261,6 @@
             cont.innerHTML = "";
             if(snapP.exists()){
                 Object.entries(snapP.val()).forEach(([id, p]) => {
-                    // BLOQUEO 10 MINUTOS SEGÚN REGLAMENTO
                     const bloqueado = new Date() >= new Date(new Date(p.fechaInicio).getTime() - 600000);
                     cont.innerHTML += `
                         <div class="match-card">
@@ -297,18 +292,30 @@
             Swal.fire("Éxito", "Pronósticos guardados", "success");
         };
 
+        // --- VALIDACIÓN DE MARCADOR REAL REFORZADA ---
         async function calcularMisPuntos() {
             const snapO = await get(child(ref(db), 'resultados_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
-            if(!snapO.exists() || !snapV.exists() || !snapP.exists()) return;
+            
+            // Si no hay nodos base, retornamos 0 inmediato
+            if(!snapO.exists() || !snapV.exists() || !snapP.exists()) {
+                await update(ref(db, `usuarios/${currentCedula}`), { puntos: 0 });
+                document.getElementById('mis-puntos-total').innerText = 0;
+                return;
+            }
             
             let pts = 0;
             const ofi = snapO.val(), mis = snapV.val(), part = snapP.val();
             
-            Object.keys(ofi).forEach(id => {
-                if(mis[id] && part[id]) {
+            Object.keys(part).forEach(id => {
+                // CORRECCIÓN CLAVE: Solo evalúa si existe un resultado real guardado para este partido ID
+                if(mis[id] && ofi[id]) {
                     const {golesL, golesV} = ofi[id], {local, visitante} = mis[id];
+                    
+                    // Doble chequeo de seguridad por si el registro en admin se creó vacío o corrupto
+                    if(golesL === undefined || golesV === undefined || golesL === "" || golesV === "") return;
+
                     const esEliminatoria = part[id].grupo.toLowerCase().includes('fase') || part[id].grupo.toLowerCase().includes('final');
                     const factor = esEliminatoria ? 2 : 1;
 
@@ -380,8 +387,8 @@
                 if(l !== "" && v !== "") data[id] = { golesL: parseInt(l), golesV: parseInt(v) };
             });
             await set(ref(db, 'resultados_oficiales'), data);
-            await calcularMisPuntos(); // Recalcular inmediatamente al publicar
-            Swal.fire("Publicado", "Resultados oficiales actualizados", "success");
+            await calcularMisPuntos();
+            Swal.fire("Publicado", "Los resultados ya son oficiales", "success");
         };
 
         window.handleLogin = async () => {
