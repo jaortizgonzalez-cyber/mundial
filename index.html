@@ -213,37 +213,39 @@
             });
         };
 
-                async function mostrarLiderWOW() {
+                        async function mostrarLiderWOW() {
             const snap = await get(child(ref(db), 'usuarios'));
             if(snap.exists()){
-                // 1. Ordenamos los usuarios de mayor a menor puntaje
                 const usuarios = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
                 
                 if(usuarios[0] && usuarios[0].puntos > 0) {
                     const maxPuntos = usuarios[0].puntos;
                     
-                    // 2. Filtramos a TODOS los usuarios que tengan ese mismo puntaje máximo
+                    // 1. Filtramos a TODOS los que tengan el puntaje máximo
                     const lideres = usuarios.filter(u => u.puntos === maxPuntos);
-                    
-                    // 3. Mapeamos solo sus nombres
                     const nombresLideres = lideres.map(u => u.nombre);
                     
-                    // 4. Si es uno solo, muestra su nombre. Si son varios, los une con comas y un "y" al final
                     let textoLideres = "";
+                    const elementNombreAnim = document.getElementById('leader-name-anim');
+                    
+                    // 2. Ajustamos el título y el texto uniendo SIEMPRE a todos los participantes
                     if (nombresLideres.length === 1) {
                         textoLideres = nombresLideres[0];
                         document.querySelector('.podium-title').innerText = "🏆 LÍDER ACTUAL 🏆";
-                    } else if (nombresLideres.length <= 3) {
-                        // Ejemplo: "Juan, Pedro y María"
+                        elementNombreAnim.style.fontSize = "2.5rem"; // Tamaño normal para un solo líder
+                    } else {
+                        // Une todos los nombres con comas y un "y" al final (Ej: "Andrés, Paul, Edwin y German")
                         textoLideres = nombresLideres.slice(0, -1).join(', ') + ' y ' + nombresLideres.slice(-1);
                         document.querySelector('.podium-title').innerText = "🏆 COLÍDERES ACTUALES 🏆";
-                    } else {
-                        // Si son más de 3 para que no rompa el diseño de la pantalla
-                        textoLideres = `${nombresLideres.slice(0, 2).join(', ')} y ${nombresLideres.length - 2} más`;
-                        document.querySelector('.podium-title').innerText = "🏆 COLÍDERES ACTUALES 🏆";
+                        
+                        // CONTROL VISUAL: Si son más de 2, bajamos el tamaño de la letra para que quepan todos en pantalla
+                        if (nombresLideres.length > 2) {
+                            elementNombreAnim.style.fontSize = "1.8rem"; 
+                        } else {
+                            elementNombreAnim.style.fontSize = "2.2rem";
+                        }
                     }
                     
-                    // 5. Inyectamos el texto en la animación
                     document.getElementById('leader-name-anim').innerText = textoLideres;
                     
                     const animDiv = document.getElementById('intro-anim');
@@ -251,10 +253,11 @@
                     setTimeout(() => {
                         animDiv.classList.add('animate__animated', 'animate__fadeOut');
                         setTimeout(() => animDiv.style.display = 'none', 1000);
-                    }, 4000); // Le damos medio segundo más de tiempo para que alcancen a leer si son varios nombres
+                    }, 4500); // 4.5 segundos para dar tiempo suficiente de leer toda la lista
                 }
             }
         }
+
 
 
         onAuthStateChanged(auth, async (user) => {
