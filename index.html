@@ -334,45 +334,55 @@
 
 
         // --- VALIDACIÓN DE MARCADOR REAL REFORZADA ---
-        async function calcularMisPuntos() {
+                async function calcularMisPuntos() {
             const snapO = await get(child(ref(db), 'resultados_oficiales'));
-            const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
+            const snapU = await get(child(ref(db), 'usuarios'));
+            const snapV = await get(child(ref(db), 'pronosticos'));
             
-            // Si no hay nodos base, retornamos 0 inmediato
-            if(!snapO.exists() || !snapV.exists() || !snapP.exists()) {
-                await update(ref(db, `usuarios/${currentCedula}`), { puntos: 0 });
-                document.getElementById('mis-puntos-total').innerText = 0;
-                return;
-            }
+            if(!snapO.exists() || !snapP.exists() || !snapU.exists()) return;
             
-            let pts = 0;
-            const ofi = snapO.val(), mis = snapV.val(), part = snapP.val();
-            
-            Object.keys(part).forEach(id => {
-                // CORRECCIÓN CLAVE: Solo evalúa si existe un resultado real guardado para este partido ID
-                if(mis[id] && ofi[id]) {
-                    const {golesL, golesV} = ofi[id], {local, visitante} = mis[id];
-                    
-                    // Doble chequeo de seguridad por si el registro en admin se creó vacío o corrupto
-                    if(golesL === undefined || golesV === undefined || golesL === "" || golesV === "") return;
+            const ofi = snapO.val(), part = snapP.val(), usuarios = snapU.val(), todosLosPronosticos = snapV.exists() ? snapV.val() : {};
+            let updatesUsuarios = {};
 
-                    const esEliminatoria = part[id].grupo.toLowerCase().includes('fase') || part[id].grupo.toLowerCase().includes('final');
-                    const factor = esEliminatoria ? 2 : 1;
+            // Hacemos el cálculo para CADA usuario en la base de datos
+            Object.keys(usuarios).forEach(cedula => {
+                let pts = 0;
+                const misPronosticos = todosLosPronosticos[cedula] || {};
 
-                    // 1. Resultado (5 o 10 pts)
-                    if(Math.sign(golesL - golesV) === Math.sign(local - visitante)) pts += (5 * factor);
-                    // 2. Goles Local (2 o 4 pts)
-                    if(golesL === local) pts += (2 * factor);
-                    // 3. Goles Visitante (2 o 4 pts)
-                    if(golesV === visitante) pts += (2 * factor);
-                    // 4. Diferencia (1 o 2 pts)
-                    if((golesL - golesV) === (local - visitante)) pts += (1 * factor);
-                }
+                Object.keys(part).forEach(id => {
+                    if(misPronosticos[id] && ofi[id]) {
+                        // Forzamos conversión a número para evitar errores de texto entero
+                        const golesL = parseInt(ofi[id].golesL, 10);
+                        const golesV = parseInt(ofi[id].golesV, 10);
+                        const local = parseInt(misPronosticos[id].local, 10);
+                        const visitante = parseInt(misPronosticos[id].visitante, 10);
+                        
+                        if(isNaN(golesL) || isNaN(golesV) || isNaN(local) || isNaN(visitante)) return;
+
+                        const esEliminatoria = part[id].grupo.toLowerCase().includes('fase') || part[id].grupo.toLowerCase().includes('final');
+                        const factor = esEliminatoria ? 2 : 1;
+
+                        if(Math.sign(golesL - golesV) === Math.sign(local - visitante)) pts += (5 * factor);
+                        if(golesL === local) pts += (2 * factor);
+                        if(golesV === visitante) pts += (2 * factor);
+                        if((golesL - golesV) === (local - visitante)) pts += (1 * factor);
+                    }
+                });
+                
+                updatesUsuarios[`usuarios/${cedula}/puntos`] = pts;
             });
-            await update(ref(db, `usuarios/${currentCedula}`), { puntos: pts });
-            document.getElementById('mis-puntos-total').innerText = pts;
+
+            // Guardamos todos los puntajes corregidos en la base de datos de un solo golpe
+            await update(ref(db), updatesUsuarios);
+
+            // Actualizamos el marcador visual del usuario actual en pantalla
+            if (currentCedula && usuarios[currentCedula]) {
+                const misNuevosPts = updatesUsuarios[`usuarios/${currentCedula}/puntos`] || 0;
+                document.getElementById('mis-puntos-total').innerText = misNuevosPts;
+            }
         }
+
 
         async function renderRanking() {
             const snap = await get(child(ref(db), 'usuarios'));
