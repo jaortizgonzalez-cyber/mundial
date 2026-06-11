@@ -282,15 +282,25 @@
         }
 
         window.guardarTodosLosPronosticos = async () => {
-            const snapP = await get(child(ref(db), 'partidos_oficiales'));
-            let up = {};
-            Object.keys(snapP.val()).forEach(id => {
-                const l = document.getElementById(`l_${id}`).value, v = document.getElementById(`v_${id}`).value;
-                if(l !== "" && v !== "") up[id] = { local: Math.max(0, parseInt(l)), visitante: Math.max(0, parseInt(v)) };
-            });
-            await update(ref(db, `pronosticos/${currentCedula}`), up);
-            Swal.fire("Éxito", "Pronósticos guardados", "success");
-        };
+    const snapP = await get(child(ref(db), 'partidos_oficiales'));
+    let up = {};
+    const ahora = new Date(); // Hora exacta del clic
+    
+    Object.entries(snapP.val()).forEach(([id, p]) => {
+        // Validamos el tiempo límite de 10 minutos otra vez aquí
+        const bloqueado = ahora >= new Date(new Date(p.fechaInicio).getTime() - 600000);
+        
+        // Si no está bloqueado, procesamos el valor del input
+        if (!bloqueado) {
+            const l = document.getElementById(`l_${id}`).value, v = document.getElementById(`v_${id}`).value;
+            if(l !== "" && v !== "") up[id] = { local: Math.max(0, parseInt(l)), visitante: Math.max(0, parseInt(v)) };
+        }
+    });
+    
+    await update(ref(db, `pronosticos/${currentCedula}`), up);
+    Swal.fire("Éxito", "Pronósticos guardados (los partidos iniciados o a menos de 10 min fueron omitidos)", "success");
+};
+
 
         // --- VALIDACIÓN DE MARCADOR REAL REFORZADA ---
         async function calcularMisPuntos() {
