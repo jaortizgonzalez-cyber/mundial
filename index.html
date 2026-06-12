@@ -303,20 +303,47 @@
             renderRanking();
         }
 
-                async function renderPartidos() {
+                        async function renderPartidos() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
             const votos = snapV.exists() ? snapV.val() : {};
             const cont = document.getElementById('contenedor-dinamico');
             cont.innerHTML = "";
+            
             if(snapP.exists()){
-                Object.entries(snapP.val()).forEach(([id, p]) => {
-                    const bloqueado = new Date() >= new Date(new Date(p.fechaInicio).getTime() - 600000);
+                const ahora = new Date();
+                const partidos = Object.entries(snapP.val());
+                
+                // 1. Buscamos la fecha de inicio del partido más próximo que esté por jugarse en el futuro
+                let fechaMasProximo = null;
+                partidos.forEach(([id, p]) => {
+                    const fechaPartido = new Date(p.fechaInicio);
+                    if (fechaPartido > ahora) {
+                        if (!fechaMasProximo || fechaPartido < fechaMasProximo) {
+                            fechaMasProximo = fechaPartido;
+                        }
+                    }
+                });
+
+                // 2. Pintamos cada partido evaluando sus reglas de visibilidad
+                partidos.forEach(([id, p]) => {
+                    const fechaPartido = new Date(p.fechaInicio);
+                    
+                    // Un partido está bloqueado para apostar si faltan menos de 10 minutos o ya empezó
+                    const bloqueado = ahora >= new Date(fechaPartido.getTime() - 600000);
+                    
+                    // REGLA PARA EL BOTÓN VER APUESTAS:
+                    // - Sí se muestra si el partido ya pasó o empezó (fechaPartido <= ahora).
+                    // - Sí se muestra si coincide exactamente con la hora del próximo más cercano (o simultáneos).
+                    // - Se oculta por completo si es un partido más lejano en el futuro.
+                    const mostrarBotonSpy = (fechaPartido <= ahora) || 
+                                            (fechaMasProximo && fechaPartido.getTime() === fechaMasProximo.getTime());
+
                     cont.innerHTML += `
                         <div class="match-card">
                             <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-gold); margin-bottom:10px;">
                                 <span>${p.grupo.includes('Fase') ? p.grupo : 'GRUPO ' + p.grupo}</span>
-                                <span>${new Date(p.fechaInicio).toLocaleString()}</span>
+                                <span>${fechaPartido.toLocaleString()}</span>
                             </div>
                             <div style="display:flex; align-items:center; justify-content:space-between">
                                 <span style="flex:1; text-align:right; font-weight:800">${p.equipoL}</span>
@@ -326,13 +353,20 @@
                                 </div>
                                 <span style="flex:1; font-weight:800">${p.equipoV}</span>
                             </div>
-                            <div style="text-align:center;">
-                                <button class="btn-spy" onclick="verApuestasGlobales('${id}', '${p.equipoL}', '${p.equipoV}')">👁️ VER APUESTAS</button>
+                            <div style="text-align:center; min-height: 35px; margin-top: 10px;">
+                                ${mostrarBotonSpy ? `
+                                    <button class="btn-spy" onclick="verApuestasGlobales('${id}', '${p.equipoL}', '${p.equipoV}')">
+                                        👁️ VER APUESTAS
+                                    </button>
+                                ` : `
+                                    <span style="color:#555; font-size:0.85rem; font-style:italic;">🔒 Apuestas ocultas hasta el cierre</span>
+                                `}
                             </div>
                         </div>`;
                 });
             }
         }
+
 
                 window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
             const snapU = await get(child(ref(db), 'usuarios'));
