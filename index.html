@@ -402,7 +402,7 @@
             if(p.style.display === 'block') renderAdminList();
         };
 
-        async function renderAdminList() {
+                async function renderAdminList() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const snapR = await get(child(ref(db), 'resultados_oficiales'));
             const list = document.getElementById('admin-list');
@@ -410,17 +410,29 @@
             if(snapP.exists()){
                 const resOf = snapR.exists() ? snapR.val() : {};
                 Object.entries(snapP.val()).forEach(([id, p]) => {
+                    // Verificamos si ya existen resultados cargados y válidos para este partido
+                    const tieneResultado = resOf[id] !== undefined && 
+                                           resOf[id].golesL !== undefined && 
+                                           resOf[id].golesV !== undefined && 
+                                           resOf[id].golesL !== "" && 
+                                           resOf[id].golesV !== "";
+                    
                     list.innerHTML += `
                         <div style="margin-bottom:10px; padding:10px; border-bottom:1px solid #333">
                             ${p.equipoL} vs ${p.equipoV} (${p.grupo})
                             <div style="display:flex; gap:5px; margin-top:5px">
-                                <input type="number" id="adm_l_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesL ?? ''}">
-                                <input type="number" id="adm_v_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesV ?? ''}">
+                                <input type="number" id="adm_l_${id}" class="input-score" style="width:40px; height:40px" 
+                                    value="${resOf[id]?.golesL ?? ''}" 
+                                    ${tieneResultado ? 'disabled' : ''}>
+                                <input type="number" id="adm_v_${id}" class="input-score" style="width:40px; height:40px" 
+                                    value="${resOf[id]?.golesV ?? ''}" 
+                                    ${tieneResultado ? 'disabled' : ''}>
                             </div>
                         </div>`;
                 });
             }
         }
+
 
         window.crearPartidoOficial = async () => {
             const l = document.getElementById('new-equipoL').value, v = document.getElementById('new-equipoV').value, g = document.getElementById('new-grupo').value, f = document.getElementById('new-fecha').value;
