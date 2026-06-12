@@ -66,7 +66,7 @@
         #admin-toggle { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent-gold); border: none; z-index: 10000; cursor: pointer; font-size: 1.5rem; }
         #admin-panel { position: fixed; inset: 0; background: var(--primary-dark); z-index: 20000; display: none; padding: 40px; overflow-y: auto; }
     
-            .btn-spy { 
+        .btn-spy { 
             background: rgba(0, 255, 136, 0.1); 
             border: 1px solid var(--accent-green); 
             color: var(--accent-green); 
@@ -84,32 +84,39 @@
             color: #000; 
         }
 
+        /* --- ESTRUCTURA FLUIDA ADAPTATIVA (NOMBRES 100% COMPLETOS) --- */
         .match-row-container {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin: 15px 0;
             width: 100%;
+            gap: 10px;
         }
+        
         .team-column {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex: 1; /* Distribuye el espacio equitativamente a los lados */
-            min-width: 0; /* Evita que el texto desborde la columna */
+            flex: 1;
+            min-width: 0;
             gap: 6px;
         }
+        
         .team-name {
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
             font-weight: 800;
             color: #ffffff;
             text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis; /* Si el nombre es absurdamente largo, pone ... en vez de romperse */
+            white-space: normal;  /* Rompe el bloqueo de puntos suspensivos */
+            overflow: visible;     /* Permite ver todo el texto */
+            text-overflow: clip;   /* Elimina la instrucción de recortar texto */
+            word-break: break-word;/* Si la palabra es muy grande en un móvil mini, baja limpiamente */
             width: 100%;
+            line-height: 1.1;
         }
+        
         .flag-img {
             width: 32px;
             height: auto;
@@ -117,18 +124,44 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
             display: block;
         }
+        
         .score-center-block {
             display: flex;
             gap: 8px;
             align-items: center;
             justify-content: center;
-            padding: 0 10px;
-            flex-shrink: 0; /* Impide que los marcadores negros se encojan */
+            flex-shrink: 0;
         }
 
-
-
-        
+        /* DISEÑO PARA COMPUTADORA (Vuelve a la visualización horizontal clásica y perfecta) */
+        @media (min-width: 768px) {
+            .match-row-container {
+                gap: 20px;
+            }
+            .team-column {
+                flex-direction: row; /* En PC se alinea País al lado de Bandera */
+                gap: 12px;
+                flex: 1.5;
+            }
+            .team-column:first-child {
+                justify-content: flex-end; /* Local empuja hacia la derecha */
+            }
+            .team-column:last-child {
+                flex-direction: row-reverse; /* Visitante invierte orden para que la bandera quede al centro */
+                justify-content: flex-end; /* Visitante empuja hacia la izquierda */
+            }
+            .team-name {
+                width: auto;
+                text-align: right;
+                font-size: 1.3rem;
+            }
+            .team-column:last-child .team-name {
+                text-align: left;
+            }
+            .flag-img {
+                width: 38px; /* Un poco más grandes en monitores */
+            }
+        }
     </style>
 </head>
 <body>
@@ -255,7 +288,7 @@
                 html: `
                 <div style="text-align:left; font-size:0.85rem; line-height:1.4; color:#ccc; max-height: 400px; overflow-y: auto; padding-right: 5px;">
                     <p>Los torneos están estructurados por una fase inicial de grupos seguida de una ronda eliminatoria.</p>
-                    <p><strong>TIEMPO LÍMITE:</strong> Puedes cambiar tu predicción hasta máximo <b>10 minutos antes</b> del inicio del partido.</p>
+                    <p><b>TIEMPO LÍMITE:</b> Puedes cambiar tu predicción hasta máximo <b>10 minutos antes</b> del inicio del partido.</p>
                     <p><strong>90 MINUTOS:</strong> La predicción incluye el tiempo reglamentario más la reposición, pero <b>EXCLUYE</b> tiempos adicionales (prórrogas) o series de penaltis.</p>
                     
                     <h4 style="color:var(--accent-green); border-bottom:1px solid #333; margin:15px 0 5px 0">PUNTUACIÓN POR PARTIDO</h4>
@@ -277,32 +310,24 @@
             });
         };
 
-                        async function mostrarLiderWOW() {
+        async function mostrarLiderWOW() {
             const snap = await get(child(ref(db), 'usuarios'));
             if(snap.exists()){
                 const usuarios = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
-                
                 if(usuarios[0] && usuarios[0].puntos > 0) {
                     const maxPuntos = usuarios[0].puntos;
-                    
-                    // 1. Filtramos a TODOS los que tengan el puntaje máximo
                     const lideres = usuarios.filter(u => u.puntos === maxPuntos);
                     const nombresLideres = lideres.map(u => u.nombre);
-                    
                     let textoLideres = "";
                     const elementNombreAnim = document.getElementById('leader-name-anim');
                     
-                    // 2. Ajustamos el título y el texto uniendo SIEMPRE a todos los participantes
                     if (nombresLideres.length === 1) {
                         textoLideres = nombresLideres[0];
                         document.querySelector('.podium-title').innerText = "🏆 LÍDER ACTUAL 🏆";
-                        elementNombreAnim.style.fontSize = "2.5rem"; // Tamaño normal para un solo líder
+                        elementNombreAnim.style.fontSize = "2.5rem";
                     } else {
-                        // Une todos los nombres con comas y un "y" al final (Ej: "Andrés, Paul, Edwin y German")
                         textoLideres = nombresLideres.slice(0, -1).join(', ') + ' y ' + nombresLideres.slice(-1);
                         document.querySelector('.podium-title').innerText = "🏆 COLÍDERES ACTUALES 🏆";
-                        
-                        // CONTROL VISUAL: Si son más de 2, bajamos el tamaño de la letra para que quepan todos en pantalla
                         if (nombresLideres.length > 2) {
                             elementNombreAnim.style.fontSize = "1.8rem"; 
                         } else {
@@ -311,18 +336,15 @@
                     }
                     
                     document.getElementById('leader-name-anim').innerText = textoLideres;
-                    
                     const animDiv = document.getElementById('intro-anim');
                     animDiv.style.display = 'flex';
                     setTimeout(() => {
                         animDiv.classList.add('animate__animated', 'animate__fadeOut');
                         setTimeout(() => animDiv.style.display = 'none', 1000);
-                    }, 4500); // 4.5 segundos para dar tiempo suficiente de leer toda la lista
+                    }, 4500);
                 }
             }
         }
-
-
 
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
@@ -359,102 +381,34 @@
                 const ahora = new Date();
                 const partidos = Object.entries(snapP.val());
 
-                // DICCIONARIO MUNDIAL 2026 DEFINITIVO (Ordenado alfabéticamente de la A a la Z)
                 const banderas = {
-                    "alemania": "de",
-                    "arabia saudi": "sa",
-                    "arabia saudí": "sa",
-                    "arabia saudita": "sa",
-                    "argelia": "dz",
-                    "argentina": "ar",
-                    "australia": "au",
-                    "austria": "at",
-                    "bélgica": "be",
-                    "belgica": "be",
-                    "bolivia": "bo",
-                    "bosnia": "ba",
-                    "bosnia y herz": "ba",
-                    "bosnia y herzegovina": "ba",
-                    "brasil": "br",
-                    "cabo verde": "cv",
-                    "canadá": "ca",
-                    "canada": "ca",
-                    "catar": "qa",
-                    "chile": "cl",
-                    "colombia": "co",
-                    "corea del sur": "kr",
-                    "costa de marfil": "ci",
-                    "costa rica": "cr",
-                    "croacia": "hr",
-                    "curacao": "cw",
-                    "curazao": "cw",
-                    "dinamarca": "dk",
-                    "ecuador": "ec",
-                    "egipto": "eg",
-                    "escocia": "gb-sct",
-                    "españa": "es",
-                    "estados unidos": "us",
-                    "francia": "fr",
-                    "ghana": "gh",
-                    "grecia": "gr",
-                    "guatemala": "gt",
-                    "haiti": "ht",
-                    "haití": "ht",
-                    "holanda": "nl",
-                    "honduras": "hn",
-                    "inglaterra": "gb-eng",
-                    "irak": "iq",
-                    "iran": "ir",
-                    "irán": "ir",
-                    "iraq": "iq",
-                    "irlanda": "ie",
-                    "italia": "it",
-                    "jamaica": "jm",
-                    "japon": "jp",
-                    "japón": "jp",
-                    "jordania": "jo",
-                    "marruecos": "ma",
-                    "mexico": "mx",
-                    "méxico": "mx",
-                    "noruega": "no",
-                    "nueva zelanda": "nz",
-                    "países bajos": "nl",
-                    "panama": "pa",
-                    "panamá": "pa",
-                    "paraguay": "py",
-                    "peru": "pe",
-                    "perú": "pe",
-                    "polonia": "pl",
-                    "portugal": "pt",
-                    "qatar": "qa",
-                    "rd congo": "cd",
-                    "republica checa": "cz",
-                    "república checa": "cz",
-                    "república democrática del congo": "cd",
-                    "ri de iran": "ir",
-                    "ri de irán": "ir",
-                    "rumania": "ro",
-                    "rumanía": "ro",
-                    "senegal": "sn",
-                    "serbia": "rs",
-                    "sudafrica": "za",
-                    "sudáfrica": "za",
-                    "suecia": "se",
-                    "suiza": "ch",
-                    "turquia": "tr",
-                    "turquía": "tr",
-                    "ucrania": "ua",
-                    "uruguay": "uy",
-                    "usa": "us",
-                    "uzbekistan": "uz",
-                    "uzbekistán": "uz",
+                    "alemania": "de", "arabia saudi": "sa", "arabia saudí": "sa", "arabia saudita": "sa",
+                    "argelia": "dz", "argentina": "ar", "australia": "au", "austria": "at",
+                    "bélgica": "be", "belgica": "be", "bolivia": "bo", "bosnia": "ba", "bosnia y herz": "ba",
+                    "bosnia y herzegovina": "ba", "brasil": "br", "cabo verde": "cv", "canadá": "ca",
+                    "canada": "ca", "catar": "qa", "chile": "cl", "colombia": "co", "corea del sur": "kr",
+                    "costa de marfil": "ci", "costa rica": "cr", "croacia": "hr", "curacao": "cw",
+                    "curazao": "cw", "dinamarca": "dk", "ecuador": "ec", "egipto": "eg", "escocia": "gb-sct",
+                    "españa": "es", "estados unidos": "us", "francia": "fr", "ghana": "gh", "grecia": "gr",
+                    "guatemala": "gt", "haiti": "ht", "haití": "ht", "holanda": "nl", "honduras": "hn",
+                    "inglaterra": "gb-eng", "irak": "iq", "iran": "ir", "irán": "ir", "iraq": "iq",
+                    "irlanda": "ie", "italia": "it", "jamaica": "jm", "japon": "jp", "japón": "jp",
+                    "jordania": "jo", "marruecos": "ma", "mexico": "mx", "méxico": "mx", "noruega": "no",
+                    "nueva zelanda": "nz", "países bajos": "nl", "panama": "pa", "panamá": "pa",
+                    "paraguay": "py", "peru": "pe", "perú": "pe", "polonia": "pl", "portugal": "pt",
+                    "qatar": "qa", "rd congo": "cd", "republica checa": "cz", "república checa": "cz",
+                    "república democrática del congo": "cd", "ri de iran": "ir", "ri de irán": "ir",
+                    "rumania": "ro", "rumanía": "ro", "senegal": "sn", "serbia": "rs", "sudafrica": "za",
+                    "sudáfrica": "za", "suecia": "se", "suiza": "ch", "turquia": "tr", "turquía": "tr",
+                    "ucrania": "ua", "uruguay": "uy", "usa": "us", "uzbekistan": "uz", "uzbekistán": "uz",
                     "venezuela": "ve"
                 };
 
-                // Función auxiliar interna para inyectar la imagen o el balón por defecto
                 const obtenerBandera = (equipo) => {
                     const nombreLimpio = equipo.toLowerCase().trim();
-                    const codigo = banderas[nombreLimpio];
+                    // Búsqueda parcial inteligente para evitar fallos si viene con textos largos de la BD
+                    const llaveEncontrada = Object.keys(banderas).find(k => nombreLimpio.includes(k) || k.includes(nombreLimpio));
+                    const codigo = llaveEncontrada ? banderas[llaveEncontrada] : null;
                     if (codigo) {
                         return `<img src="https://flagcdn.com/w80/${codigo}.png" class="flag-img" alt="${equipo}">`;
                     }
@@ -474,16 +428,14 @@
                                 <span>${fechaPartido.toLocaleString([], {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
                             </div>
                             
-                            <!-- NUEVA ESTRUCTURA VERTICAL RESPONSIVA -->
                             <div class="match-row-container">
-                                
                                 <!-- Columna Equipo Local -->
                                 <div class="team-column">
                                     <div class="team-name">${p.equipoL}</div>
                                     ${obtenerBandera(p.equipoL)}
                                 </div>
                                 
-                                <!-- Bloque Central de Marcadores (Intocable) -->
+                                <!-- Bloque Central de Marcadores -->
                                 <div class="score-center-block">
                                     <input type="number" id="l_${id}" value="${votos[id]?.local ?? ''}" class="input-score" ${bloqueado ? 'disabled' : ''}>
                                     <input type="number" id="v_${id}" value="${votos[id]?.visitante ?? ''}" class="input-score" ${bloqueado ? 'disabled' : ''}>
@@ -494,7 +446,6 @@
                                     <div class="team-name">${p.equipoV}</div>
                                     ${obtenerBandera(p.equipoV)}
                                 </div>
-                                
                             </div>
                             
                             <div style="text-align:center; min-height: 35px; margin-top: 12px;">
@@ -507,16 +458,13 @@
                                 `}
                             </div>
                         </div>`;
-
-
                 });
             }
         }
 
-                window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
+        window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
             const snapU = await get(child(ref(db), 'usuarios'));
             const snapV = await get(child(ref(db), 'pronosticos'));
-            
             if(!snapU.exists()) return Swal.fire("Información", "No hay usuarios.", "info");
             
             const usuarios = snapU.val();
@@ -531,20 +479,17 @@
                             <th style="text-align:center; width:80px;">Pronóstico</th>
                         </tr>
                     </thead>
-                    <tbody>
-            `;
+                    <tbody>`;
             
             let contadorVotos = 0;
             Object.keys(usuarios).forEach(cedula => {
                 const nombreUsuario = usuarios[cedula].nombre;
                 const votoUsuario = todosLosPronosticos[cedula]?.[idPartido];
-                
                 let celdaPronostico = `<span style="color:#666; font-style:italic;">Sin apuesta</span>`;
                 if(votoUsuario !== undefined && votoUsuario.local !== "" && votoUsuario.visitante !== "") {
                     celdaPronostico = `<b style="color:var(--accent-green); font-size:1.1rem;">${votoUsuario.local} - ${votoUsuario.visitante}</b>`;
                     contadorVotos++;
                 }
-                
                 tablaHtml += `<tr><td style="color:#fff; font-weight:600;">${nombreUsuario}</td><td style="text-align:center;">${celdaPronostico}</td></tr>`;
             });
             
@@ -561,53 +506,40 @@
             });
         };
 
-
         window.guardarTodosLosPronosticos = async () => {
-    const snapP = await get(child(ref(db), 'partidos_oficiales'));
-    let up = {};
-    const ahora = new Date(); // Hora exacta del clic
-    
-    Object.entries(snapP.val()).forEach(([id, p]) => {
-        // Validamos el tiempo límite de 10 minutos otra vez aquí
-        const bloqueado = ahora >= new Date(new Date(p.fechaInicio).getTime() - 600000);
-        
-        // Si no está bloqueado, procesamos el valor del input
-        if (!bloqueado) {
-            const l = document.getElementById(`l_${id}`).value, v = document.getElementById(`v_${id}`).value;
-            if(l !== "" && v !== "") up[id] = { local: Math.max(0, parseInt(l)), visitante: Math.max(0, parseInt(v)) };
-        }
-    });
-    
-    await update(ref(db, `pronosticos/${currentCedula}`), up);
-    Swal.fire("Éxito", "Pronósticos guardados (los partidos iniciados o a menos de 10 min fueron omitidos)", "success");
-};
+            const snapP = await get(child(ref(db), 'partidos_oficiales'));
+            let up = {};
+            const ahora = new Date();
+            Object.entries(snapP.val()).forEach(([id, p]) => {
+                const bloqueado = ahora >= new Date(new Date(p.fechaInicio).getTime() - 600000);
+                if (!bloqueado) {
+                    const l = document.getElementById(`l_${id}`).value, v = document.getElementById(`v_${id}`).value;
+                    if(l !== "" && v !== "") up[id] = { local: Math.max(0, parseInt(l)), visitante: Math.max(0, parseInt(v)) };
+                }
+            });
+            await update(ref(db, `pronosticos/${currentCedula}`), up);
+            Swal.fire("Éxito", "Pronósticos guardados (los partidos iniciados o a menos de 10 min fueron omitidos)", "success");
+        };
 
-
-        // --- VALIDACIÓN DE MARCADOR REAL REFORZADA ---
-                async function calcularMisPuntos() {
+        async function calcularMisPuntos() {
             const snapO = await get(child(ref(db), 'resultados_oficiales'));
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const snapU = await get(child(ref(db), 'usuarios'));
             const snapV = await get(child(ref(db), 'pronosticos'));
-            
             if(!snapO.exists() || !snapP.exists() || !snapU.exists()) return;
             
             const ofi = snapO.val(), part = snapP.val(), usuarios = snapU.val(), todosLosPronosticos = snapV.exists() ? snapV.val() : {};
             let updatesUsuarios = {};
 
-            // Hacemos el cálculo para CADA usuario en la base de datos
             Object.keys(usuarios).forEach(cedula => {
                 let pts = 0;
                 const misPronosticos = todosLosPronosticos[cedula] || {};
-
                 Object.keys(part).forEach(id => {
                     if(misPronosticos[id] && ofi[id]) {
-                        // Forzamos conversión a número para evitar errores de texto entero
                         const golesL = parseInt(ofi[id].golesL, 10);
                         const golesV = parseInt(ofi[id].golesV, 10);
                         const local = parseInt(misPronosticos[id].local, 10);
                         const visitante = parseInt(misPronosticos[id].visitante, 10);
-                        
                         if(isNaN(golesL) || isNaN(golesV) || isNaN(local) || isNaN(visitante)) return;
 
                         const esEliminatoria = part[id].grupo.toLowerCase().includes('fase') || part[id].grupo.toLowerCase().includes('final');
@@ -619,20 +551,15 @@
                         if((golesL - golesV) === (local - visitante)) pts += (1 * factor);
                     }
                 });
-                
                 updatesUsuarios[`usuarios/${cedula}/puntos`] = pts;
             });
 
-            // Guardamos todos los puntajes corregidos en la base de datos de un solo golpe
             await update(ref(db), updatesUsuarios);
-
-            // Actualizamos el marcador visual del usuario actual en pantalla
             if (currentCedula && usuarios[currentCedula]) {
                 const misNuevosPts = updatesUsuarios[`usuarios/${currentCedula}/puntos`] || 0;
                 document.getElementById('mis-puntos-total').innerText = misNuevosPts;
             }
         }
-
 
         async function renderRanking() {
             const snap = await get(child(ref(db), 'usuarios'));
@@ -652,7 +579,7 @@
             if(p.style.display === 'block') renderAdminList();
         };
 
-                async function renderAdminList() {
+        async function renderAdminList() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const snapR = await get(child(ref(db), 'resultados_oficiales'));
             const list = document.getElementById('admin-list');
@@ -660,29 +587,18 @@
             if(snapP.exists()){
                 const resOf = snapR.exists() ? snapR.val() : {};
                 Object.entries(snapP.val()).forEach(([id, p]) => {
-                    // Verificamos si ya existen resultados cargados y válidos para este partido
-                    const tieneResultado = resOf[id] !== undefined && 
-                                           resOf[id].golesL !== undefined && 
-                                           resOf[id].golesV !== undefined && 
-                                           resOf[id].golesL !== "" && 
-                                           resOf[id].golesV !== "";
-                    
+                    const tieneResultado = resOf[id] !== undefined && resOf[id].golesL !== undefined && resOf[id].golesV !== undefined && resOf[id].golesL !== "" && resOf[id].golesV !== "";
                     list.innerHTML += `
                         <div style="margin-bottom:10px; padding:10px; border-bottom:1px solid #333">
                             ${p.equipoL} vs ${p.equipoV} (${p.grupo})
                             <div style="display:flex; gap:5px; margin-top:5px">
-                                <input type="number" id="adm_l_${id}" class="input-score" style="width:40px; height:40px" 
-                                    value="${resOf[id]?.golesL ?? ''}" 
-                                    ${tieneResultado ? 'disabled' : ''}>
-                                <input type="number" id="adm_v_${id}" class="input-score" style="width:40px; height:40px" 
-                                    value="${resOf[id]?.golesV ?? ''}" 
-                                    ${tieneResultado ? 'disabled' : ''}>
+                                <input type="number" id="adm_l_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesL ?? ''}" ${tieneResultado ? 'disabled' : ''}>
+                                <input type="number" id="adm_v_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesV ?? ''}" ${tieneResultado ? 'disabled' : ''}>
                             </div>
                         </div>`;
                 });
             }
         }
-
 
         window.crearPartidoOficial = async () => {
             const l = document.getElementById('new-equipoL').value, v = document.getElementById('new-equipoV').value, g = document.getElementById('new-grupo').value, f = document.getElementById('new-fecha').value;
