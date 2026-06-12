@@ -566,13 +566,36 @@
             const snap = await get(child(ref(db), 'usuarios'));
             if(snap.exists()){
                 const sorted = Object.values(snap.val()).sort((a,b) => b.puntos - a.puntos);
-                document.getElementById('body-ranking').innerHTML = sorted.map((u, i) => `
-                    <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05)">
-                        <span>${i+1}. ${u.nombre}</span>
-                        <span style="color:var(--accent-gold); font-weight:bold">${u.puntos} PTS</span>
-                    </div>`).join('');
+                
+                let htmlRanking = "";
+                let puestoActual = 1;
+
+                sorted.forEach((u, i) => {
+                    // Si detecta un cambio de puntaje hacia abajo, avanza el puesto consecutivo
+                    if (i > 0 && u.puntos < sorted[i - 1].puntos) {
+                        puestoActual++;
+                    }
+                    
+                    // Condición: ¿El siguiente participante tiene los mismos puntos? 
+                    // Sirve para saber si este elemento es el inicio o parte de un empate
+                    const esMismoPuntajeAnterior = i > 0 && u.puntos === sorted[i - 1].puntos;
+                    
+                    htmlRanking += `
+                        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05)">
+                            <!-- Si comparte puntos con el anterior, dejamos el espacio en blanco en vez de repetir el número -->
+                            <span style="font-weight: 600;">
+                                ${esMismoPuntajeAnterior ? '&nbsp;&nbsp;&nbsp;&nbsp;' : puestoActual + '.'} ${u.nombre}
+                            </span>
+                            
+                            <!-- El puntaje se sigue mostrando alineado a la derecha -->
+                            <span style="color:var(--accent-gold); font-weight:bold">${u.puntos} PTS</span>
+                        </div>`;
+                });
+
+                document.getElementById('body-ranking').innerHTML = htmlRanking;
             }
         }
+
 
         window.toggleAdminPanel = () => {
             const p = document.getElementById('admin-panel');
