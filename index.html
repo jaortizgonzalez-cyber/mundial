@@ -65,6 +65,25 @@
 
         #admin-toggle { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent-gold); border: none; z-index: 10000; cursor: pointer; font-size: 1.5rem; }
         #admin-panel { position: fixed; inset: 0; background: var(--primary-dark); z-index: 20000; display: none; padding: 40px; overflow-y: auto; }
+    
+            .btn-spy { 
+            background: rgba(0, 255, 136, 0.1); 
+            border: 1px solid var(--accent-green); 
+            color: var(--accent-green); 
+            padding: 6px 12px; 
+            border-radius: 8px; 
+            font-family: 'Barlow Condensed', sans-serif; 
+            font-weight: 600; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            font-size: 0.85rem; 
+            transition: 0.2s; 
+        }
+        .btn-spy:hover { 
+            background: var(--accent-green); 
+            color: #000; 
+        }
+
     </style>
 </head>
 <body>
@@ -284,7 +303,7 @@
             renderRanking();
         }
 
-        async function renderPartidos() {
+                async function renderPartidos() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
             const votos = snapV.exists() ? snapV.val() : {};
@@ -307,10 +326,62 @@
                                 </div>
                                 <span style="flex:1; font-weight:800">${p.equipoV}</span>
                             </div>
+                            <div style="text-align:center;">
+                                <button class="btn-spy" onclick="verApuestasGlobales('${id}', '${p.equipoL}', '${p.equipoV}')">👁️ VER APUESTAS</button>
+                            </div>
                         </div>`;
                 });
             }
         }
+
+                window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
+            const snapU = await get(child(ref(db), 'usuarios'));
+            const snapV = await get(child(ref(db), 'pronosticos'));
+            
+            if(!snapU.exists()) return Swal.fire("Información", "No hay usuarios.", "info");
+            
+            const usuarios = snapU.val();
+            const todosLosPronosticos = snapV.exists() ? snapV.val() : {};
+            
+            let tablaHtml = `
+                <div style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                <table class="swal-table">
+                    <thead>
+                        <tr>
+                            <th>Participante</th>
+                            <th style="text-align:center; width:80px;">Pronóstico</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            let contadorVotos = 0;
+            Object.keys(usuarios).forEach(cedula => {
+                const nombreUsuario = usuarios[cedula].nombre;
+                const votoUsuario = todosLosPronosticos[cedula]?.[idPartido];
+                
+                let celdaPronostico = `<span style="color:#666; font-style:italic;">Sin apuesta</span>`;
+                if(votoUsuario !== undefined && votoUsuario.local !== "" && votoUsuario.visitante !== "") {
+                    celdaPronostico = `<b style="color:var(--accent-green); font-size:1.1rem;">${votoUsuario.local} - ${votoUsuario.visitante}</b>`;
+                    contadorVotos++;
+                }
+                
+                tablaHtml += `<tr><td style="color:#fff; font-weight:600;">${nombreUsuario}</td><td style="text-align:center;">${celdaPronostico}</td></tr>`;
+            });
+            
+            tablaHtml += `</tbody></table></div><p style="font-size:0.8rem; color:#888; text-align:right; margin-top:10px;">Apuestas registradas: ${contadorVotos}</p>`;
+            
+            Swal.fire({
+                title: `<span style="font-family:Anton; color:var(--accent-gold); font-size:1.4rem;">PRONÓSTICOS REGISTRADOS</span><br><span style="font-size:0.9rem; color:#fff;">${equipoL} vs ${equipoV}</span>`,
+                background: '#020d1a',
+                color: '#fff',
+                width: '450px',
+                html: tablaHtml,
+                confirmButtonText: 'CERRAR',
+                confirmButtonColor: '#333'
+            });
+        };
+
 
         window.guardarTodosLosPronosticos = async () => {
     const snapP = await get(child(ref(db), 'partidos_oficiales'));
