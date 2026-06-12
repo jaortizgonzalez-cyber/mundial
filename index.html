@@ -303,7 +303,7 @@
             renderRanking();
         }
 
-                        async function renderPartidos() {
+                                async function renderPartidos() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
             const votos = snapV.exists() ? snapV.val() : {};
@@ -314,30 +314,31 @@
                 const ahora = new Date();
                 const partidos = Object.entries(snapP.val());
                 
-                // 1. Buscamos la fecha de inicio del partido más próximo que esté por jugarse en el futuro
-                let fechaMasProximo = null;
+                // 1. Buscamos el partido más próximo en el futuro que YA esté bloqueado (faltan menos de 10 min o ya empezó)
+                let fechaMasProximoBloqueado = null;
                 partidos.forEach(([id, p]) => {
                     const fechaPartido = new Date(p.fechaInicio);
-                    if (fechaPartido > ahora) {
-                        if (!fechaMasProximo || fechaPartido < fechaMasProximo) {
-                            fechaMasProximo = fechaPartido;
+                    const bloqueado = ahora >= new Date(fechaPartido.getTime() - 600000);
+                    
+                    if (bloqueado) {
+                        // Guardamos la fecha más reciente de los partidos que ya cerraron apuestas
+                        if (!fechaMasProximoBloqueado || fechaPartido > fechaMasProximoBloqueado) {
+                            fechaMasProximoBloqueado = fechaPartido;
                         }
                     }
                 });
 
-                // 2. Pintamos cada partido evaluando sus reglas de visibilidad
+                // 2. Pintamos cada partido aplicando el filtro estricto
                 partidos.forEach(([id, p]) => {
                     const fechaPartido = new Date(p.fechaInicio);
                     
-                    // Un partido está bloqueado para apostar si faltan menos de 10 minutos o ya empezó
+                    // Cierre de apuestas: 10 minutos antes del partido
                     const bloqueado = ahora >= new Date(fechaPartido.getTime() - 600000);
                     
-                    // REGLA PARA EL BOTÓN VER APUESTAS:
-                    // - Sí se muestra si el partido ya pasó o empezó (fechaPartido <= ahora).
-                    // - Sí se muestra si coincide exactamente con la hora del próximo más cercano (o simultáneos).
-                    // - Se oculta por completo si es un partido más lejano en el futuro.
-                    const mostrarBotonSpy = (fechaPartido <= ahora) || 
-                                            (fechaMasProximo && fechaPartido.getTime() === fechaMasProximo.getTime());
+                    // REGLA DE ORO DE TRANSPARENCIA:
+                    // El botón SOLO aparece si el partido ya está bloqueado (ya no se pueden cambiar apuestas)
+                    // Y ocultamos los del futuro lejano para que la lista no sea gigante.
+                    const mostrarBotonSpy = bloqueado;
 
                     cont.innerHTML += `
                         <div class="match-card">
@@ -359,13 +360,14 @@
                                         👁️ VER APUESTAS
                                     </button>
                                 ` : `
-                                    <span style="color:#555; font-size:0.85rem; font-style:italic;">🔒 Apuestas ocultas hasta el cierre</span>
+                                    <span style="color:#555; font-size:0.85rem; font-style:italic;">🔒 Pronósticos ocultos (Disponibles hoy a las ${new Date(fechaPartido.getTime() - 600000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})})</span>
                                 `}
                             </div>
                         </div>`;
                 });
             }
         }
+
 
 
                 window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
