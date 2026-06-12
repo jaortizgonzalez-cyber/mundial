@@ -84,6 +84,24 @@
             color: #000; 
         }
 
+                .flag-img {
+            width: 35px;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            vertical-align: middle;
+        }
+        .team-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        .team-left { justify-content: flex-end; text-align: right; }
+        .team-right { justify-content: flex-start; text-align: left; }
+
+
+        
     </style>
 </head>
 <body>
@@ -303,7 +321,7 @@
             renderRanking();
         }
 
-                                async function renderPartidos() {
+        async function renderPartidos() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
             const votos = snapV.exists() ? snapV.val() : {};
@@ -313,62 +331,155 @@
             if(snapP.exists()){
                 const ahora = new Date();
                 const partidos = Object.entries(snapP.val());
-                
-                // 1. Buscamos el partido más próximo en el futuro que YA esté bloqueado (faltan menos de 10 min o ya empezó)
-                let fechaMasProximoBloqueado = null;
-                partidos.forEach(([id, p]) => {
-                    const fechaPartido = new Date(p.fechaInicio);
-                    const bloqueado = ahora >= new Date(fechaPartido.getTime() - 600000);
-                    
-                    if (bloqueado) {
-                        // Guardamos la fecha más reciente de los partidos que ya cerraron apuestas
-                        if (!fechaMasProximoBloqueado || fechaPartido > fechaMasProximoBloqueado) {
-                            fechaMasProximoBloqueado = fechaPartido;
-                        }
-                    }
-                });
 
-                // 2. Pintamos cada partido aplicando el filtro estricto
+                // DICCIONARIO MUNDIAL 2026 DEFINITIVO (Ordenado alfabéticamente de la A a la Z)
+                const banderas = {
+                    "alemania": "de",
+                    "arabia saudi": "sa",
+                    "arabia saudí": "sa",
+                    "arabia saudita": "sa",
+                    "argelia": "dz",
+                    "argentina": "ar",
+                    "australia": "au",
+                    "austria": "at",
+                    "bélgica": "be",
+                    "belgica": "be",
+                    "bolivia": "bo",
+                    "bosnia": "ba",
+                    "bosnia y herz": "ba",
+                    "bosnia y herzegovina": "ba",
+                    "brasil": "br",
+                    "cabo verde": "cv",
+                    "canadá": "ca",
+                    "canada": "ca",
+                    "catar": "qa",
+                    "chile": "cl",
+                    "colombia": "co",
+                    "corea del sur": "kr",
+                    "costa de marfil": "ci",
+                    "costa rica": "cr",
+                    "croacia": "hr",
+                    "curacao": "cw",
+                    "curazao": "cw",
+                    "dinamarca": "dk",
+                    "ecuador": "ec",
+                    "egipto": "eg",
+                    "escocia": "gb-sct",
+                    "españa": "es",
+                    "estados unidos": "us",
+                    "francia": "fr",
+                    "ghana": "gh",
+                    "grecia": "gr",
+                    "guatemala": "gt",
+                    "haiti": "ht",
+                    "haití": "ht",
+                    "holanda": "nl",
+                    "honduras": "hn",
+                    "inglaterra": "gb-eng",
+                    "irak": "iq",
+                    "iran": "ir",
+                    "irán": "ir",
+                    "iraq": "iq",
+                    "irlanda": "ie",
+                    "italia": "it",
+                    "jamaica": "jm",
+                    "japon": "jp",
+                    "japón": "jp",
+                    "jordania": "jo",
+                    "marruecos": "ma",
+                    "mexico": "mx",
+                    "méxico": "mx",
+                    "noruega": "no",
+                    "nueva zelanda": "nz",
+                    "países bajos": "nl",
+                    "panama": "pa",
+                    "panamá": "pa",
+                    "paraguay": "py",
+                    "peru": "pe",
+                    "perú": "pe",
+                    "polonia": "pl",
+                    "portugal": "pt",
+                    "qatar": "qa",
+                    "rd congo": "cd",
+                    "republica checa": "cz",
+                    "república checa": "cz",
+                    "república democrática del congo": "cd",
+                    "ri de iran": "ir",
+                    "ri de irán": "ir",
+                    "rumania": "ro",
+                    "rumanía": "ro",
+                    "senegal": "sn",
+                    "serbia": "rs",
+                    "sudafrica": "za",
+                    "sudáfrica": "za",
+                    "suecia": "se",
+                    "suiza": "ch",
+                    "turquia": "tr",
+                    "turquía": "tr",
+                    "ucrania": "ua",
+                    "uruguay": "uy",
+                    "usa": "us",
+                    "uzbekistan": "uz",
+                    "uzbekistán": "uz",
+                    "venezuela": "ve"
+                };
+
+                // Función auxiliar interna para inyectar la imagen o el balón por defecto
+                const obtenerBandera = (equipo) => {
+                    const nombreLimpio = equipo.toLowerCase().trim();
+                    const codigo = banderas[nombreLimpio];
+                    if (codigo) {
+                        return `<img src="https://flagcdn.com/w80/${codigo}.png" class="flag-img" alt="${equipo}">`;
+                    }
+                    return `<span style="font-size: 1.5rem;">⚽</span>`;
+                };
+
                 partidos.forEach(([id, p]) => {
                     const fechaPartido = new Date(p.fechaInicio);
-                    
-                    // Cierre de apuestas: 10 minutos antes del partido
-                    const bloqueado = ahora >= new Date(fechaPartido.getTime() - 600000);
-                    
-                    // REGLA DE ORO DE TRANSPARENCIA:
-                    // El botón SOLO aparece si el partido ya está bloqueado (ya no se pueden cambiar apuestas)
-                    // Y ocultamos los del futuro lejano para que la lista no sea gigante.
+                    const fechaCierre = new Date(fechaPartido.getTime() - 600000);
+                    const bloqueado = ahora >= fechaCierre;
                     const mostrarBotonSpy = bloqueado;
 
                     cont.innerHTML += `
                         <div class="match-card">
-                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-gold); margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-gold); margin-bottom:15px;">
                                 <span>${p.grupo.includes('Fase') ? p.grupo : 'GRUPO ' + p.grupo}</span>
                                 <span>${fechaPartido.toLocaleString()}</span>
                             </div>
-                            <div style="display:flex; align-items:center; justify-content:space-between">
-                                <span style="flex:1; text-align:right; font-weight:800">${p.equipoL}</span>
-                                <div style="display:flex; gap:10px; margin:0 15px">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap: 10px;">
+                                
+                                <!-- Bloque Equipo Local -->
+                                <div class="team-box team-left">
+                                    <span style="font-weight:800; font-size:1.1rem;">${p.equipoL}</span>
+                                    ${obtenerBandera(p.equipoL)}
+                                </div>
+                                
+                                <!-- Inputs de Marcadores -->
+                                <div style="display:flex; gap:10px; min-width:120px; justify-content:center;">
                                     <input type="number" id="l_${id}" value="${votos[id]?.local ?? ''}" class="input-score" ${bloqueado ? 'disabled' : ''}>
                                     <input type="number" id="v_${id}" value="${votos[id]?.visitante ?? ''}" class="input-score" ${bloqueado ? 'disabled' : ''}>
                                 </div>
-                                <span style="flex:1; font-weight:800">${p.equipoV}</span>
+                                
+                                <!-- Bloque Equipo Visitante -->
+                                <div class="team-box team-right">
+                                    ${obtenerBandera(p.equipoV)}
+                                    <span style="font-weight:800; font-size:1.1rem;">${p.equipoV}</span>
+                                </div>
+                                
                             </div>
-                            <div style="text-align:center; min-height: 35px; margin-top: 10px;">
+                            <div style="text-align:center; min-height: 35px; margin-top: 15px;">
                                 ${mostrarBotonSpy ? `
                                     <button class="btn-spy" onclick="verApuestasGlobales('${id}', '${p.equipoL}', '${p.equipoV}')">
                                         👁️ VER APUESTAS
                                     </button>
                                 ` : `
-                                    <span style="color:#555; font-size:0.85rem; font-style:italic;">🔒 Pronósticos ocultos (Disponibles pronto a las ${new Date(fechaPartido.getTime() - 600000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})})</span>
+                                    <span style="color:#555; font-size:0.85rem; font-style:italic;">🔒 Pronósticos ocultos (Disponibles pronto)</span>
                                 `}
                             </div>
                         </div>`;
                 });
             }
         }
-
-
 
                 window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
             const snapU = await get(child(ref(db), 'usuarios'));
