@@ -373,7 +373,11 @@
         async function renderPartidos() {
             const snapP = await get(child(ref(db), 'partidos_oficiales'));
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
+            // LEER RESULTADOS REALES SIN ALTERAR EL FLUJO ORIGINAL
+            const snapR = await get(child(ref(db), 'resultados_oficiales'));
+            
             const votos = snapV.exists() ? snapV.val() : {};
+            const resultadosReales = snapR.exists() ? snapR.val() : {};
             const cont = document.getElementById('contenedor-dinamico');
             cont.innerHTML = "";
             
@@ -407,7 +411,6 @@
 
                 const obtenerBandera = (equipo) => {
                     const nombreLimpio = equipo.toLowerCase().trim();
-                    // Búsqueda parcial inteligente para evitar fallos si viene con textos largos de la BD
                     const llaveEncontrada = Object.keys(banderas).find(k => nombreLimpio.includes(k) || k.includes(nombreLimpio));
                     const codigo = llaveEncontrada ? banderas[llaveEncontrada] : null;
                     if (codigo) {
@@ -421,6 +424,10 @@
                     const fechaCierre = new Date(fechaPartido.getTime() - 600000);
                     const bloqueado = ahora >= fechaCierre;
                     const mostrarBotonSpy = bloqueado;
+
+                    // CONTROL INDIVIDUAL: Si ya se registró el resultado real de este partido en la BD
+                    const resReal = resultadosReales[id];
+                    const tieneResultadoOficial = resReal !== undefined && resReal.golesL !== undefined && resReal.golesV !== undefined;
 
                     cont.innerHTML += `
                         <div class="match-card">
@@ -438,8 +445,8 @@
                                 
                                 <!-- Bloque Central de Marcadores -->
                                 <div class="score-center-block">
-                                    <input type="number" id="l_${id}" value="${votos[id]?.local ?? ''}" class="input-score" ${bloqueado ? 'disabled' : ''}>
-                                    <input type="number" id="v_${id}" value="${votos[id]?.visitante ?? ''}" class="input-score" ${bloqueado ? 'disabled' : ''}>
+                                    <input type="number" id="l_${id}" value="${votos[id]?.local ?? ''}" class="input-score" ${bloqueado || tieneResultadoOficial ? 'disabled' : ''}>
+                                    <input type="number" id="v_${id}" value="${votos[id]?.visitante ?? ''}" class="input-score" ${bloqueado || tieneResultadoOficial ? 'disabled' : ''}>
                                 </div>
                                 
                                 <!-- Columna Equipo Visitante -->
@@ -449,7 +456,14 @@
                                 </div>
                             </div>
                             
-                            <div style="text-align:center; min-height: 35px; margin-top: 12px;">
+                            <div style="text-align:center; min-height: 35px; margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; justify-content: center;">
+                                ${tieneResultadoOficial ? `
+                                    <!-- Inserta de forma adaptativa el marcador real cargado en tu base de datos -->
+                                    <div style="background: rgba(0, 255, 136, 0.12); border: 1px dashed var(--accent-green); color: var(--accent-green); padding: 5px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; font-family: 'Anton'; letter-spacing: 0.5px;">
+                                        ⚽ MARCADOR OFICIAL: ${resReal.golesL} - ${resReal.golesV}
+                                    </div>
+                                ` : ''}
+
                                 ${mostrarBotonSpy ? `
                                     <button class="btn-spy" onclick="verApuestasGlobales('${id}', '${p.equipoL}', '${p.equipoV}')">
                                         👁️ VER APUESTAS
@@ -462,6 +476,7 @@
                 });
             }
         }
+
 
         window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
             const snapU = await get(child(ref(db), 'usuarios'));
