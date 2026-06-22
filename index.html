@@ -84,82 +84,28 @@
             color: #000; 
         }
 
-        /* --- ESTRUCTURA FLUIDA ADAPTATIVA (NOMBRES 100% COMPLETOS) --- */
-        .match-row-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 15px 0;
-            width: 100%;
-            gap: 10px;
-        }
-        
-        .team-column {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            min-width: 0;
-            gap: 6px;
-        }
-        
-        .team-name {
-            font-size: clamp(0.9rem, 3vw, 1.2rem);
-            font-weight: 800;
-            color: #ffffff;
-            text-align: center;
-            white-space: normal;
-            overflow: visible;
-            text-overflow: clip;
-            word-break: break-word;
-            width: 100%;
-            line-height: 1.1;
-        }
-        
-        .flag-img {
-            width: 32px;
-            height: auto;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            display: block;
-        }
-        
-        .score-center-block {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
+        /* --- ESTRUCTURA FLUIDA ADAPTATIVA --- */
+        .match-row-container { display: flex; align-items: center; justify-content: space-between; margin: 15px 0; width: 100%; gap: 10px; }
+        .team-column { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-width: 0; gap: 6px; }
+        .team-name { font-size: clamp(0.9rem, 3vw, 1.2rem); font-weight: 800; color: #ffffff; text-align: center; white-space: normal; overflow: visible; word-break: break-word; width: 100%; line-height: 1.1; }
+        .flag-img { width: 32px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: block; }
+        .score-center-block { display: flex; gap: 8px; align-items: center; justify-content: center; flex-shrink: 0; }
+
+        /* Estilos para el Pulso */
+        .pulso-container { display: flex; height: 6px; width: 100%; border-radius: 3px; overflow: hidden; margin: 8px 0; background: #1a1a1a; }
+        .pulso-local { background: var(--accent-green); height: 100%; }
+        .pulso-draw { background: #555; height: 100%; }
+        .pulso-away { background: var(--accent-gold); height: 100%; }
+        .pulso-text { font-size: 0.65rem; color: #888; text-align: center; margin-bottom: 5px; }
 
         @media (min-width: 768px) {
-            .match-row-container {
-                gap: 20px;
-            }
-            .team-column {
-                flex-direction: row;
-                gap: 12px;
-                flex: 1.5;
-            }
-            .team-column:first-child {
-                justify-content: flex-end;
-            }
-            .team-column:last-child {
-                flex-direction: row-reverse;
-                justify-content: flex-end;
-            }
-            .team-name {
-                width: auto;
-                text-align: right;
-                font-size: 1.3rem;
-            }
-            .team-column:last-child .team-name {
-                text-align: left;
-            }
-            .flag-img {
-                width: 38px;
-            }
+            .match-row-container { gap: 20px; }
+            .team-column { flex-direction: row; gap: 12px; flex: 1.5; }
+            .team-column:first-child { justify-content: flex-end; }
+            .team-column:last-child { flex-direction: row-reverse; justify-content: flex-end; }
+            .team-name { width: auto; text-align: right; font-size: 1.3rem; }
+            .team-column:last-child .team-name { text-align: left; }
+            .flag-img { width: 38px; }
         }
     </style>
 </head>
@@ -218,7 +164,6 @@
                 <div style="font-family:'Anton'; font-size:3rem; color:var(--accent-gold)"><span id="mis-puntos-total">0</span> PTS</div>
             </div>
 
-            <!-- BOTÓN FILTRO PARA OCULTAR PARTIDOS JUGADOS -->
             <div style="text-align: center; margin: 15px 0;">
                 <button id="btn-filtro-jugados" onclick="toggleFiltroJugados()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--accent-gold); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
                     👁️ OCULTAR PARTIDOS JUGADOS
@@ -289,7 +234,6 @@
         const auth = getAuth(app);
         let currentCedula = null;
         
-        // VARIABLE LOCAL PARA FILTRO SIN ALTERAR NADA MÁS
         let ocultarJugados = false;
 
         window.toggleFiltroJugados = () => {
@@ -401,6 +345,10 @@
             const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
             const snapR = await get(child(ref(db), 'resultados_oficiales'));
             
+            // NUEVO: Obtenemos TODOS los pronósticos para calcular el pulso
+            const snapTodosVotos = await get(child(ref(db), 'pronosticos'));
+            const todosLosVotos = snapTodosVotos.exists() ? snapTodosVotos.val() : {};
+
             const votos = snapV.exists() ? snapV.val() : {};
             const resultadosReales = snapR.exists() ? snapR.val() : {};
             const cont = document.getElementById('contenedor-dinamico');
@@ -446,17 +394,28 @@
                 partidos.forEach(([id, p]) => {
                     const fechaPartido = new Date(p.fechaInicio);
                     const fechaCierre = new Date(fechaPartido.getTime() - 600000);
-                    const bloqueado = grandmaCheck(ahora, fechaCierre);
-                    function grandmaCheck(t, c){ return t >= c; }
+                    const bloqueado = (ahora >= fechaCierre);
                     const mostrarBotonSpy = bloqueado;
 
                     const resReal = resultadosReales[id];
                     const tieneResultadoOficial = resReal !== undefined && resReal.golesL !== undefined && resReal.golesV !== undefined;
 
-                    // FILTRO DE CONTROL REMOTO
-                    if (ocultarJugados && tieneResultadoOficial) {
-                        return;
-                    }
+                    if (ocultarJugados && tieneResultadoOficial) return;
+
+                    // Cálculo del Pulso
+                    let l=0, e=0, v=0, total=0;
+                    Object.keys(todosLosVotos).forEach(cedula => {
+                        if(todosLosVotos[cedula][id]) {
+                            const p = todosLosVotos[cedula][id];
+                            total++;
+                            if(p.local > p.visitante) l++;
+                            else if(p.local < p.visitante) v++;
+                            else e++;
+                        }
+                    });
+                    const pL = total > 0 ? Math.round((l/total)*100) : 33;
+                    const pE = total > 0 ? Math.round((e/total)*100) : 33;
+                    const pV = total > 0 ? Math.round((v/total)*100) : 34;
 
                     cont.innerHTML += `
                         <div class="match-card">
@@ -482,6 +441,13 @@
                                 </div>
                             </div>
                             
+                            <div class="pulso-text">Tendencia: ${l} L | ${e} E | ${v} V</div>
+                            <div class="pulso-container">
+                                <div class="pulso-local" style="width: ${pL}%"></div>
+                                <div class="pulso-draw" style="width: ${pE}%"></div>
+                                <div class="pulso-away" style="width: ${pV}%"></div>
+                            </div>
+
                             <div style="text-align:center; min-height: 35px; margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; justify-content: center;">
                                 ${tieneResultadoOficial ? `
                                     <div style="background: rgba(0, 255, 136, 0.12); border: 1px dashed var(--accent-green); color: var(--accent-green); padding: 5px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; font-family: 'Anton'; letter-spacing: 0.5px;">
@@ -648,18 +614,14 @@
 
                 let contadorAgregados = 0;
                 
-                // Procesamiento en bloque
                 for (let i = 0; i < partidos.length; i++) {
                     const p = partidos[i];
-                    
-                    // Mapeo dinámico para soportar múltiples formatos de JSON
                     const eqL = p.local || p.equipoL;
                     const eqV = p.visitante || p.equipoV;
                     const grp = p.grupo;
                     const fecha = p.fecha_hora || p.fechaInicio;
 
                     if(eqL && eqV && grp && fecha) {
-                        // Sumamos 'i' a Date.now() para garantizar un ID único por iteración
                         const uniqueId = 'p_' + (Date.now() + i);
                         await set(ref(db, `partidos_oficiales/${uniqueId}`), { 
                             equipoL: eqL, 
@@ -671,7 +633,6 @@
                     }
                 }
                 
-                // Limpiar la caja y refrescar la vista
                 document.getElementById('bulk-json').value = "";
                 renderAdminList();
                 Swal.fire("Sincronización Exitosa", `Se importaron ${contadorAgregados} partidos correctamente a la base de datos.`, "success");
