@@ -256,6 +256,11 @@
                 <input type="datetime-local" id="new-fecha" class="custom-input">
                 <button class="btn-action btn-green" onclick="crearPartidoOficial()">CREAR</button>
             </div>
+            <div class="match-card">
+                <h3>📥 CARGA MASIVA (JSON)</h3>
+                <textarea id="bulk-json" class="custom-input" rows="8" placeholder='Pega aquí tu lista JSON de partidos...' style="resize: vertical; font-family: monospace; font-size: 0.85rem; background: rgba(0,0,0,0.6);"></textarea>
+                <button class="btn-action btn-green" onclick="cargarPartidosMasivos()">IMPORTAR LISTA</button>
+            </div>
             <div>
                 <h3>RESULTADOS REALES</h3>
                 <div id="admin-list"></div>
@@ -631,6 +636,49 @@
             if(!l || !v || !g || !f) return Swal.fire("Error", "Faltan datos", "error");
             await set(ref(db, 'partidos_oficiales/p_' + Date.now()), { equipoL: l, equipoV: v, grupo: g, fechaInicio: f });
             renderAdminList(); Swal.fire("Creado", "Partido en línea", "success");
+        };
+
+        window.cargarPartidosMasivos = async () => {
+            const jsonText = document.getElementById('bulk-json').value;
+            if(!jsonText) return Swal.fire("Error", "Por favor pega el código JSON primero", "warning");
+            
+            try {
+                const partidos = JSON.parse(jsonText);
+                if(!Array.isArray(partidos)) throw new Error("El formato debe ser una lista con corchetes [ ]");
+
+                let contadorAgregados = 0;
+                
+                // Procesamiento en bloque
+                for (let i = 0; i < partidos.length; i++) {
+                    const p = partidos[i];
+                    
+                    // Mapeo dinámico para soportar múltiples formatos de JSON
+                    const eqL = p.local || p.equipoL;
+                    const eqV = p.visitante || p.equipoV;
+                    const grp = p.grupo;
+                    const fecha = p.fecha_hora || p.fechaInicio;
+
+                    if(eqL && eqV && grp && fecha) {
+                        // Sumamos 'i' a Date.now() para garantizar un ID único por iteración
+                        const uniqueId = 'p_' + (Date.now() + i);
+                        await set(ref(db, `partidos_oficiales/${uniqueId}`), { 
+                            equipoL: eqL, 
+                            equipoV: eqV, 
+                            grupo: grp, 
+                            fechaInicio: fecha 
+                        });
+                        contadorAgregados++;
+                    }
+                }
+                
+                // Limpiar la caja y refrescar la vista
+                document.getElementById('bulk-json').value = "";
+                renderAdminList();
+                Swal.fire("Sincronización Exitosa", `Se importaron ${contadorAgregados} partidos correctamente a la base de datos.`, "success");
+                
+            } catch (err) {
+                Swal.fire("Error de Formato JSON", "Asegúrate de copiar el JSON exacto. Detalle: " + err.message, "error");
+            }
         };
 
         window.guardarResultadosOficiales = async () => {
