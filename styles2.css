@@ -136,6 +136,12 @@ header {
 .lbl-visitante { color: var(--accent-gold); }
 
 /* --- LABORATORIO DE DATOS --- */
+.stats-row-hidden {
+    display: none !important;
+}
+.stats-row-visible {
+    display: flex !important;
+}
 .stats-container {
     text-align: left;
     font-family: 'Barlow Condensed', sans-serif;
