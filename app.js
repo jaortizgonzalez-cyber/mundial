@@ -540,22 +540,16 @@ window.abrirLaboratorioDatos = async () => {
 
 // 4. Lógica global para el botón "Ver más / Ver menos"
 window.toggleStatsLaboratorio = (idBloque, btnElement) => {
-    // 1. Buscamos el modal padre de SweetAlert
-    const modal = btnElement.closest('.swal2-html-container');
+    // Buscamos todas las filas que tengan el atributo data-stat-group="el_id_que_buscamos"
+    const filas = document.querySelectorAll(`[data-stat-group="${idBloque}"]`);
     
-    // 2. Buscamos todas las filas que tengan la clase que definimos
-    // Usamos el idBloque para ser específicos
-    const filas = modal.querySelectorAll(`.extra-stat-${idBloque}`);
+    // Verificamos si están ocultas mirando la primera fila
+    const estaOculto = filas[0].style.display === 'none';
     
-    // 3. Verificamos el estado actual basándonos en la primera fila encontrada
-    const estaOculto = filas[0].style.display === 'none' || filas[0].style.display === '';
-    
-    // 4. Cambiamos el display
     filas.forEach(fila => {
         fila.style.display = estaOculto ? 'flex' : 'none';
     });
     
-    // 5. Cambiamos el texto del botón
     btnElement.innerText = estaOculto ? "VER MENOS ▲" : "VER MÁS ▼";
     btnElement.style.color = estaOculto ? "var(--accent-green)" : "#aaa";
 };
