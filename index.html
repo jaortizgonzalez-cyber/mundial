@@ -1089,49 +1089,50 @@
                 
                 let up = {}; 
                 const ahora = new Date();
+                let hayCambios = false;
                 
                 Object.entries(snapP.val()).forEach(([id, p]) => {
                     const bloqueado = ahora >= new Date(new Date(p.fechaInicio).getTime() - 600000);
+                    
                     if (!bloqueado) {
                         const inputL = document.getElementById(`l_${id}`);
                         const inputV = document.getElementById(`v_${id}`);
                         
                         if (inputL && inputV) {
-                            // Limpiamos espacios en blanco accidentales
                             const l = inputL.value.trim();
                             const v = inputV.value.trim();
                             
-                            // Si ambos campos tienen texto y son números válidos
                             if (l !== "" && v !== "" && !isNaN(l) && !isNaN(v)) {
+                                // Si hay números, los guardamos normal
                                 up[id] = { 
                                     local: Math.max(0, parseInt(l)), 
                                     visitante: Math.max(0, parseInt(v)) 
                                 };
+                                hayCambios = true;
                             } else {
-                                // Si borraron algo o metieron un dato inválido, ordenamos borrar la apuesta
-                                up[id] = null;
+                                // SOLUCIÓN INFALIBLE: En lugar de "null", sobreescribimos con texto vacío.
+                                // Firebase no puede ignorar esto, borrará el número sí o sí.
+                                up[id] = { local: "", visitante: "" };
+                                hayCambios = true;
                             }
                         }
                     }
                 });
 
-                // Si hay datos por actualizar (ya sea números o nulls de borrado)
-                if (Object.keys(up).length > 0) {
+                if (hayCambios) {
                     await update(ref(db, `pronosticos/${currentCedula}`), up);
                 }
                 
-                // Mostramos el éxito y, cuando el usuario le dé a OK, refrescamos la interfaz
+                // Refrescamos toda la vista al darle OK
                 Swal.fire("Éxito", "Tus pronósticos han sido actualizados", "success").then(() => {
                     renderPartidos();
                 });
                 
             } catch (error) {
-                // Si Firebase rechaza algo, ahora lo veremos en rojo
-                console.error("Error detallado:", error);
+                // Si llegara a fallar, ahora te dirá exactamente por qué
                 Swal.fire("Error", "No se pudo guardar: " + error.message, "error");
             }
         };
-
 
         async function calcularMisPuntos() {
 
