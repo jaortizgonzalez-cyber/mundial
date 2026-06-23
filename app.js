@@ -542,19 +542,20 @@ window.abrirLaboratorioDatos = async () => {
 // 4. Lógica global para el botón "Ver más / Ver menos"
 window.toggleStatsLaboratorio = (idBloque, btnElement) => {
     const filas = document.querySelectorAll(`[data-stat-group="${idBloque}"]`);
-    if (filas.length === 0) return;
-
-    // Usamos getComputedStyle para preguntar el estado real, 
-    // sin importar si viene de CSS o de un estilo previo.
-    const estilo = window.getComputedStyle(filas[0]);
-    const estaOculto = estilo.display === 'none';
-
+    
+    // Verificamos el estado actual basándonos en si tiene la clase hidden
+    const estaOculto = filas[0].classList.contains('stats-row-hidden');
+    
     filas.forEach(fila => {
-        // Si estaba oculto (none), lo ponemos en 'flex'. 
-        // Si estaba visible, lo ponemos en 'none'.
-        fila.style.display = estaOculto ? 'flex' : 'none';
+        if (estaOculto) {
+            fila.classList.remove('stats-row-hidden');
+            fila.classList.add('stats-row-visible');
+        } else {
+            fila.classList.remove('stats-row-visible');
+            fila.classList.add('stats-row-hidden');
+        }
     });
-
+    
     // Actualizamos el botón
     btnElement.innerText = estaOculto ? "VER MENOS ▲" : "VER MÁS ▼";
     btnElement.style.color = estaOculto ? "var(--accent-green)" : "#aaa";
