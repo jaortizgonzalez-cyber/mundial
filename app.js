@@ -539,24 +539,26 @@ window.abrirLaboratorioDatos = async () => {
 
 // 4. Lógica global para el botón "Ver más / Ver menos"
 window.toggleStatsLaboratorio = (idBloque, btnElement) => {
-    // Buscamos el contenedor padre (donde está el botón)
-    const contenedor = btnElement.parentElement.parentElement;
+    // 1. Buscamos el modal padre de SweetAlert
+    const modal = btnElement.closest('.swal2-html-container');
     
-    // Buscamos dentro de ese contenedor específico los elementos ocultos
-    const elementosOcultos = contenedor.querySelectorAll(`.extra-stat-${idBloque}`);
+    // 2. Buscamos todas las filas que tengan la clase que definimos
+    // Usamos el idBloque para ser específicos
+    const filas = modal.querySelectorAll(`.extra-stat-${idBloque}`);
     
-    const estaExpandiendo = btnElement.innerText.includes("VER MÁS");
+    // 3. Verificamos el estado actual basándonos en la primera fila encontrada
+    const estaOculto = filas[0].style.display === 'none' || filas[0].style.display === '';
     
-    elementosOcultos.forEach(el => {
-        // Forzamos el display a flex para que mantenga el diseño, o ninguno para ocultar
-        el.style.display = estaExpandiendo ? 'flex' : 'none';
+    // 4. Cambiamos el display
+    filas.forEach(fila => {
+        fila.style.display = estaOculto ? 'flex' : 'none';
     });
     
-    // Actualizamos texto y color
-    btnElement.innerText = estaExpandiendo ? "VER MENOS ▲" : "VER MÁS ▼";
-    btnElement.style.color = estaExpandiendo ? "var(--accent-green)" : "#aaa";
-    btnElement.style.borderColor = estaExpandiendo ? "var(--accent-green)" : "#555";
+    // 5. Cambiamos el texto del botón
+    btnElement.innerText = estaOculto ? "VER MENOS ▲" : "VER MÁS ▼";
+    btnElement.style.color = estaOculto ? "var(--accent-green)" : "#aaa";
 };
+
 window.handleLogin = async () => {
     const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
     try {
