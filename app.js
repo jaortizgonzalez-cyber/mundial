@@ -539,17 +539,23 @@ window.abrirLaboratorioDatos = async () => {
 
 // 4. Lógica global para el botón "Ver más / Ver menos"
 window.toggleStatsLaboratorio = (idBloque, btnElement) => {
-    const elementosOcultos = document.querySelectorAll(`.extra-stat-${idBloque}`);
+    // Buscamos el contenedor padre (donde está el botón)
+    const contenedor = btnElement.parentElement.parentElement;
+    
+    // Buscamos dentro de ese contenedor específico los elementos ocultos
+    const elementosOcultos = contenedor.querySelectorAll(`.extra-stat-${idBloque}`);
+    
     const estaExpandiendo = btnElement.innerText.includes("VER MÁS");
     
     elementosOcultos.forEach(el => {
-        // Usamos flex porque las filas (stat-row) usan display: flex
+        // Forzamos el display a flex para que mantenga el diseño, o ninguno para ocultar
         el.style.display = estaExpandiendo ? 'flex' : 'none';
     });
     
+    // Actualizamos texto y color
     btnElement.innerText = estaExpandiendo ? "VER MENOS ▲" : "VER MÁS ▼";
-    if(estaExpandiendo) btnElement.style.color = "var(--accent-green)";
-    else btnElement.style.color = "#aaa";
+    btnElement.style.color = estaExpandiendo ? "var(--accent-green)" : "#aaa";
+    btnElement.style.borderColor = estaExpandiendo ? "var(--accent-green)" : "#555";
 };
 window.handleLogin = async () => {
     const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
