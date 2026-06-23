@@ -489,15 +489,11 @@ window.abrirLaboratorioDatos = async () => {
     const generarHTMLBarra = (titulo, icono, arrayDatos, valorKey, textoSufijo, colorClass, maxValor, idBloque) => {
         let html = `<h4 style="color:var(--accent-gold); margin: 25px 0 10px 0; border-bottom: 1px solid #333; padding-bottom: 5px;">${icono} ${titulo}</h4>`;
         
-        arrayDatos.forEach((eq, index) => {
+        // 1. Renderizamos el Top 5 (Siempre visible, sin lógica de ocultar)
+        arrayDatos.slice(0, 5).forEach((eq, index) => {
             const porcentajeAncho = maxValor > 0 ? (eq[valorKey] / maxValor) * 100 : 0;
-            // A partir del puesto 6 (índice 5), ocultamos la fila por defecto
-            // Dentro de tu función generarHTMLBarra, cambia esta parte del HTML:
-            // En tu bucle de generación de filas:
-            const isHidden = index >= 5 ? 'stats-row-hidden' : 'stats-row-visible';
-            
             html += `
-            <div class="stat-row animate__animated animate__fadeIn ${isHidden}" data-stat-group="${idBloque}">
+            <div class="stat-row">
                 <div class="stat-team-info"><span style="color:#666; font-size:0.8rem; width:15px;">${index+1}.</span> <span>${eq.nombre.substring(0, 12)}</span></div>
                 <div class="stat-bar-container">
                     <div class="stat-bar-fill ${colorClass}" style="width: ${porcentajeAncho}%"></div>
@@ -505,19 +501,35 @@ window.abrirLaboratorioDatos = async () => {
                 <div class="stat-numbers">${eq[valorKey]} ${textoSufijo}</div>
             </div>`;
         });
-
-        // Si hay más de 5 equipos, inyectamos el botón de Ver más
+    
+        // 2. Si hay más de 5, creamos el contenedor oculto para el resto
         if (arrayDatos.length > 5) {
+            html += `<div id="extra-rows-${idBloque}" style="display:none;">`;
+            
+            arrayDatos.slice(5).forEach((eq, index) => {
+                const porcentajeAncho = maxValor > 0 ? (eq[valorKey] / maxValor) * 100 : 0;
+                html += `
+                <div class="stat-row animate__animated animate__fadeIn">
+                    <div class="stat-team-info"><span style="color:#666; font-size:0.8rem; width:15px;">${index + 6}.</span> <span>${eq.nombre.substring(0, 12)}</span></div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-fill ${colorClass}" style="width: ${porcentajeAncho}%"></div>
+                    </div>
+                    <div class="stat-numbers">${eq[valorKey]} ${textoSufijo}</div>
+                </div>`;
+            });
+            
+            html += `</div>`; // Cierre del contenedor oculto
+    
+            // 3. Botón de acción
             html += `
             <div style="text-align:center; margin-top:8px;">
-                <button onclick="toggleStatsLaboratorio('${idBloque}', this)" style="background:none; border:1px solid #555; color:#aaa; padding:5px 15px; border-radius:15px; cursor:pointer; font-family:'Barlow Condensed'; font-weight:bold; transition:0.3s;" onmouseover="this.style.color='#fff'; this.style.borderColor='#fff'" onmouseout="this.style.color='#aaa'; this.style.borderColor='#555'">
+                <button onclick="toggleStatsLaboratorio('${idBloque}', this)" style="background:none; border:1px solid #555; color:#aaa; padding:5px 15px; border-radius:15px; cursor:pointer; font-family:'Barlow Condensed'; font-weight:bold; transition:0.3s;">
                     VER MÁS ▼
                 </button>
             </div>`;
         }
         return html;
     };
-
     let modalHTML = `<div class="stats-container">`;
     modalHTML += `<p style="color:#aaa; font-size:0.85rem; text-align:center;">Análisis basado en los partidos finalizados.</p>`;
     
@@ -541,24 +553,21 @@ window.abrirLaboratorioDatos = async () => {
 
 // 4. Lógica global para el botón "Ver más / Ver menos"
 window.toggleStatsLaboratorio = (idBloque, btnElement) => {
-    const filas = document.querySelectorAll(`[data-stat-group="${idBloque}"]`);
+    // Buscamos el contenedor específico de ese bloque
+    const contenedorExtra = document.getElementById(`extra-rows-${idBloque}`);
     
-    // Verificamos el estado actual basándonos en si tiene la clase hidden
-    const estaOculto = filas[0].classList.contains('stats-row-hidden');
+    if (!contenedorExtra) return;
+
+    // Verificamos si está oculto
+    const estaOculto = contenedorExtra.style.display === 'none';
     
-    filas.forEach(fila => {
-        if (estaOculto) {
-            fila.classList.remove('stats-row-hidden');
-            fila.classList.add('stats-row-visible');
-        } else {
-            fila.classList.remove('stats-row-visible');
-            fila.classList.add('stats-row-hidden');
-        }
-    });
+    // Toggle directo del contenedor
+    contenedorExtra.style.display = estaOculto ? 'block' : 'none';
     
-    // Actualizamos el botón
+    // Actualizamos el texto del botón
     btnElement.innerText = estaOculto ? "VER MENOS ▲" : "VER MÁS ▼";
     btnElement.style.color = estaOculto ? "var(--accent-green)" : "#aaa";
+    btnElement.style.borderColor = estaOculto ? "var(--accent-green)" : "#555";
 };
 
 window.handleLogin = async () => {
