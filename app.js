@@ -429,6 +429,100 @@ window.guardarResultadosOficiales = async () => {
     Swal.fire("Publicado", "Los resultados ya son oficiales", "success");
 };
 
+window.abrirLaboratorioDatos = async () => {
+    const snapP = await get(child(ref(db), 'partidos_oficiales'));
+    const snapR = await get(child(ref(db), 'resultados_oficiales'));
+
+    if (!snapP.exists() || !snapR.exists()) {
+        return Swal.fire("Info", "Aún no hay suficientes partidos jugados para generar estadísticas.", "info");
+    }
+
+    const partidos = snapP.val();
+    const resultados = snapR.val();
+    let statsEquipos = {};
+
+    // 1. Recolectar y procesar datos
+    Object.keys(partidos).forEach(id => {
+        if (resultados[id] && resultados[id].golesL !== "" && resultados[id].golesV !== "") {
+            const eqL = partidos[id].equipoL;
+            const eqV = partidos[id].equipoV;
+            const gL = parseInt(resultados[id].golesL, 10);
+            const gV = parseInt(resultados[id].golesV, 10);
+
+            // Inicializar equipos si no existen
+            if (!statsEquipos[eqL]) statsEquipos[eqL] = { jugados: 0, victorias: 0, empates: 0, derrotas: 0, golesFavor: 0, golesContra: 0 };
+            if (!statsEquipos[eqV]) statsEquipos[eqV] = { jugados: 0, victorias: 0, empates: 0, derrotas: 0, golesFavor: 0, golesContra: 0 };
+
+            // Sumar partidos y goles
+            statsEquipos[eqL].jugados++; statsEquipos[eqV].jugados++;
+            statsEquipos[eqL].golesFavor += gL; statsEquipos[eqL].golesContra += gV;
+            statsEquipos[eqV].golesFavor += gV; statsEquipos[eqV].golesContra += gL;
+
+            // Calcular V, E, D
+            if (gL > gV) { statsEquipos[eqL].victorias++; statsEquipos[eqV].derrotas++; }
+            else if (gL < gV) { statsEquipos[eqV].victorias++; statsEquipos[eqL].derrotas++; }
+            else { statsEquipos[eqL].empates++; statsEquipos[eqV].empates++; }
+        }
+    });
+
+    // Convertir a Array y calcular % de victoria y diferencia de gol
+    let arrayStats = Object.entries(statsEquipos).map(([nombre, s]) => {
+        return {
+            nombre,
+            ...s,
+            winRate: s.jugados > 0 ? Math.round((s.victorias / s.jugados) * 100) : 0,
+            difGoles: s.golesFavor - s.golesContra
+        };
+    });
+
+    if (arrayStats.length === 0) return Swal.fire("Info", "No hay resultados oficiales.", "info");
+
+    // 2. Generar Rankings (Top 5)
+    const topOfensivas = [...arrayStats].sort((a, b) => b.golesFavor - a.golesFavor).slice(0, 5);
+    const topDefensas = [...arrayStats].sort((a, b) => a.golesContra - b.golesContra).filter(e => e.jugados > 0).slice(0, 5);
+    const topWinRate = [...arrayStats].sort((a, b) => b.winRate - a.winRate).slice(0, 5);
+
+    // 3. Función auxiliar para renderizar las barras CSS
+    const generarHTMLBarra = (titulo, icono, arrayDatos, valorKey, textoSufijo, colorClass, maxValor) => {
+        let html = `<h4 style="color:var(--accent-gold); margin: 20px 0 10px 0; border-bottom: 1px solid #333; padding-bottom: 5px;">${icono} ${titulo}</h4>`;
+        arrayDatos.forEach(eq => {
+            const porcentajeAncho = maxValor > 0 ? (eq[valorKey] / maxValor) * 100 : 0;
+            html += `
+            <div class="stat-row">
+                <div class="stat-team-info"><span>${eq.nombre.substring(0, 12)}</span></div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar-fill ${colorClass}" style="width: ${porcentajeAncho}%"></div>
+                </div>
+                <div class="stat-numbers">${eq[valorKey]} ${textoSufijo}</div>
+            </div>`;
+        });
+        return html;
+    };
+
+    // Calculamos los máximos para que la barra más larga siempre sea el 100% del contenedor
+    const maxGolesF = Math.max(...topOfensivas.map(e => e.golesFavor), 1);
+    const maxGolesC = Math.max(...topDefensas.map(e => e.golesContra), 1); // Cuidado: ¡Aquí menos es mejor!
+
+    let modalHTML = `<div class="stats-container">`;
+    modalHTML += `<p style="color:#aaa; font-size:0.85rem; text-align:center;">Análisis basado en los partidos finalizados.</p>`;
+    
+    modalHTML += generarHTMLBarra("MÁQUINAS GOLEADORAS (Goles a Favor)", "⚽", topOfensivas, 'golesFavor', 'GF', 'bg-offensive', maxGolesF);
+    modalHTML += generarHTMLBarra("MUROS INFRANQUEABLES (Goles en Contra)", "🛡️", topDefensas, 'golesContra', 'GC', 'bg-defensive', 10); // Base 10 goles para escala visual
+    modalHTML += generarHTMLBarra("EFECTIVIDAD (% Victorias)", "🔥", topWinRate, 'winRate', '%', 'bg-winrate', 100);
+
+    modalHTML += `</div>`;
+
+    Swal.fire({
+        title: `<span style="font-family:Anton; font-size:1.8rem; color:#fff;">CENTRAL DE DATOS</span>`,
+        html: modalHTML,
+        background: '#020d1a',
+        color: '#fff',
+        width: '600px',
+        confirmButtonText: 'CERRAR PANEL',
+        confirmButtonColor: '#333'
+    });
+};
+
 window.handleLogin = async () => {
     const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
     try {
