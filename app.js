@@ -98,8 +98,13 @@ async function renderPartidos() {
     const snapP = await get(child(ref(db), 'partidos_oficiales'));
     const snapV = await get(child(ref(db), `pronosticos/${currentCedula}`));
     const snapR = await get(child(ref(db), 'resultados_oficiales'));
+    
+    // NUEVO: Traemos el volumen de datos de todos los usuarios
+    const snapAll = await get(child(ref(db), 'pronosticos')); 
+
     const votos = snapV.exists() ? snapV.val() : {};
     const resultadosReales = snapR.exists() ? snapR.val() : {};
+    const todosLosVotos = snapAll.exists() ? snapAll.val() : {}; 
     const cont = document.getElementById('contenedor-dinamico');
     cont.innerHTML = "";
     
@@ -145,7 +150,36 @@ async function renderPartidos() {
             const bloqueado = ahora >= new Date(fechaPartido.getTime() - 600000);
             const resReal = resultadosReales[id];
             const tieneResultadoOficial = resReal !== undefined && resReal.golesL !== undefined && resReal.golesV !== undefined;
+            
             if (ocultarJugados && tieneResultadoOficial) return;
+
+            // --- INICIO CÁLCULO ESTADÍSTICO (EL CEREBRO DE MULTIVAC) ---
+            let votosLocal = 0, votosEmpate = 0, votosVisitante = 0;
+            let totalVotosPartido = 0;
+
+            Object.values(todosLosVotos).forEach(votosUsuario => {
+                if(votosUsuario && votosUsuario[id]) {
+                    const l = votosUsuario[id].local;
+                    const v = votosUsuario[id].visitante;
+                    
+                    if(l !== "" && v !== "" && l !== undefined && v !== undefined) {
+                        totalVotosPartido++;
+                        if(l > v) votosLocal++;
+                        else if(l < v) votosVisitante++;
+                        else votosEmpate++;
+                    }
+                }
+            });
+
+            // Lógica de resguardo: Si nadie ha votado, el empate asume el 100% visual para crear una barra gris vacía
+            const pctLocal = totalVotosPartido > 0 ? Math.round((votosLocal / totalVotosPartido) * 100) : 0;
+            const pctEmpate = totalVotosPartido > 0 ? Math.round((votosEmpate / totalVotosPartido) * 100) : 100;
+            const pctVisitante = totalVotosPartido > 0 ? Math.round((votosVisitante / totalVotosPartido) * 100) : 0;
+
+            const textLocal = totalVotosPartido > 0 ? `${pctLocal}% Local` : `-`;
+            const textEmpate = totalVotosPartido > 0 ? `${pctEmpate}% Empate` : `Sin pronósticos`;
+            const textVisitante = totalVotosPartido > 0 ? `${pctVisitante}% Visita` : `-`;
+            // --- FIN CÁLCULO ESTADÍSTICO ---
 
             cont.innerHTML += `
                 <div class="match-card">
@@ -167,6 +201,21 @@ async function renderPartidos() {
                             ${obtenerBandera(p.equipoV)}
                         </div>
                     </div>
+
+                    <div class="pulse-container">
+                        <div class="pulse-title">TENDENCIA DE LOS PARTICIPANTES</div>
+                        <div class="pulse-bar">
+                            <div class="pulse-segment pulse-local" style="width: ${pctLocal}%"></div>
+                            <div class="pulse-segment pulse-empate" style="width: ${pctEmpate}%"></div>
+                            <div class="pulse-segment pulse-visitante" style="width: ${pctVisitante}%"></div>
+                        </div>
+                        <div class="pulse-labels">
+                            <span class="lbl-local">${textLocal}</span>
+                            <span class="lbl-empate">${textEmpate}</span>
+                            <span class="lbl-visitante">${textVisitante}</span>
+                        </div>
+                    </div>
+                    
                     <div style="text-align:center; min-height: 35px; margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; justify-content: center;">
                         ${tieneResultadoOficial ? `<div style="background: rgba(0, 255, 136, 0.12); border: 1px dashed var(--accent-green); color: var(--accent-green); padding: 5px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; font-family: 'Anton'; letter-spacing: 0.5px;">⚽ MARCADOR OFICIAL: ${resReal.golesL} - ${resReal.golesV}</div>` : ''}
                         ${bloqueado ? `<button class="btn-spy" onclick="verApuestasGlobales('${id}', '${p.equipoL}', '${p.equipoV}')">👁️ VER APUESTAS</button>` : `<span style="color:#555; font-size:0.85rem; font-style:italic;">🔒 Pronósticos ocultos (Disponibles pronto)</span>`}
@@ -175,7 +224,6 @@ async function renderPartidos() {
         });
     }
 }
-
 window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
     const snapU = await get(child(ref(db), 'usuarios'));
     const snapV = await get(child(ref(db), 'pronosticos'));
