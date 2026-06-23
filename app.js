@@ -493,10 +493,11 @@ window.abrirLaboratorioDatos = async () => {
             const porcentajeAncho = maxValor > 0 ? (eq[valorKey] / maxValor) * 100 : 0;
             // A partir del puesto 6 (índice 5), ocultamos la fila por defecto
             // Dentro de tu función generarHTMLBarra, cambia esta parte del HTML:
-            const isHidden = index >= 5 ? `style="display:none;"` : '';
+            // En tu bucle de generación de filas:
+            const isHidden = index >= 5 ? 'stats-row-hidden' : 'stats-row-visible';
             
             html += `
-            <div class="stat-row animate__animated animate__fadeIn" ${isHidden} data-stat-group="${idBloque}">
+            <div class="stat-row animate__animated animate__fadeIn ${isHidden}" data-stat-group="${idBloque}">
                 <div class="stat-team-info"><span style="color:#666; font-size:0.8rem; width:15px;">${index+1}.</span> <span>${eq.nombre.substring(0, 12)}</span></div>
                 <div class="stat-bar-container">
                     <div class="stat-bar-fill ${colorClass}" style="width: ${porcentajeAncho}%"></div>
