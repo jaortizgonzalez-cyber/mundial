@@ -540,12 +540,21 @@ window.abrirLaboratorioDatos = async () => {
 
 // 4. Lógica global para el botón "Ver más / Ver menos"
 window.toggleStatsLaboratorio = (idBloque, btnElement) => {
-    // Buscamos todas las filas que tengan el atributo data-stat-group="el_id_que_buscamos"
-    const filas = document.querySelectorAll(`[data-stat-group="${idBloque}"]`);
+    // 1. Buscamos todas las filas con ese grupo
+    const selector = `[data-stat-group="${idBloque}"]`;
+    const filas = document.querySelectorAll(selector);
     
-    // Verificamos si están ocultas mirando la primera fila
+    // 2. Debug: Si no encuentra nada, avísanos en consola en lugar de romper la app
+    if (filas.length === 0) {
+        console.error("DEBUG: No encontré filas con el selector: " + selector);
+        console.warn("Asegúrate de que tus elementos tengan data-stat-group='" + idBloque + "'");
+        return; // Salimos de la función para que no de error
+    }
+    
+    // 3. Verificamos el estado basándonos en la primera fila
     const estaOculto = filas[0].style.display === 'none';
     
+    // 4. Aplicamos el cambio
     filas.forEach(fila => {
         fila.style.display = estaOculto ? 'flex' : 'none';
     });
