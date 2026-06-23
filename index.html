@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
 
     <meta charset="UTF-8">
@@ -1084,31 +1083,54 @@
 
 
         window.guardarTodosLosPronosticos = async () => {
+            try {
+                const snapP = await get(child(ref(db), 'partidos_oficiales'));
+                if (!snapP.exists()) return;
+                
+                let up = {}; 
+                const ahora = new Date();
+                
+                Object.entries(snapP.val()).forEach(([id, p]) => {
+                    const bloqueado = ahora >= new Date(new Date(p.fechaInicio).getTime() - 600000);
+                    if (!bloqueado) {
+                        const inputL = document.getElementById(`l_${id}`);
+                        const inputV = document.getElementById(`v_${id}`);
+                        
+                        if (inputL && inputV) {
+                            // Limpiamos espacios en blanco accidentales
+                            const l = inputL.value.trim();
+                            const v = inputV.value.trim();
+                            
+                            // Si ambos campos tienen texto y son números válidos
+                            if (l !== "" && v !== "" && !isNaN(l) && !isNaN(v)) {
+                                up[id] = { 
+                                    local: Math.max(0, parseInt(l)), 
+                                    visitante: Math.max(0, parseInt(v)) 
+                                };
+                            } else {
+                                // Si borraron algo o metieron un dato inválido, ordenamos borrar la apuesta
+                                up[id] = null;
+                            }
+                        }
+                    }
+                });
 
-            const snapP = await get(child(ref(db), 'partidos_oficiales'));
-
-            let up = {}; const ahora = new Date();
-
-            Object.entries(snapP.val()).forEach(([id, p]) => {
-
-                const bloqueado = ahora >= new Date(new Date(p.fechaInicio).getTime() - 600000);
-
-                if (!bloqueado) {
-
-                    const l = document.getElementById(`l_${id}`).value, v = document.getElementById(`v_${id}`).value;
-
-                    if(l !== "" && v !== "") up[id] = { local: Math.max(0, parseInt(l)), visitante: Math.max(0, parseInt(v)) };
-
+                // Si hay datos por actualizar (ya sea números o nulls de borrado)
+                if (Object.keys(up).length > 0) {
+                    await update(ref(db, `pronosticos/${currentCedula}`), up);
                 }
-
-            });
-
-            await update(ref(db, `pronosticos/${currentCedula}`), up);
-
-            Swal.fire("Éxito", "Pronósticos guardados", "success");
-
+                
+                // Mostramos el éxito y, cuando el usuario le dé a OK, refrescamos la interfaz
+                Swal.fire("Éxito", "Tus pronósticos han sido actualizados", "success").then(() => {
+                    renderPartidos();
+                });
+                
+            } catch (error) {
+                // Si Firebase rechaza algo, ahora lo veremos en rojo
+                console.error("Error detallado:", error);
+                Swal.fire("Error", "No se pudo guardar: " + error.message, "error");
+            }
         };
-
 
 
         async function calcularMisPuntos() {
