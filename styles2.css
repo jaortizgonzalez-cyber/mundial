@@ -134,3 +134,50 @@ header {
 .lbl-local { color: var(--accent-green); }
 .lbl-empate { color: #888; }
 .lbl-visitante { color: var(--accent-gold); }
+
+/* --- LABORATORIO DE DATOS --- */
+.stats-container {
+    text-align: left;
+    font-family: 'Barlow Condensed', sans-serif;
+}
+.stat-row {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.stat-team-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 35%;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+.stat-bar-container {
+    width: 45%;
+    background: #222;
+    border-radius: 4px;
+    height: 12px;
+    overflow: hidden;
+    position: relative;
+}
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease-in-out;
+}
+.stat-numbers {
+    width: 20%;
+    text-align: right;
+    font-family: 'Anton';
+    font-size: 1.1rem;
+    color: var(--accent-gold);
+}
+.bg-offensive { background: var(--accent-green); box-shadow: 0 0 10px rgba(0,255,136,0.5); }
+.bg-defensive { background: #00aaff; box-shadow: 0 0 10px rgba(0,170,255,0.5); }
+.bg-winrate { background: #ff4444; box-shadow: 0 0 10px rgba(255,68,68,0.5); }
