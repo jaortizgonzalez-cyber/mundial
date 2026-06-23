@@ -465,50 +465,64 @@ window.abrirLaboratorioDatos = async () => {
         }
     });
 
-    // Convertir a Array y calcular % de victoria y diferencia de gol
+    // Convertir a Array y calcular % de victoria
     let arrayStats = Object.entries(statsEquipos).map(([nombre, s]) => {
         return {
             nombre,
             ...s,
-            winRate: s.jugados > 0 ? Math.round((s.victorias / s.jugados) * 100) : 0,
-            difGoles: s.golesFavor - s.golesContra
+            winRate: s.jugados > 0 ? Math.round((s.victorias / s.jugados) * 100) : 0
         };
     });
 
     if (arrayStats.length === 0) return Swal.fire("Info", "No hay resultados oficiales.", "info");
 
-    // 2. Generar Rankings (Top 5)
-    const topOfensivas = [...arrayStats].sort((a, b) => b.golesFavor - a.golesFavor).slice(0, 5);
-    const topDefensas = [...arrayStats].sort((a, b) => a.golesContra - b.golesContra).filter(e => e.jugados > 0).slice(0, 5);
-    const topWinRate = [...arrayStats].sort((a, b) => b.winRate - a.winRate).slice(0, 5);
+    // 2. Generar Rankings COMPLETOS (Sin el .slice(0,5), pero filtrando los que tienen 0 para no hacer bulto)
+    const rankOfensivas = [...arrayStats].filter(e => e.golesFavor > 0).sort((a, b) => b.golesFavor - a.golesFavor);
+    const rankDefensas = [...arrayStats].filter(e => e.jugados > 0).sort((a, b) => a.golesContra - b.golesContra);
+    const rankWinRate = [...arrayStats].filter(e => e.jugados > 0).sort((a, b) => b.winRate - a.winRate);
 
-    // 3. Función auxiliar para renderizar las barras CSS
-    const generarHTMLBarra = (titulo, icono, arrayDatos, valorKey, textoSufijo, colorClass, maxValor) => {
-        let html = `<h4 style="color:var(--accent-gold); margin: 20px 0 10px 0; border-bottom: 1px solid #333; padding-bottom: 5px;">${icono} ${titulo}</h4>`;
-        arrayDatos.forEach(eq => {
+    // Calculamos los máximos dinámicos
+    const maxGolesF = rankOfensivas.length > 0 ? Math.max(...rankOfensivas.map(e => e.golesFavor)) : 1;
+    const maxGolesC = rankDefensas.length > 0 ? Math.max(...rankDefensas.map(e => e.golesContra)) : 1; 
+
+    // 3. Función auxiliar actualizada con el expansor "Ver más"
+    const generarHTMLBarra = (titulo, icono, arrayDatos, valorKey, textoSufijo, colorClass, maxValor, idBloque) => {
+        let html = `<h4 style="color:var(--accent-gold); margin: 25px 0 10px 0; border-bottom: 1px solid #333; padding-bottom: 5px;">${icono} ${titulo}</h4>`;
+        
+        arrayDatos.forEach((eq, index) => {
             const porcentajeAncho = maxValor > 0 ? (eq[valorKey] / maxValor) * 100 : 0;
+            // A partir del puesto 6 (índice 5), ocultamos la fila por defecto
+            const isHidden = index >= 5 ? `style="display:none;" class="extra-stat-${idBloque}"` : '';
+            
             html += `
-            <div class="stat-row">
-                <div class="stat-team-info"><span>${eq.nombre.substring(0, 12)}</span></div>
+            <div class="stat-row animate__animated animate__fadeIn" ${isHidden}>
+                <div class="stat-team-info"><span style="color:#666; font-size:0.8rem; width:15px;">${index+1}.</span> <span>${eq.nombre.substring(0, 12)}</span></div>
                 <div class="stat-bar-container">
                     <div class="stat-bar-fill ${colorClass}" style="width: ${porcentajeAncho}%"></div>
                 </div>
                 <div class="stat-numbers">${eq[valorKey]} ${textoSufijo}</div>
             </div>`;
         });
+
+        // Si hay más de 5 equipos, inyectamos el botón de Ver más
+        if (arrayDatos.length > 5) {
+            html += `
+            <div style="text-align:center; margin-top:8px;">
+                <button onclick="toggleStatsLaboratorio('${idBloque}', this)" style="background:none; border:1px solid #555; color:#aaa; padding:5px 15px; border-radius:15px; cursor:pointer; font-family:'Barlow Condensed'; font-weight:bold; transition:0.3s;" onmouseover="this.style.color='#fff'; this.style.borderColor='#fff'" onmouseout="this.style.color='#aaa'; this.style.borderColor='#555'">
+                    VER MÁS ▼
+                </button>
+            </div>`;
+        }
         return html;
     };
-
-    // Calculamos los máximos para que la barra más larga siempre sea el 100% del contenedor
-    const maxGolesF = Math.max(...topOfensivas.map(e => e.golesFavor), 1);
-    const maxGolesC = Math.max(...topDefensas.map(e => e.golesContra), 1); // Cuidado: ¡Aquí menos es mejor!
 
     let modalHTML = `<div class="stats-container">`;
     modalHTML += `<p style="color:#aaa; font-size:0.85rem; text-align:center;">Análisis basado en los partidos finalizados.</p>`;
     
-    modalHTML += generarHTMLBarra("MÁQUINAS GOLEADORAS (Goles a Favor)", "⚽", topOfensivas, 'golesFavor', 'GF', 'bg-offensive', maxGolesF);
-    modalHTML += generarHTMLBarra("MUROS INFRANQUEABLES (Goles en Contra)", "🛡️", topDefensas, 'golesContra', 'GC', 'bg-defensive', 10); // Base 10 goles para escala visual
-    modalHTML += generarHTMLBarra("EFECTIVIDAD (% Victorias)", "🔥", topWinRate, 'winRate', '%', 'bg-winrate', 100);
+    // Generamos las secciones pasándole un ID único a cada una ('ofensiva', 'defensa', 'efectividad')
+    modalHTML += generarHTMLBarra("MÁQUINAS GOLEADORAS (Goles a Favor)", "⚽", rankOfensivas, 'golesFavor', 'GF', 'bg-offensive', maxGolesF, 'ofensiva');
+    modalHTML += generarHTMLBarra("MUROS INFRANQUEABLES (Goles en Contra)", "🛡️", rankDefensas, 'golesContra', 'GC', 'bg-defensive', Math.max(maxGolesC, 5), 'defensa'); 
+    modalHTML += generarHTMLBarra("EFECTIVIDAD (% Victorias)", "🔥", rankWinRate, 'winRate', '%', 'bg-winrate', 100, 'efectividad');
 
     modalHTML += `</div>`;
 
@@ -523,6 +537,20 @@ window.abrirLaboratorioDatos = async () => {
     });
 };
 
+// 4. Lógica global para el botón "Ver más / Ver menos"
+window.toggleStatsLaboratorio = (idBloque, btnElement) => {
+    const elementosOcultos = document.querySelectorAll(`.extra-stat-${idBloque}`);
+    const estaExpandiendo = btnElement.innerText.includes("VER MÁS");
+    
+    elementosOcultos.forEach(el => {
+        // Usamos flex porque las filas (stat-row) usan display: flex
+        el.style.display = estaExpandiendo ? 'flex' : 'none';
+    });
+    
+    btnElement.innerText = estaExpandiendo ? "VER MENOS ▲" : "VER MÁS ▼";
+    if(estaExpandiendo) btnElement.style.color = "var(--accent-green)";
+    else btnElement.style.color = "#aaa";
+};
 window.handleLogin = async () => {
     const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
     try {
