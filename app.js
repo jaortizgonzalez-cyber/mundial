@@ -581,34 +581,39 @@ async function actualizarResultadosEnVivo() {
         const games = data.games || [];
 
         games.forEach(game => {
+            const matchCard = document.querySelector(`[data-home="${game.home_team_name_en}"][data-away="${game.away_team_name_en}"]`);
+            if (!matchCard) return;
+
+            // 1. Limpiar indicadores previos (para evitar que se vean varios a la vez)
+            const indicadorExistente = matchCard.querySelector('.live-pill, .finished-pill');
+            
             if (game.time_elapsed === 'live') {
-                // Buscamos si tenemos una tarjeta de este partido en la pantalla
-                // Asumimos que podemos identificar el partido por el nombre de los equipos
-                // (O podrías usar IDs si la API te los da)
-                const homeName = game.home_team_name_en;
-                const awayName = game.away_team_name_en;
+                // Actualizar marcador
+                matchCard.querySelector('.score-live-home').value = game.home_score || 0;
+                matchCard.querySelector('.score-live-away').value = game.away_score || 0;
                 
-                // Aquí buscamos el marcador dentro de tu HTML actual
-                // Esta es una forma "quirúrgica" de actualizar solo el número
-                const matchCard = document.querySelector(`[data-home="${homeName}"][data-away="${awayName}"]`);
-                
-                if (matchCard) {
-                    const hScore = game.home_score || 0;
-                    const aScore = game.away_score || 0;
-                    
-                    // Actualizamos el marcador visualmente
-                    matchCard.querySelector('.score-live-home').innerText = hScore;
-                    matchCard.querySelector('.score-live-away').innerText = aScore;
-                    
-                    // Aseguramos que tenga el tag de EN VIVO
-                    if(!matchCard.querySelector('.live-indicator')) {
-                        matchCard.insertAdjacentHTML('afterbegin', '<div class="live-indicator">EN VIVO</div>');
-                    }
+                // Si no tiene el pill de en vivo, ponlo
+                if(!matchCard.querySelector('.live-pill')) {
+                    if (indicadorExistente) indicadorExistente.remove();
+                    matchCard.insertAdjacentHTML('afterbegin', '<div class="live-pill">En Vivo</div>');
                 }
+            } 
+            else if (game.time_elapsed === 'finished') {
+                // Si el partido terminó, quitamos el indicador de vivo y ponemos el de finalizado
+                if (indicadorExistente && indicadorExistente.classList.contains('live-pill')) {
+                    indicadorExistente.remove();
+                }
+                
+                if (!matchCard.querySelector('.finished-pill')) {
+                    matchCard.insertAdjacentHTML('afterbegin', '<div class="finished-pill">Finalizado</div>');
+                }
+                
+                // Opcional: Bloquear inputs para que nadie más toque nada
+                matchCard.querySelectorAll('input').forEach(i => i.disabled = true);
             }
         });
     } catch (e) {
-        console.log("Servicio de resultados en vivo pausado temporalmente.");
+        console.log("Servicio de resultados en vivo pausado.");
     }
 }
 
