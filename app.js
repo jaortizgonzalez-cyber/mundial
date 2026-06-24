@@ -627,6 +627,35 @@ async function actualizarResultadosEnVivo() {
 // Iniciar el ciclo de actualización cada 30 segundos
 setInterval(actualizarResultadosEnVivo, 30000);
 
+async function testDeDiagnostico() {
+    console.log("--- INICIANDO DIAGNÓSTICO ---");
+    try {
+        // Probamos la conexión
+        const response = await fetch("https://worldcup26.ir/get/games");
+        
+        if (!response.ok) {
+            console.error("❌ La API respondió con error:", response.status);
+            return;
+        }
+
+        const data = await response.json();
+        console.log("✅ Conexión exitosa. Datos recibidos:", data);
+
+        if (data.games && data.games.length > 0) {
+            console.log("🔍 Primer partido encontrado:", data.games[0].home_team_name_en);
+        } else {
+            console.warn("⚠️ La API respondió pero no tiene partidos (lista vacía).");
+        }
+
+    } catch (error) {
+        console.error("❌ FALLO CRÍTICO DE CONEXIÓN:", error);
+        console.error("¿Es posible que sea un error de CORS? (Revisa si el servidor bloquea la petición)");
+    }
+}
+
+// Ejecuta esto manualmente en la consola o se ejecutará solo
+testDeDiagnostico();
+
 window.handleLogin = async () => {
     const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
     try {
