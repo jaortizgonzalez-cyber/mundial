@@ -204,6 +204,12 @@ async function renderPartidos() {
                         ${obtenerBandera(p.equipoV)}
                     </div>
                 </div>
+
+                <div class="live-score-display" id="live-score-${id}">
+                    <span class="live-home-score live-score-number">0</span>
+                    <span>-</span>
+                    <span class="live-away-score live-score-number">0</span>
+                </div>
         
                 <div class="pulse-container">
                     <div class="pulse-title">TENDENCIA DE LOS PARTICIPANTES</div>
