@@ -187,3 +187,22 @@ header {
 .bg-offensive { background: var(--accent-green); box-shadow: 0 0 10px rgba(0,255,136,0.5); }
 .bg-defensive { background: #00aaff; box-shadow: 0 0 10px rgba(0,170,255,0.5); }
 .bg-winrate { background: #ff4444; box-shadow: 0 0 10px rgba(255,68,68,0.5); }
+
+/* Indicador de partido en vivo */
+.live-indicator {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #ff0000;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    animation: blink 1.5s infinite;
+    margin-bottom: 5px;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
