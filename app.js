@@ -581,39 +581,46 @@ async function actualizarResultadosEnVivo() {
         const games = data.games || [];
 
         games.forEach(game => {
-            const matchCard = document.querySelector(`[data-home="${game.home_team_name_en}"][data-away="${game.away_team_name_en}"]`);
-            if (!matchCard) return;
+            // Normalizamos nombres para evitar errores de espacios o mayúsculas
+            const homeApi = game.home_team_name_en.trim().toLowerCase();
+            const awayApi = game.away_team_name_en.trim().toLowerCase();
 
-            // 1. Limpiar indicadores previos (para evitar que se vean varios a la vez)
-            const indicadorExistente = matchCard.querySelector('.live-pill, .finished-pill');
-            
-            if (game.time_elapsed === 'live') {
-                // Actualizar marcador
-                matchCard.querySelector('.score-live-home').value = game.home_score || 0;
-                matchCard.querySelector('.score-live-away').value = game.away_score || 0;
-                
-                // Si no tiene el pill de en vivo, ponlo
-                if(!matchCard.querySelector('.live-pill')) {
-                    if (indicadorExistente) indicadorExistente.remove();
-                    matchCard.insertAdjacentHTML('afterbegin', '<div class="live-pill">En Vivo</div>');
+            // Buscamos todas las tarjetas para comparar
+            const cards = document.querySelectorAll('.match-card');
+            cards.forEach(card => {
+                const homeCard = card.getAttribute('data-home').trim().toLowerCase();
+                const awayCard = card.getAttribute('data-away').trim().toLowerCase();
+
+                if (homeCard === homeApi && awayCard === awayApi) {
+                    const indicadorExistente = card.querySelector('.live-pill, .finished-pill');
+
+                    if (game.time_elapsed === 'live') {
+                        // Actualizar marcadores
+                        const inputL = card.querySelector('.score-live-home');
+                        const inputV = card.querySelector('.score-live-away');
+                        if(inputL) inputL.value = game.home_score || 0;
+                        if(inputV) inputV.value = game.away_score || 0;
+
+                        // Poner indicador En Vivo
+                        if (!card.querySelector('.live-pill')) {
+                            if (indicadorExistente) indicadorExistente.remove();
+                            card.insertAdjacentHTML('afterbegin', '<div class="live-pill">En Vivo</div>');
+                        }
+                    } 
+                    else if (game.time_elapsed === 'finished') {
+                        // Poner indicador Finalizado
+                        if (!card.querySelector('.finished-pill')) {
+                            if (indicadorExistente) indicadorExistente.remove();
+                            card.insertAdjacentHTML('afterbegin', '<div class="finished-pill">Finalizado</div>');
+                            // Bloquear inputs
+                            card.querySelectorAll('input').forEach(i => i.disabled = true);
+                        }
+                    }
                 }
-            } 
-            else if (game.time_elapsed === 'finished') {
-                // Si el partido terminó, quitamos el indicador de vivo y ponemos el de finalizado
-                if (indicadorExistente && indicadorExistente.classList.contains('live-pill')) {
-                    indicadorExistente.remove();
-                }
-                
-                if (!matchCard.querySelector('.finished-pill')) {
-                    matchCard.insertAdjacentHTML('afterbegin', '<div class="finished-pill">Finalizado</div>');
-                }
-                
-                // Opcional: Bloquear inputs para que nadie más toque nada
-                matchCard.querySelectorAll('input').forEach(i => i.disabled = true);
-            }
+            });
         });
     } catch (e) {
-        console.log("Servicio de resultados en vivo pausado.");
+        console.error("Error en sincronización en vivo:", e);
     }
 }
 
