@@ -575,52 +575,57 @@ window.toggleStatsLaboratorio = (idBloque, btnElement) => {
 
 // Función para consultar la API en vivo
 async function actualizarResultadosEnVivo() {
+    // 1. Diccionario de traducción: API (Inglés) -> Tu Web (Español/Tu formato)
+    // Si tu web usa "Marruecos" y el API "Morocco", ponlo aquí:
+    const mapeoNombres = {
+        "morocco": "Marruecos",
+        "scotland": "Escocia",
+        "brazil": "Brasil",
+        "haiti": "Haití"
+        // Agrega aquí todos los que detectes que no coinciden
+    };
+
     try {
         const response = await fetch("https://worldcup26.ir/get/games");
         const data = await response.json();
         const games = data.games || [];
 
-        games.forEach(game => {
-            // Normalizamos nombres para evitar errores de espacios o mayúsculas
-            const homeApi = game.home_team_name_en.trim().toLowerCase();
-            const awayApi = game.away_team_name_en.trim().toLowerCase();
+        // Filtramos solo los que están en vivo (igual que tu Python)
+        const enVivo = games.filter(p => p.time_elapsed === 'live');
 
-            // Buscamos todas las tarjetas para comparar
-            const cards = document.querySelectorAll('.match-card');
-            cards.forEach(card => {
-                const homeCard = card.getAttribute('data-home').trim().toLowerCase();
-                const awayCard = card.getAttribute('data-away').trim().toLowerCase();
+        enVivo.forEach(game => {
+            // Obtenemos los nombres del API y los pasamos a minúsculas
+            let homeApi = (game.home_team_name_en || '').toLowerCase();
+            let awayApi = (game.away_team_name_en || '').toLowerCase();
 
-                if (homeCard === homeApi && awayCard === awayApi) {
-                    const indicadorExistente = card.querySelector('.live-pill, .finished-pill');
+            // Traducimos al nombre que usas en tu web si existe en el mapa
+            const homeFinal = mapeoNombres[homeApi] || game.home_team_name_en;
+            const awayFinal = mapeoNombres[awayApi] || game.away_team_name_en;
 
-                    if (game.time_elapsed === 'live') {
-                        // Actualizar marcadores
-                        const inputL = card.querySelector('.score-live-home');
-                        const inputV = card.querySelector('.score-live-away');
-                        if(inputL) inputL.value = game.home_score || 0;
-                        if(inputV) inputV.value = game.away_score || 0;
-
-                        // Poner indicador En Vivo
-                        if (!card.querySelector('.live-pill')) {
-                            if (indicadorExistente) indicadorExistente.remove();
-                            card.insertAdjacentHTML('afterbegin', '<div class="live-pill">En Vivo</div>');
-                        }
-                    } 
-                    else if (game.time_elapsed === 'finished') {
-                        // Poner indicador Finalizado
-                        if (!card.querySelector('.finished-pill')) {
-                            if (indicadorExistente) indicadorExistente.remove();
-                            card.insertAdjacentHTML('afterbegin', '<div class="finished-pill">Finalizado</div>');
-                            // Bloquear inputs
-                            card.querySelectorAll('input').forEach(i => i.disabled = true);
-                        }
-                    }
+            // Buscamos la tarjeta en tu HTML usando estos nombres
+            const matchCard = document.querySelector(`[data-home="${homeFinal}"][data-away="${awayFinal}"]`);
+            
+            if (matchCard) {
+                // Actualizamos marcadores
+                const hScore = game.home_score || 0;
+                const aScore = game.away_score || 0;
+                
+                const inputL = matchCard.querySelector('.score-live-home');
+                const inputV = matchCard.querySelector('.score-live-away');
+                
+                if(inputL) inputL.value = hScore;
+                if(inputV) inputV.value = aScore;
+                
+                // Ponemos el indicador
+                if(!matchCard.querySelector('.live-pill')) {
+                    matchCard.insertAdjacentHTML('afterbegin', '<div class="live-pill">En Vivo</div>');
                 }
-            });
+            } else {
+                console.warn(`No encontré tarjeta para: ${homeFinal} vs ${awayFinal}`);
+            }
         });
     } catch (e) {
-        console.error("Error en sincronización en vivo:", e);
+        console.error("Error en sincronización:", e);
     }
 }
 
