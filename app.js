@@ -182,45 +182,48 @@ async function renderPartidos() {
             // --- FIN CÁLCULO ESTADÍSTICO ---
 
             cont.innerHTML += `
-                <div class="match-card">
-                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-gold); margin-bottom:12px;">
-                        <span>${p.grupo.includes('Fase') ? p.grupo : 'GRUPO ' + p.grupo}</span>
-                        <span>${fechaPartido.toLocaleString([], {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
-                    </div>
-                    <div class="match-row-container">
-                        <div class="team-column">
-                            <div class="team-name">${p.equipoL}</div>
-                            ${obtenerBandera(p.equipoL)}
-                        </div>
-                        <div class="score-center-block">
-                            <input type="number" id="l_${id}" value="${votos[id]?.local ?? ''}" class="input-score" ${bloqueado || tieneResultadoOficial ? 'disabled' : ''}>
-                            <input type="number" id="v_${id}" value="${votos[id]?.visitante ?? ''}" class="input-score" ${bloqueado || tieneResultadoOficial ? 'disabled' : ''}>
-                        </div>
-                        <div class="team-column">
-                            <div class="team-name">${p.equipoV}</div>
-                            ${obtenerBandera(p.equipoV)}
-                        </div>
-                    </div>
-
-                    <div class="pulse-container">
-                        <div class="pulse-title">TENDENCIA DE LOS PARTICIPANTES</div>
-                        <div class="pulse-bar">
-                            <div class="pulse-segment pulse-local" style="width: ${pctLocal}%"></div>
-                            <div class="pulse-segment pulse-empate" style="width: ${pctEmpate}%"></div>
-                            <div class="pulse-segment pulse-visitante" style="width: ${pctVisitante}%"></div>
-                        </div>
-                        <div class="pulse-labels">
-                            <span class="lbl-local">${textLocal}</span>
-                            <span class="lbl-empate">${textEmpate}</span>
-                            <span class="lbl-visitante">${textVisitante}</span>
-                        </div>
+            <div class="match-card" data-home="${p.equipoL}" data-away="${p.equipoV}">
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-gold); margin-bottom:12px;">
+                    <span>${p.grupo.includes('Fase') ? p.grupo : 'GRUPO ' + p.grupo}</span>
+                    <span>${fechaPartido.toLocaleString([], {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+                
+                <div class="match-row-container">
+                    <div class="team-column">
+                        <div class="team-name">${p.equipoL}</div>
+                        ${obtenerBandera(p.equipoL)}
                     </div>
                     
-                    <div style="text-align:center; min-height: 35px; margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; justify-content: center;">
-                        ${tieneResultadoOficial ? `<div style="background: rgba(0, 255, 136, 0.12); border: 1px dashed var(--accent-green); color: var(--accent-green); padding: 5px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; font-family: 'Anton'; letter-spacing: 0.5px;">⚽ MARCADOR OFICIAL: ${resReal.golesL} - ${resReal.golesV}</div>` : ''}
-                        ${bloqueado ? `<button class="btn-spy" onclick="verApuestasGlobales('${id}', '${p.equipoL}', '${p.equipoV}')">👁️ VER APUESTAS</button>` : `<span style="color:#555; font-size:0.85rem; font-style:italic;">🔒 Pronósticos ocultos (Disponibles pronto)</span>`}
+                    <div class="score-center-block">
+                        <input type="number" id="l_${id}" value="${votos[id]?.local ?? ''}" class="input-score score-live-home" ${bloqueado || tieneResultadoOficial ? 'disabled' : ''}>
+                        <input type="number" id="v_${id}" value="${votos[id]?.visitante ?? ''}" class="input-score score-live-away" ${bloqueado || tieneResultadoOficial ? 'disabled' : ''}>
                     </div>
-                </div>`;
+                    
+                    <div class="team-column">
+                        <div class="team-name">${p.equipoV}</div>
+                        ${obtenerBandera(p.equipoV)}
+                    </div>
+                </div>
+        
+                <div class="pulse-container">
+                    <div class="pulse-title">TENDENCIA DE LOS PARTICIPANTES</div>
+                    <div class="pulse-bar">
+                        <div class="pulse-segment pulse-local" style="width: ${pctLocal}%"></div>
+                        <div class="pulse-segment pulse-empate" style="width: ${pctEmpate}%"></div>
+                        <div class="pulse-segment pulse-visitante" style="width: ${pctVisitante}%"></div>
+                    </div>
+                    <div class="pulse-labels">
+                        <span class="lbl-local">${textLocal}</span>
+                        <span class="lbl-empate">${textEmpate}</span>
+                        <span class="lbl-visitante">${textVisitante}</span>
+                    </div>
+                </div>
+                
+                <div style="text-align:center; min-height: 35px; margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; justify-content: center;">
+                    ${tieneResultadoOficial ? `<div style="background: rgba(0, 255, 136, 0.12); border: 1px dashed var(--accent-green); color: var(--accent-green); padding: 5px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; font-family: 'Anton'; letter-spacing: 0.5px;">⚽ MARCADOR OFICIAL: ${resReal.golesL} - ${resReal.golesV}</div>` : ''}
+                    ${bloqueado ? `<button class="btn-spy" onclick="verApuestasGlobales('${id}', '${p.equipoL}', '${p.equipoV}')">👁️ VER APUESTAS</button>` : `<span style="color:#555; font-size:0.85rem; font-style:italic;">🔒 Pronósticos ocultos (Disponibles pronto)</span>`}
+                </div>
+            </div>`;
         });
     }
 }
