@@ -254,3 +254,23 @@ header {
     text-transform: uppercase;
     text-align: center;
 }
+
+/* Contenedor del marcador en vivo (separado de los inputs) */
+.live-score-display {
+    display: none; /* Oculto por defecto */
+    justify-content: center;
+    gap: 15px;
+    background: #1a1a1a;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 1px solid var(--accent-gold);
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+}
+
+.live-score-number {
+    font-family: 'Anton', sans-serif;
+    color: var(--accent-green);
+}
