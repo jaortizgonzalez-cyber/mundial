@@ -570,6 +570,48 @@ window.toggleStatsLaboratorio = (idBloque, btnElement) => {
     btnElement.style.borderColor = estaOculto ? "var(--accent-green)" : "#555";
 };
 
+// Función para consultar la API en vivo
+async function actualizarResultadosEnVivo() {
+    try {
+        const response = await fetch("https://worldcup26.ir/get/games");
+        const data = await response.json();
+        const games = data.games || [];
+
+        games.forEach(game => {
+            if (game.time_elapsed === 'live') {
+                // Buscamos si tenemos una tarjeta de este partido en la pantalla
+                // Asumimos que podemos identificar el partido por el nombre de los equipos
+                // (O podrías usar IDs si la API te los da)
+                const homeName = game.home_team_name_en;
+                const awayName = game.away_team_name_en;
+                
+                // Aquí buscamos el marcador dentro de tu HTML actual
+                // Esta es una forma "quirúrgica" de actualizar solo el número
+                const matchCard = document.querySelector(`[data-home="${homeName}"][data-away="${awayName}"]`);
+                
+                if (matchCard) {
+                    const hScore = game.home_score || 0;
+                    const aScore = game.away_score || 0;
+                    
+                    // Actualizamos el marcador visualmente
+                    matchCard.querySelector('.score-live-home').innerText = hScore;
+                    matchCard.querySelector('.score-live-away').innerText = aScore;
+                    
+                    // Aseguramos que tenga el tag de EN VIVO
+                    if(!matchCard.querySelector('.live-indicator')) {
+                        matchCard.insertAdjacentHTML('afterbegin', '<div class="live-indicator">EN VIVO</div>');
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        console.log("Servicio de resultados en vivo pausado temporalmente.");
+    }
+}
+
+// Iniciar el ciclo de actualización cada 30 segundos
+setInterval(actualizarResultadosEnVivo, 30000);
+
 window.handleLogin = async () => {
     const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
     try {
