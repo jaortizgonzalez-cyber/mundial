@@ -110,7 +110,6 @@ header {
 }
 .pulse-segment {
     height: 100%;
-    /* Animación fluida de 0.8s cuando cambian los porcentajes */
     transition: width 0.8s ease-in-out; 
 }
 .pulse-local { 
@@ -136,16 +135,9 @@ header {
 .lbl-visitante { color: var(--accent-gold); }
 
 /* --- LABORATORIO DE DATOS --- */
-.stats-row-hidden {
-    display: none !important;
-}
-.stats-row-visible {
-    display: flex !important;
-}
-.stats-container {
-    text-align: left;
-    font-family: 'Barlow Condensed', sans-serif;
-}
+.stats-row-hidden { display: none !important; }
+.stats-row-visible { display: flex !important; }
+.stats-container { text-align: left; font-family: 'Barlow Condensed', sans-serif; }
 .stat-row {
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
@@ -156,121 +148,10 @@ header {
     align-items: center;
     justify-content: space-between;
 }
-.stat-team-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 35%;
-    font-weight: bold;
-    font-size: 1.1rem;
-}
-.stat-bar-container {
-    width: 45%;
-    background: #222;
-    border-radius: 4px;
-    height: 12px;
-    overflow: hidden;
-    position: relative;
-}
-.stat-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 1s ease-in-out;
-}
-.stat-numbers {
-    width: 20%;
-    text-align: right;
-    font-family: 'Anton';
-    font-size: 1.1rem;
-    color: var(--accent-gold);
-}
+.stat-team-info { display: flex; align-items: center; gap: 10px; width: 35%; font-weight: bold; font-size: 1.1rem; }
+.stat-bar-container { width: 45%; background: #222; border-radius: 4px; height: 12px; overflow: hidden; position: relative; }
+.stat-bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease-in-out; }
+.stat-numbers { width: 20%; text-align: right; font-family: 'Anton'; font-size: 1.1rem; color: var(--accent-gold); }
 .bg-offensive { background: var(--accent-green); box-shadow: 0 0 10px rgba(0,255,136,0.5); }
 .bg-defensive { background: #00aaff; box-shadow: 0 0 10px rgba(0,170,255,0.5); }
 .bg-winrate { background: #ff4444; box-shadow: 0 0 10px rgba(255,68,68,0.5); }
-
-/* Indicador de partido en vivo */
-.live-indicator {
-    display: inline-block;
-    padding: 2px 8px;
-    background: #ff0000;
-    color: white;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    animation: blink 1.5s infinite;
-    margin-bottom: 5px;
-}
-
-/* Aviso de partido próximo */
-.scheduled-indicator {
-    display: inline-block;
-    padding: 2px 8px;
-    background: #007bff; /* Azul para "Programado" */
-    color: white;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
-
-.live-pill {
-    display: block;
-    margin: 0 auto 10px auto; /* Centrado automático */
-    width: fit-content;
-    padding: 3px 10px;
-    background-color: #d93025; /* Rojo tipo Google */
-    color: white;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    animation: blink 1.5s infinite;
-    text-align: center;
-}
-
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
-}
-
-.finished-pill {
-    display: block;
-    margin: 0 auto 10px auto;
-    width: fit-content;
-    padding: 3px 10px;
-    background-color: #5f6368; /* Gris neutro tipo Google */
-    color: white;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    text-align: center;
-}
-
-/* Contenedor del marcador en vivo (separado de los inputs) */
-.live-score-display {
-    display: none; /* Oculto por defecto */
-    justify-content: center;
-    gap: 15px;
-    background: #1a1a1a;
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 10px;
-    border: 1px solid var(--accent-gold);
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: white;
-}
-
-.live-score-number {
-    font-family: 'Anton', sans-serif;
-    color: var(--accent-green);
-}
