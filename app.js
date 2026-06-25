@@ -193,7 +193,7 @@ async function renderPartidos() {
                 </div>
                 
                 <!-- ESPACIO SUTIL PARA MARCADOR EN VIVO -->
-                <div class="sutil-live-score" style="text-align:center; font-size:1rem; font-weight:bold; font-family:'Anton'; margin-top:5px; min-height:22px;"></div>
+                <div class="sutil-live-score" style="display:none; text-align:center; font-size:1rem; font-weight:bold; font-family:'Anton'; margin-top:5px;"></div>
 
                 <div class="pulse-container">
                     <div class="pulse-title">TENDENCIA DE LOS PARTICIPANTES</div>
@@ -287,10 +287,12 @@ async function sincronizarMarcadoresSutiles() {
             });
 
             if (game && sutilDiv) {
-                if (game.time_elapsed === 'live') {
+                // LÓGICA DE VISIBILIDAD:
+                if (game && game.time_elapsed === 'live') {
+                    sutilDiv.style.display = 'flex'; // Aparece solo si es en vivo
                     sutilDiv.innerHTML = `<span class="score-numbers-wow">${game.home_score}</span> <span class="estado-vivo">EN VIVO</span> <span class="score-numbers-wow">${game.away_score}</span>`;
-                } 
-                else if (game.time_elapsed === 'finished') {
+                } else {
+                    sutilDiv.style.display = 'none'; // Desaparece y no deja franja
                     sutilDiv.innerHTML = "";
                 }
             }
