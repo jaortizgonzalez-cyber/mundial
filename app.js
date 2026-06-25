@@ -167,7 +167,7 @@ async function renderPartidos() {
             const pctVisitante = totalVotosPartido > 0 ? Math.round((votosVisitante / totalVotosPartido) * 100) : 0;
 
             cont.innerHTML += `
-            <div class="match-card" data-home="${p.equipoL}" data-away="${p.equipoV}">
+            <div class="match-card" data-home="${p.equipoL.toLowerCase().trim()}" data-away="${p.equipoV.toLowerCase().trim()}">
                 <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-gold); margin-bottom:12px;">
                     <span>${p.grupo.includes('Fase') ? p.grupo : 'GRUPO ' + p.grupo}</span>
                     <span>${fechaPartido.toLocaleString([], {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
@@ -188,7 +188,6 @@ async function renderPartidos() {
                     </div>
                 </div>
                 
-                <!-- ESPACIO SUTIL PARA MARCADOR EN VIVO -->
                 <div class="sutil-live-score" style="text-align:center; font-size:1rem; font-weight:bold; font-family:'Anton'; margin-top:5px; min-height:22px;"></div>
 
                 <div class="pulse-container">
@@ -235,8 +234,8 @@ async function sincronizarMarcadoresSutiles() {
         const data = await response.json();
         
         document.querySelectorAll('.match-card').forEach(card => {
-            const homeCard = card.getAttribute('data-home').toLowerCase().trim();
-            const awayCard = card.getAttribute('data-away').toLowerCase().trim();
+            const homeCard = card.getAttribute('data-home');
+            const awayCard = card.getAttribute('data-away');
             const sutilDiv = card.querySelector('.sutil-live-score');
             
             const game = (data.games || []).find(g => {
@@ -253,12 +252,12 @@ async function sincronizarMarcadoresSutiles() {
                 }
             }
         });
-    } catch (e) { /* Fallo silencioso */ }
+    } catch (e) { /* Silencioso */ }
 }
 setInterval(sincronizarMarcadoresSutiles, 30000);
 
 // --- UTILIDADES ---
-window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
+window.verApuestasGlobales = async (id, eL, eV) => {
     const snapU = await get(child(ref(db), 'usuarios'));
     const snapV = await get(child(ref(db), 'pronosticos'));
     if(!snapU.exists()) return Swal.fire("Información", "No hay usuarios.", "info");
@@ -268,7 +267,7 @@ window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
     let contadorVotos = 0;
     Object.keys(usuarios).forEach(cedula => {
         const nombreUsuario = usuarios[cedula].nombre;
-        const votoUsuario = todosLosPronosticos[cedula]?.[idPartido];
+        const votoUsuario = todosLosPronosticos[cedula]?.[id];
         let celdaPronostico = `<span style="color:#666; font-style:italic;">Sin apuesta</span>`;
         if(votoUsuario !== undefined && votoUsuario.local !== "" && votoUsuario.visitante !== "") {
             celdaPronostico = `<b style="color:var(--accent-green); font-size:1.1rem;">${votoUsuario.local} - ${votoUsuario.visitante}</b>`;
@@ -277,7 +276,7 @@ window.verApuestasGlobales = async (idPartido, equipoL, equipoV) => {
         tablaHtml += `<tr><td style="color:#fff; font-weight:600;">${nombreUsuario}</td><td style="text-align:center;">${celdaPronostico}</td></tr>`;
     });
     tablaHtml += `</tbody></table></div><p style="font-size:0.8rem; color:#888; text-align:right; margin-top:10px;">Apuestas registradas: ${contadorVotos}</p>`;
-    Swal.fire({ title: `<span style="font-family:Anton; color:var(--accent-gold); font-size:1.4rem;">PRONÓSTICOS REGISTRADOS</span><br><span style="font-size:0.9rem; color:#fff;">${equipoL} vs ${equipoV}</span>`, background: '#020d1a', color: '#fff', width: '450px', html: tablaHtml, confirmButtonText: 'CERRAR', confirmButtonColor: '#333' });
+    Swal.fire({ title: `<span style="font-family:Anton; color:var(--accent-gold); font-size:1.4rem;">PRONÓSTICOS REGISTRADOS</span><br><span style="font-size:0.9rem; color:#fff;">${eL} vs ${eV}</span>`, background: '#020d1a', color: '#fff', width: '450px', html: tablaHtml, confirmButtonText: 'CERRAR', confirmButtonColor: '#333' });
 };
 
 window.guardarTodosLosPronosticos = async () => {
