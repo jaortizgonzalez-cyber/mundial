@@ -166,6 +166,10 @@ async function renderPartidos() {
             const pctEmpate = totalVotosPartido > 0 ? Math.round((votosEmpate / totalVotosPartido) * 100) : 100;
             const pctVisitante = totalVotosPartido > 0 ? Math.round((votosVisitante / totalVotosPartido) * 100) : 0;
 
+            const textLocal = totalVotosPartido > 0 ? `${pctLocal}% Local` : `-`;
+            const textEmpate = totalVotosPartido > 0 ? `${pctEmpate}% Empate` : `Sin pronósticos`;
+            const textVisitante = totalVotosPartido > 0 ? `${pctVisitante}% Visita` : `-`;
+
             cont.innerHTML += `
             <div class="match-card" data-home="${p.equipoL.toLowerCase().trim()}" data-away="${p.equipoV.toLowerCase().trim()}">
                 <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-gold); margin-bottom:12px;">
@@ -188,6 +192,7 @@ async function renderPartidos() {
                     </div>
                 </div>
                 
+                <!-- ESPACIO SUTIL PARA MARCADOR EN VIVO -->
                 <div class="sutil-live-score" style="text-align:center; font-size:1rem; font-weight:bold; font-family:'Anton'; margin-top:5px; min-height:22px;"></div>
 
                 <div class="pulse-container">
@@ -196,6 +201,11 @@ async function renderPartidos() {
                         <div class="pulse-segment pulse-local" style="width: ${pctLocal}%"></div>
                         <div class="pulse-segment pulse-empate" style="width: ${pctEmpate}%"></div>
                         <div class="pulse-segment pulse-visitante" style="width: ${pctVisitante}%"></div>
+                    </div>
+                    <div class="pulse-labels">
+                        <span class="lbl-local">${textLocal}</span>
+                        <span class="lbl-empate">${textEmpate}</span>
+                        <span class="lbl-visitante">${textVisitante}</span>
                     </div>
                 </div>
                 
