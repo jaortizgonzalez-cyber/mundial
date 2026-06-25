@@ -220,6 +220,65 @@ async function renderPartidos() {
 
 // --- LÓGICA DE MARCADORES EN VIVO ---
 async function sincronizarMarcadoresSutiles() {
+    // --- INYECCIÓN 1: Memoria y funciones de apoyo para el Gol ---
+    window.marcadoresPrevios = window.marcadoresPrevios || {};
+
+    const obtenerUltimoAnotador = (scorersString) => {
+        if (!scorersString || scorersString === "null" || scorersString === "") return "Desconocido";
+        try {
+            // Limpia las llaves { } de los extremos
+            const limpio = scorersString.replace(/^\{|\}$/g, ''); 
+            // Extrae el contenido que está entre comillas dobles
+            const matches = limpio.match(/"([^"]+)"/g); 
+            if (matches && matches.length > 0) {
+                return matches[matches.length - 1].replace(/"/g, ''); // Retorna el último de la lista sin comillas
+            }
+            // Si por alguna razón la API no manda comillas, lo separamos por coma
+            const items = limpio.split(',');
+            return items[items.length - 1].trim(); 
+        } catch (e) {
+            return "Desconocido";
+        }
+    };
+
+    const lanzarAlertaGol = (equipo, anotador) => {
+        Swal.fire({
+            html: `
+                <style>
+                    @keyframes shake {
+                        0% { transform: translate(1px, 1px) rotate(0deg); }
+                        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+                        20% { transform: translate(-3px, 0px) rotate(1deg); }
+                        30% { transform: translate(3px, 2px) rotate(0deg); }
+                        40% { transform: translate(1px, -1px) rotate(1deg); }
+                        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+                        60% { transform: translate(-3px, 1px) rotate(0deg); }
+                        70% { transform: translate(3px, 1px) rotate(-1deg); }
+                        80% { transform: translate(-1px, -1px) rotate(1deg); }
+                        90% { transform: translate(1px, 2px) rotate(0deg); }
+                        100% { transform: translate(1px, -2px) rotate(-1deg); }
+                    }
+                    .animacion-gol {
+                        animation: shake 0.5s infinite;
+                        font-family: 'Anton', sans-serif;
+                        font-size: 5rem;
+                        color: #00ff88;
+                        text-shadow: 0 0 20px #00ff88, 0 0 40px #000;
+                    }
+                </style>
+                <div class="animacion-gol">¡G⚽⚽⚽L!</div>
+                <div style="font-family:'Anton'; font-size:2rem; color:#fff; margin-top:20px;">${equipo.toUpperCase()}</div>
+                <div style="font-size:1.4rem; color:#d4af37; margin-top:10px; font-weight:bold;">👟 ${anotador}</div>
+            `,
+            background: '#020d1a',
+            backdrop: `rgba(0, 0, 0, 0.9)`,
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true
+        });
+    };
+    // -------------------------------------------------------------
+
     const traducciones = {
         "mexico": "méxico",
         "south africa": "sudáfrica",
@@ -305,6 +364,27 @@ async function sincronizarMarcadoresSutiles() {
             if (game && sutilDiv) {
                 // LÓGICA DE VISIBILIDAD:
                 if (game && game.time_elapsed === 'live') {
+
+                    // --- INYECCIÓN 2: Lógica de detección de Gol ---
+                    const gameId = game.id;
+                    const currentHome = parseInt(game.home_score) || 0;
+                    const currentAway = parseInt(game.away_score) || 0;
+
+                    if (window.marcadoresPrevios[gameId]) {
+                        const prev = window.marcadoresPrevios[gameId];
+                        
+                        if (currentHome > prev.home) {
+                            const anotador = obtenerUltimoAnotador(game.home_scorers);
+                            lanzarAlertaGol(game.home_team_name_en, anotador); // Ejemplo: "Australia", "H. Kane 12'(p)"
+                        } else if (currentAway > prev.away) {
+                            const anotador = obtenerUltimoAnotador(game.away_scorers);
+                            lanzarAlertaGol(game.away_team_name_en, anotador);
+                        }
+                    }
+                    // Guardamos el marcador actual para la siguiente revisión (dentro de 30 segs)
+                    window.marcadoresPrevios[gameId] = { home: currentHome, away: currentAway };
+                    // -----------------------------------------------
+
                     sutilDiv.style.display = 'flex'; // Aparece solo si es en vivo
                     sutilDiv.innerHTML = `<span class="score-numbers-wow">${game.home_score}</span> <span class="estado-vivo">EN VIVO</span> <span class="score-numbers-wow">${game.away_score}</span>`;
                     
