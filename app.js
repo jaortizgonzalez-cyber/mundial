@@ -195,20 +195,14 @@ async function renderPartidos() {
                     </div>
                     
                     <div class="score-center-block">
-                        <input type="number" id="l_${id}" value="${votos[id]?.local ?? ''}" class="input-score score-live-home" ${bloqueado || tieneResultadoOficial ? 'disabled' : ''}>
-                        <input type="number" id="v_${id}" value="${votos[id]?.visitante ?? ''}" class="input-score score-live-away" ${bloqueado || tieneResultadoOficial ? 'disabled' : ''}>
+                        <input type="number" id="l_${id}" value="${votos[id]?.local ?? ''}" class="input-score" ${bloqueado || tieneResultadoOficial ? 'disabled' : ''}>
+                        <input type="number" id="v_${id}" value="${votos[id]?.visitante ?? ''}" class="input-score" ${bloqueado || tieneResultadoOficial ? 'disabled' : ''}>
                     </div>
                     
                     <div class="team-column">
                         <div class="team-name">${p.equipoV}</div>
                         ${obtenerBandera(p.equipoV)}
                     </div>
-                </div>
-
-                <div class="live-score-display" id="live-score-${id}">
-                    <span class="live-home-score live-score-number">0</span>
-                    <span>-</span>
-                    <span class="live-away-score live-score-number">0</span>
                 </div>
         
                 <div class="pulse-container">
@@ -578,92 +572,6 @@ window.toggleStatsLaboratorio = (idBloque, btnElement) => {
     btnElement.style.color = estaOculto ? "var(--accent-green)" : "#aaa";
     btnElement.style.borderColor = estaOculto ? "var(--accent-green)" : "#555";
 };
-
-// Función para consultar la API en vivo
-async function actualizarResultadosEnVivo() {
-    try {
-        const response = await fetch("https://worldcup26.ir/get/games");
-        const data = await response.json();
-        const games = data.games || [];
-
-        games.forEach(game => {
-            const homeApi = (game.home_team_name_en || '').trim().toLowerCase();
-            const awayApi = (game.away_team_name_en || '').trim().toLowerCase();
-
-            const cards = document.querySelectorAll('.match-card');
-            cards.forEach(card => {
-                const homeCard = (card.getAttribute('data-home') || "").trim().toLowerCase();
-                const awayCard = (card.getAttribute('data-away') || "").trim().toLowerCase();
-
-                if (homeCard === homeApi && awayCard === awayApi) {
-                    // Localizamos los nuevos espacios de visualización
-                    const scoreDisplay = card.querySelector('.live-score-display');
-                    const homeDisplay = card.querySelector('.live-home-score');
-                    const awayDisplay = card.querySelector('.live-away-score');
-                    const indicadorExistente = card.querySelector('.live-pill, .finished-pill');
-
-                    if (game.time_elapsed === 'live') {
-                        // Mostramos el marcador real
-                        scoreDisplay.style.display = 'flex';
-                        homeDisplay.innerText = game.home_score ?? 0;
-                        awayDisplay.innerText = game.away_score ?? 0;
-
-                        // Indicador En Vivo
-                        if (!card.querySelector('.live-pill')) {
-                            if (indicadorExistente) indicadorExistente.remove();
-                            card.insertAdjacentHTML('afterbegin', '<div class="live-pill">En Vivo</div>');
-                        }
-                    } 
-                    else if (game.time_elapsed === 'finished') {
-                        // Mostramos marcador final
-                        scoreDisplay.style.display = 'flex';
-                        homeDisplay.innerText = game.home_score ?? 0;
-                        awayDisplay.innerText = game.away_score ?? 0;
-
-                        if (!card.querySelector('.finished-pill')) {
-                            if (indicadorExistente) indicadorExistente.remove();
-                            card.insertAdjacentHTML('afterbegin', '<div class="finished-pill">Finalizado</div>');
-                        }
-                    }
-                }
-            });
-        });
-    } catch (e) {
-        console.error("Error:", e);
-    }
-}
-
-// Iniciar el ciclo de actualización cada 30 segundos
-setInterval(actualizarResultadosEnVivo, 30000);
-
-async function testDeDiagnostico() {
-    console.log("--- INICIANDO DIAGNÓSTICO ---");
-    try {
-        // Probamos la conexión
-        const response = await fetch("https://worldcup26.ir/get/games");
-        
-        if (!response.ok) {
-            console.error("❌ La API respondió con error:", response.status);
-            return;
-        }
-
-        const data = await response.json();
-        console.log("✅ Conexión exitosa. Datos recibidos:", data);
-
-        if (data.games && data.games.length > 0) {
-            console.log("🔍 Primer partido encontrado:", data.games[0].home_team_name_en);
-        } else {
-            console.warn("⚠️ La API respondió pero no tiene partidos (lista vacía).");
-        }
-
-    } catch (error) {
-        console.error("❌ FALLO CRÍTICO DE CONEXIÓN:", error);
-        console.error("¿Es posible que sea un error de CORS? (Revisa si el servidor bloquea la petición)");
-    }
-}
-
-// Ejecuta esto manualmente en la consola o se ejecutará solo
-testDeDiagnostico();
 
 window.handleLogin = async () => {
     const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
