@@ -299,7 +299,7 @@ async function sincronizarMarcadoresSutiles() {
         });
     } catch (e) { /* Silencioso */ }
 }
-setInterval(sincronizarMarcadoresSutiles, 1000);
+setInterval(sincronizarMarcadoresSutiles, 30000);
 
 // --- UTILIDADES ---
 window.verApuestasGlobales = async (id, eL, eV) => {
