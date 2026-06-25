@@ -402,15 +402,45 @@ window.toggleAdminPanel = () => {
 async function renderAdminList() {
     const snapP = await get(child(ref(db), 'partidos_oficiales'));
     const snapR = await get(child(ref(db), 'resultados_oficiales'));
-    const list = document.getElementById('admin-list'); list.innerHTML = "";
+    const list = document.getElementById('admin-list'); 
+    list.innerHTML = "";
+    
     if(snapP.exists()){
         const resOf = snapR.exists() ? snapR.val() : {};
+        let pendientes = "";
+        let completados = "";
+
         Object.entries(snapP.val()).forEach(([id, p]) => {
             const tieneResultado = resOf[id] !== undefined && resOf[id].golesL !== undefined && resOf[id].golesV !== undefined && resOf[id].golesL !== "" && resOf[id].golesV !== "";
-            list.innerHTML += `<div style="margin-bottom:10px; padding:10px; border-bottom:1px solid #333">${p.equipoL} vs ${p.equipoV} (${p.grupo})<div style="display:flex; gap:5px; margin-top:5px"><input type="number" id="adm_l_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesL ?? ''}" ${tieneResultado ? 'disabled' : ''}><input type="number" id="adm_v_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesV ?? ''}" ${tieneResultado ? 'disabled' : ''}></div></div>`;
+            const html = `<div style="margin-bottom:10px; padding:10px; border-bottom:1px solid #333">${p.equipoL} vs ${p.equipoV} (${p.grupo})<div style="display:flex; gap:5px; margin-top:5px"><input type="number" id="adm_l_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesL ?? ''}" ${tieneResultado ? 'disabled' : ''}><input type="number" id="adm_v_${id}" class="input-score" style="width:40px; height:40px" value="${resOf[id]?.golesV ?? ''}" ${tieneResultado ? 'disabled' : ''}></div></div>`;
+            
+            if(tieneResultado) completados += html;
+            else pendientes += html;
         });
+
+        // Pintamos pendientes primero
+        list.innerHTML += `<div style="color:var(--accent-green); margin-bottom:10px;">PARTIDOS PENDIENTES:</div>` + pendientes;
+
+        // Pintamos botón y sección de completados
+        if(completados !== "") {
+            list.innerHTML += `
+                <button onclick="const d = document.getElementById('completados-list'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; this.innerText = d.style.display === 'block' ? '▲ OCULTAR RESULTADOS PASADOS' : '▼ VER RESULTADOS PASADOS'" 
+                style="width:100%; padding:10px; margin:15px 0; background:rgba(255,255,255,0.05); border:1px solid #444; color:#fff; cursor:pointer;">▼ VER RESULTADOS PASADOS</button>
+                <div id="completados-list" style="display:none;">${completados}</div>`;
+        }
     }
 }
+
+window.toggleAdminView = () => {
+    const div = document.getElementById('admin-completados');
+    const btn = document.getElementById('btn-toggle-admin');
+    const esVisible = div.style.display === 'block';
+    
+    div.style.display = esVisible ? 'none' : 'block';
+    btn.innerHTML = esVisible 
+        ? `👁️ VER RESULTADOS PASADOS` 
+        : `🙈 OCULTAR RESULTADOS PASADOS`;
+};
 
 window.crearPartidoOficial = async () => {
     const l = document.getElementById('new-equipoL').value, v = document.getElementById('new-equipoV').value, g = document.getElementById('new-grupo').value, f = document.getElementById('new-fecha').value;
