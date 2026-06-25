@@ -221,7 +221,7 @@ async function renderPartidos() {
 // --- LÓGICA DE MARCADORES EN VIVO ---
 async function sincronizarMarcadoresSutiles() {
     const traducciones = {
-        "mexico": "mexico",
+        "mexico": "méxico",
         "south africa": "sudáfrica",
         "south korea": "corea del sur",
         "czech republic": "república checa",
