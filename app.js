@@ -220,20 +220,17 @@ async function renderPartidos() {
 
 // --- LÓGICA DE MARCADORES EN VIVO ---
 async function sincronizarMarcadoresSutiles() {
-    // --- INYECCIÓN 1: Memoria y funciones de apoyo para el Gol ---
+    // --- MEMORIA Y FUNCIONES DE APOYO ---
     window.marcadoresPrevios = window.marcadoresPrevios || {};
 
     const obtenerUltimoAnotador = (scorersString) => {
         if (!scorersString || scorersString === "null" || scorersString === "") return "Desconocido";
         try {
-            // Limpia las llaves { } de los extremos
             const limpio = scorersString.replace(/^\{|\}$/g, ''); 
-            // Extrae el contenido que está entre comillas dobles
             const matches = limpio.match(/"([^"]+)"/g); 
             if (matches && matches.length > 0) {
-                return matches[matches.length - 1].replace(/"/g, ''); // Retorna el último de la lista sin comillas
+                return matches[matches.length - 1].replace(/"/g, '');
             }
-            // Si por alguna razón la API no manda comillas, lo separamos por coma
             const items = limpio.split(',');
             return items[items.length - 1].trim(); 
         } catch (e) {
@@ -277,7 +274,6 @@ async function sincronizarMarcadoresSutiles() {
             timerProgressBar: true
         });
     };
-    // -------------------------------------------------------------
 
     const traducciones = {
         "mexico": "méxico",
@@ -331,9 +327,10 @@ async function sincronizarMarcadoresSutiles() {
     };
 
     try {
+        // --- CAMBIO: Se agregó { cache: 'no-store' } para evitar la caché de disco ---
         const [resGames, resStadiums] = await Promise.all([
-            fetch("https://worldcup26.ir/get/games"),
-            fetch("https://worldcup26.ir/get/stadiums")
+            fetch("https://worldcup26.ir/get/games", { cache: 'no-store' }),
+            fetch("https://worldcup26.ir/get/stadiums", { cache: 'no-store' })
         ]);
         
         const data = await resGames.json(); 
@@ -362,7 +359,6 @@ async function sincronizarMarcadoresSutiles() {
             if (game && sutilDiv) {
                 if (game.time_elapsed === 'live') {
                     
-                    // Lógica de detección de Gol (Aislada por ID)
                     const gameId = game.id;
                     const currentHome = parseInt(game.home_score) || 0;
                     const currentAway = parseInt(game.away_score) || 0;
@@ -376,7 +372,6 @@ async function sincronizarMarcadoresSutiles() {
                             lanzarAlertaGol(game.away_team_name_en, obtenerUltimoAnotador(game.away_scorers));
                         }
                     }
-                    
                     window.marcadoresPrevios[gameId] = { home: currentHome, away: currentAway };
 
                     sutilDiv.style.display = 'flex';
@@ -396,8 +391,13 @@ async function sincronizarMarcadoresSutiles() {
             }
         });
     } catch (e) { /* Silencioso */ }
+    
+    // --- CAMBIO: Recursión en lugar de setInterval global ---
+    setTimeout(sincronizarMarcadoresSutiles, 10000);
 }
-setInterval(sincronizarMarcadoresSutiles, 10000);
+
+// Inicia el ciclo
+sincronizarMarcadoresSutiles();
 
 // --- UTILIDADES ---
 window.verApuestasGlobales = async (id, eL, eV) => {
