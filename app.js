@@ -290,9 +290,9 @@ async function sincronizarMarcadoresSutiles() {
                 if (game.time_elapsed === 'live') {
                     sutilDiv.innerHTML = `<span class="score-numbers-wow">${game.home_score}</span> <span class="estado-vivo">EN VIVO</span> <span class="score-numbers-wow">${game.away_score}</span>`;
                 } 
-                //else if (game.time_elapsed === 'finished') {
-                //    sutilDiv.innerHTML = `<span style="color:#888">${game.home_score}</span> <span class="estado-finalizado">FINALIZADO</span> <span style="color:#888">${game.away_score}</span>`;
-                //}
+                else if (game.time_elapsed === 'finished') {
+                    sutilDiv.innerHTML = "";
+                }
             }
         });
     } catch (e) { /* Silencioso */ }
