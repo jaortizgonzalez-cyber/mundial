@@ -155,3 +155,48 @@ header {
 .bg-offensive { background: var(--accent-green); box-shadow: 0 0 10px rgba(0,255,136,0.5); }
 .bg-defensive { background: #00aaff; box-shadow: 0 0 10px rgba(0,170,255,0.5); }
 .bg-winrate { background: #ff4444; box-shadow: 0 0 10px rgba(255,68,68,0.5); }
+
+
+/* --- ESTILO WOW PARA EL MARCADOR EN VIVO --- */
+.sutil-live-score {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 10px;
+    transition: all 0.5s ease;
+}
+
+/* Animación de "respiración" para el indicador en vivo */
+@keyframes pulso-vivo {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.estado-vivo {
+    color: #ff4444 !important;
+    font-size: 0.7rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 1px;
+    animation: pulso-vivo 1.5s infinite ease-in-out;
+}
+
+/* Estilo para los números del score */
+.score-numbers-wow {
+    font-family: 'Anton', sans-serif;
+    font-size: 1.3rem !important;
+    color: #ffffff !important;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.estado-finalizado {
+    color: #888 !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
