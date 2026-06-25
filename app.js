@@ -272,13 +272,29 @@ async function sincronizarMarcadoresSutiles() {
     };
 
     try {
-        const response = await fetch("https://worldcup26.ir/get/games");
-        const data = await response.json();
+        // CAMBIO 1: Llamamos a las dos APIs al mismo tiempo
+        const [resGames, resStadiums] = await Promise.all([
+            fetch("https://worldcup26.ir/get/games"),
+            fetch("https://worldcup26.ir/get/stadiums")
+        ]);
+        
+        const data = await resGames.json(); // Mantenemos tu variable 'data' intacta
+        const dataStadiums = await resStadiums.json();
+        const stadiumsList = dataStadiums.stadiums || [];
         
         document.querySelectorAll('.match-card').forEach(card => {
             const homeCard = card.getAttribute('data-home');
             const awayCard = card.getAttribute('data-away');
             const sutilDiv = card.querySelector('.sutil-live-score');
+            
+            // CAMBIO 2: Creamos el contenedor del estadio (oculto por defecto) al tope de la card
+            let stadiumDiv = card.querySelector('.live-stadium-name');
+            if (!stadiumDiv) {
+                stadiumDiv = document.createElement('div');
+                stadiumDiv.className = 'live-stadium-name';
+                stadiumDiv.style.cssText = "text-align:center; font-size:0.75rem; color:#aaa; margin-bottom:10px; font-weight:bold; letter-spacing:1px; display:none; justify-content:center; align-items:center; gap:6px;";
+                card.prepend(stadiumDiv);
+            }
             
             const game = (data.games || []).find(g => {
                 const hApi = (g.home_team_name_en || "").toLowerCase().trim();
@@ -291,15 +307,26 @@ async function sincronizarMarcadoresSutiles() {
                 if (game && game.time_elapsed === 'live') {
                     sutilDiv.style.display = 'flex'; // Aparece solo si es en vivo
                     sutilDiv.innerHTML = `<span class="score-numbers-wow">${game.home_score}</span> <span class="estado-vivo">EN VIVO</span> <span class="score-numbers-wow">${game.away_score}</span>`;
+                    
+                    // CAMBIO 3: Si está en vivo, buscamos el estadio y lo mostramos
+                    const stadium = stadiumsList.find(s => s.id === game.stadium_id);
+                    if (stadium) {
+                        stadiumDiv.innerHTML = `<span style="color:#888; font-weight:normal;">🏟️ ESTADIO:</span> <span style="color:#d4af37;">${stadium.name_en.toUpperCase()}</span>`;
+                        stadiumDiv.style.display = 'flex';
+                    }
                 } else {
                     sutilDiv.style.display = 'none'; // Desaparece y no deja franja
                     sutilDiv.innerHTML = "";
+                    
+                    // Limpiamos y ocultamos el estadio también
+                    stadiumDiv.style.display = 'none';
+                    stadiumDiv.innerHTML = "";
                 }
             }
         });
     } catch (e) { /* Silencioso */ }
 }
-setInterval(sincronizarMarcadoresSutiles, 30000);
+setInterval(sincronizarMarcadoresSutiles, 10000);
 
 // --- UTILIDADES ---
 window.verApuestasGlobales = async (id, eL, eV) => {
