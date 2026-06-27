@@ -308,7 +308,7 @@ async function sincronizarMarcadoresSutiles() {
         "iran": "ri de irán",
         "new zealand": "nueva zelanda",
         "spain": "españa",
-        "cape verde": "cabo verde",
+        "cape verde": "islas de cabo verde",
         "saudi arabia": "arabia saudí",
         "uruguay": "uruguay",
         "france": "francia",
