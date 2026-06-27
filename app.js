@@ -170,10 +170,15 @@ async function renderPartidos() {
             const textEmpate = totalVotosPartido > 0 ? `${pctEmpate}% Empate` : `Sin pronósticos`;
             const textVisitante = totalVotosPartido > 0 ? `${pctVisitante}% Visita` : `-`;
 
+            // Lógica para mostrar grupos o fases
+            const fasesEliminatorias = ['dieciseisavos', 'octavos', 'cuartos', 'semifinal', 'tercer puesto', 'final'];
+            const esEliminatoria = fasesEliminatorias.some(f => p.grupo.toLowerCase().includes(f));
+            const tituloGrupo = esEliminatoria ? p.grupo.toUpperCase() : 'GRUPO ' + p.grupo.toUpperCase();
+
             cont.innerHTML += `
             <div class="match-card" data-home="${p.equipoL.toLowerCase().trim()}" data-away="${p.equipoV.toLowerCase().trim()}">
                 <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-gold); margin-bottom:12px;">
-                    <span>${p.grupo.includes('Fase') ? p.grupo : 'GRUPO ' + p.grupo}</span>
+                    <span>${tituloGrupo}</span>
                     <span>${fechaPartido.toLocaleString([], {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
                 </div>
                 
@@ -192,7 +197,6 @@ async function renderPartidos() {
                     </div>
                 </div>
                 
-                <!-- ESPACIO SUTIL PARA MARCADOR EN VIVO -->
                 <div class="sutil-live-score" style="display:none; text-align:center; font-size:1rem; font-weight:bold; font-family:'Anton'; margin-top:5px;"></div>
 
                 <div class="pulse-container">
@@ -220,7 +224,6 @@ async function renderPartidos() {
 
 // --- LÓGICA DE MARCADORES EN VIVO ---
 async function sincronizarMarcadoresSutiles() {
-    // --- MEMORIA Y FUNCIONES DE APOYO ---
     window.marcadoresPrevios = window.marcadoresPrevios || {};
 
     const obtenerUltimoAnotador = (scorersString) => {
@@ -327,7 +330,6 @@ async function sincronizarMarcadoresSutiles() {
     };
 
     try {
-        // --- CAMBIO: Se agregó { cache: 'no-store' } para evitar la caché de disco ---
         const [resGames, resStadiums] = await Promise.all([
             fetch("https://worldcup26.ir/get/games", { cache: 'no-store' }),
             fetch("https://worldcup26.ir/get/stadiums", { cache: 'no-store' })
@@ -358,14 +360,12 @@ async function sincronizarMarcadoresSutiles() {
 
             if (game && sutilDiv) {
                 if (game.time_elapsed === 'live') {
-                    
                     const gameId = game.id;
                     const currentHome = parseInt(game.home_score) || 0;
                     const currentAway = parseInt(game.away_score) || 0;
 
                     if (window.marcadoresPrevios[gameId]) {
                         const prev = window.marcadoresPrevios[gameId];
-                        
                         if (currentHome > prev.home) {
                             lanzarAlertaGol(game.home_team_name_en, obtenerUltimoAnotador(game.home_scorers));
                         } else if (currentAway > prev.away) {
@@ -392,14 +392,11 @@ async function sincronizarMarcadoresSutiles() {
         });
     } catch (e) { /* Silencioso */ }
     
-    // --- CAMBIO: Recursión en lugar de setInterval global ---
     setTimeout(sincronizarMarcadoresSutiles, 10000);
 }
 
-// Inicia el ciclo
 sincronizarMarcadoresSutiles();
 
-// --- UTILIDADES ---
 window.verApuestasGlobales = async (id, eL, eV) => {
     const snapU = await get(child(ref(db), 'usuarios'));
     const snapV = await get(child(ref(db), 'pronosticos'));
@@ -464,7 +461,11 @@ async function calcularMisPuntos() {
                 const golesL = parseInt(ofi[id].golesL, 10); const golesV = parseInt(ofi[id].golesV, 10);
                 const local = parseInt(misPronosticos[id].local, 10); const visitante = parseInt(misPronosticos[id].visitante, 10);
                 if(isNaN(golesL) || isNaN(golesV) || isNaN(local) || isNaN(visitante)) return;
-                const esEliminatoria = part[id].grupo.toLowerCase().includes('fase') || part[id].grupo.toLowerCase().includes('final');
+                
+                // --- AJUSTE: Identificar eliminatorias automáticamente ---
+                const fasesEliminatorias = ['dieciseisavos', 'octavos', 'cuartos', 'semifinal', 'tercer puesto', 'final'];
+                const esEliminatoria = fasesEliminatorias.some(f => part[id].grupo.toLowerCase().includes(f));
+                
                 const factor = esEliminatoria ? 2 : 1;
                 if(Math.sign(golesL - golesV) === Math.sign(local - visitante)) pts += (5 * factor);
                 if(golesL === local) pts += (2 * factor); if(golesV === visitante) pts += (2 * factor);
@@ -516,10 +517,8 @@ async function renderAdminList() {
             else pendientes += html;
         });
 
-        // Pintamos pendientes primero
         list.innerHTML += `<div style="color:var(--accent-green); margin-bottom:10px;">PARTIDOS PENDIENTES:</div>` + pendientes;
 
-        // Pintamos botón y sección de completados
         if(completados !== "") {
             list.innerHTML += `
                 <button onclick="const d = document.getElementById('completados-list'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; this.innerText = d.style.display === 'block' ? '▲ OCULTAR RESULTADOS PASADOS' : '▼ VER RESULTADOS PASADOS'" 
