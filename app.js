@@ -108,7 +108,11 @@ async function renderPartidos() {
     
     if(snapP.exists()){
         const ahora = new Date();
-        const partidos = Object.entries(snapP.val());
+        // --- ESTA ES LA ÚNICA LÍNEA QUE ORDENA LOS PARTIDOS POR FECHA Y HORA ---
+        const partidos = Object.entries(snapP.val()).sort((a, b) => {
+            return new Date(a[1].fechaInicio) - new Date(b[1].fechaInicio);
+        });
+        //const partidos = Object.entries(snapP.val());
 
         const banderas = {
             "alemania": "de", "arabia saudi": "sa", "arabia saudí": "sa", "arabia saudita": "sa",
