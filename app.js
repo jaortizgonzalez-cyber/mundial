@@ -16,7 +16,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 let currentCedula = null;
-let ocultarJugados = false;
+let ocultarJugados = true;
 
 window.toggleFiltroJugados = () => {
     ocultarJugados = !ocultarJugados;
